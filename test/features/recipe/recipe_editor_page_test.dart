@@ -1,5 +1,6 @@
 import 'package:bufferite/core/engine/buffer.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
+import 'package:bufferite/core/ui/components/step_card.dart';
 import 'package:bufferite/features/recipe/recipe.dart';
 import 'package:bufferite/features/recipe/recipe_editor_page.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,32 @@ void main() {
     await tester.pump();
     final toggle = tester.widget<Switch>(find.byType(Switch));
     expect(toggle.value, isFalse);
+  });
+
+  testWidgets('reorder mengubah urutan step', (tester) async {
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Dua Step',
+      steps: <RecipeStep>[
+        RecipeStep(id: 's1', operationId: 'core.alpha'),
+        RecipeStep(id: 's2', operationId: 'core.beta'),
+      ],
+      input: const TextBuffer('x'),
+    );
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump();
+
+    final list = tester.widget<ReorderableListView>(
+      find.byType(ReorderableListView),
+    );
+    list.onReorderItem!(0, 1);
+    await tester.pump();
+
+    final names = tester
+        .widgetList<StepCard>(find.byType(StepCard))
+        .map((card) => card.name)
+        .toList();
+    expect(names, <String>['core.beta', 'core.alpha']);
   });
 
   testWidgets('Simpan menampilkan toast', (tester) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/engine/buffer.dart';
@@ -129,24 +130,41 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         style: theme.textTheme.bodySmall,
       );
     }
-    return Column(
+    return ReorderableListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      onReorderItem: _reorder,
       children: <Widget>[
-        for (var index = 0; index < _steps.length; index++) ...<Widget>[
-          StepCard(
-            name: _steps[index].operationId,
-            category: _steps[index].args.keys.isEmpty
-                ? 'Operasi'
-                : _steps[index].args.keys.join(', '),
-            enabled: _steps[index].enabled,
-            onEnabledChanged: (value) => setState(() {
-              _steps[index] = _steps[index].copyWith(enabled: value);
-            }),
-            onTap: () => _configureStep(index),
+        for (var index = 0; index < _steps.length; index++)
+          Padding(
+            key: ValueKey<String>(_steps[index].id),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: ReorderableDelayedDragStartListener(
+              index: index,
+              child: StepCard(
+                name: _steps[index].operationId,
+                category: _steps[index].args.keys.isEmpty
+                    ? 'Operasi'
+                    : _steps[index].args.keys.join(', '),
+                enabled: _steps[index].enabled,
+                onEnabledChanged: (value) => setState(() {
+                  _steps[index] = _steps[index].copyWith(enabled: value);
+                }),
+                onTap: () => _configureStep(index),
+              ),
+            ),
           ),
-          if (index < _steps.length - 1) const SizedBox(height: AppSpacing.sm),
-        ],
       ],
     );
+  }
+
+  void _reorder(int oldIndex, int newIndex) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      final step = _steps.removeAt(oldIndex);
+      _steps.insert(newIndex, step);
+    });
   }
 
   void _save() {
