@@ -1,6 +1,6 @@
 # architecture.md — Bufferite Architecture
 
-Versi dokumen: 1.0
+Versi dokumen: 1.1
 Status: Final (MVP)
 
 ## 1. Prinsip Arsitektur
@@ -118,3 +118,28 @@ dokumen skema (plugins.md bagian manifest dan operations.md bagian recipe).
 - Strategi cache runtime untuk banyak plugin.
 - Ukuran maksimum core.berp dan strategi lazy load operasi.
 - Streaming untuk file besar (Fase 2).
+
+## 12. Dependency Inti & Alasan
+
+Setiap dependency langsung wajib punya alasan dan alternatif yang
+dipertimbangkan. Dependency baru harus ditambahkan ke tabel ini sebelum
+dipakai di kode.
+
+| Package | Digunakan untuk | Alasan | Alternatif yang ditolak |
+|---|---|---|---|
+| `flutter_riverpod` | State management & DI | Diwajibkan `AGENT.md`; testable, tanpa singleton mutable | `provider` (kurang terstruktur untuk async), `bloc` (boilerplate lebih besar) |
+| `crypto` | SHA-256, HMAC, hash operasi core | API ringkas, didukung luas, cukup untuk hash/HMAC | `pointycastle` (algoritma lebih lengkap, tetapi belum perlu untuk verifikasi hash) |
+| `archive` | Baca/tulis zip `.berp` | Mendukung zip encode/decode murni Dart | `zip`/`archive_io` (API lebih terbatas atau tidak perlu) |
+| `path_provider` | Direktori database dan paket plugin | Standar Flutter untuk path aplikasi lintas platform | Platform channel manual (reinventing) |
+| `sqflite` | Recipe, plugin, settings store | Sesuai `ARCHITECTURE.md` (SQLite); ringan, tanpa codegen | `drift` (codegen + build step), `isar` (binary DB, bukan SQLite) |
+| `wasm_run` | Menjalankan runtime Lua/WASM | Diwajibkan `ARCHITECTURE.md` dan `PLUGINS.md` | `wasmer`/FFI native (kompleksitas build lintas platform) |
+| `file_picker` | Sideload `.berp` dan impor `.brecipe` | Mendukung Android/iOS/desktop, scoped user pick | Platform channel manual per OS |
+| `sqflite_common_ffi` (dev) | Test storage tanpa device | Menjalankan SQLite di host/CI | Mock repository (tidak menguji SQL/migrasi) |
+
+Catatan:
+
+- `cupertino_icons` dari template Flutter dihapus karena belum dipakai.
+- Dependency transitif tidak dicatat di sini; yang dicatat adalah dependency
+  langsung di `pubspec.yaml`.
+- Penambahan dependency untuk Fase 2 (mis. signature Ed25519) harus melalui
+  review keamanan dan pembaruan tabel ini.

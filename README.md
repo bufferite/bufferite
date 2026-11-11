@@ -32,15 +32,10 @@ lib/
   core/        (engine, plugin, runtime, storage, ui, error)
   features/    (recipe, operations, library, plugins, settings)
   assets/      (core.berp, lua_runtime.wasm)
-docs/
-  agent.md
-  architecture.md
-  plugins.md
-  operations.md
-  design.md
-  roadmap.md
-  README.md
-  CONTRIBUTING.md
+test/          (unit, contract, widget test)
+Dokumen proyek berada di root repo:
+  README.md, AGENT.md, ARCHITECTURE.md, PLUGINS.md, operations.md,
+  DESIGN.md, ROADMAP.md, TODO.md, progress.md, CONTRIBUTING.md
 
 ## Cara Build & Run
 1. Pastikan Flutter SDK terpasang.
@@ -49,9 +44,9 @@ docs/
 4. Untuk build rilis: flutter build apk / flutter build ios
 
 ## Dokumentasi
-- architecture.md — layer, alur data, bootstrap, keamanan.
+- architecture.md — layer, struktur folder, alur data, bootstrap, keamanan.
 - plugins.md — sistem plugin, tier, izin, integritas WASM, registry.
-- operations.md — kontrak Operation dan isi core.berp.
+- operations.md — kontrak Operation, error, dan skema recipe v1.
 - design.md — design system, komponen, wireframe, aksesibilitas.
 - roadmap.md — fase dan prioritas.
 - agent.md — aturan kerja AI agent.
@@ -60,8 +55,8 @@ docs/
 - CONTRIBUTING.md — panduan kontribusi.
 
 ## Lisensi
-TBD (rekomendasi: MIT untuk inti dan core.berp; plugin komunitas mengikuti
-lisensi masing-masing).
+MIT untuk inti dan core.berp (lihat [LICENSE](LICENSE)). Plugin komunitas
+mengikuti lisensi masing-masing.
 
 ## Status
-MVP dalam pengembangan. Lihat roadmap.md untuk detail fase.
+Fase 0 — fondasi. Lihat roadmap.md dan progress.md untuk detail.
