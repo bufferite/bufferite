@@ -57,34 +57,34 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F00 — Fondasi Proyek & Dokumentasi
 
-- [ ] **F00-T01 (P0)** Scaffold struktur folder feature-first.
+- [x] **F00-T01 (P0)** Scaffold struktur folder feature-first.
   - Buat `lib/core/{engine,plugin,runtime,storage,ui,error}`,
     `lib/features/{recipe,operations,library,plugins,settings}`,
     `lib/assets/`, dan `test/{core,features}` dengan `.gitkeep`.
   - Acceptance: struktur sesuai `ARCHITECTURE.md` §3; `flutter analyze`
     tetap bersih.
-- [ ] **F00-T02 (P0)** Tambahkan dependency inti beserta alasan.
+- [x] **F00-T02 (P0)** Tambahkan dependency inti beserta alasan.
   - Kandidat: `flutter_riverpod`, `crypto`, `archive`, `path_provider`,
     `sqflite`, `wasm_run`, `file_picker`; dev: `sqflite_common_ffi`.
   - Acceptance: `flutter pub get` sukses; tabel dependency + alasan +
     alternatif yang ditolak ditulis di `ARCHITECTURE.md`.
-- [ ] **F00-T03 (P0)** Perketat `analysis_options.yaml`.
+- [x] **F00-T03 (P0)** Perketat `analysis_options.yaml`.
   - Aktifkan lint relevan (mis. `always_declare_return_types`,
     `prefer_final_locals`, `avoid_print`, `use_super_parameters`).
   - Acceptance: `flutter analyze` tanpa issue.
-- [ ] **F00-T04 (P1)** CI dasar GitHub Actions: `flutter analyze` +
+- [x] **F00-T04 (P1)** CI dasar GitHub Actions: `flutter analyze` +
     `flutter test` pada push/PR.
-- [ ] **F00-T05 (P1)** Rapikan `README.md` dan lisensi.
+- [x] **F00-T05 (P1)** Rapikan `README.md` dan lisensi.
   - Perbaiki referensi folder `docs/` (dokumen ada di root), perbarui
     status proyek, tambahkan `LICENSE` MIT untuk inti.
-- [ ] **F00-T06 (P0)** Buat `operations.md`.
+- [x] **F00-T06 (P0)** Buat `operations.md`.
   - Isi minimum: detail kontrak `Operation`, tipe parameter, format
     `OperationIO`, format error terstruktur, skema recipe v1, aturan
     contract test, dan katalog operasi core (boleh bertahap, dilengkapi
     di F13).
   - Acceptance: tidak ada lagi rujukan dokumen yang hilang; kontrak
     disetujui dan dipakai oleh test.
-- [ ] **F00-T07 (P0)** Bersihkan template Flutter.
+- [x] **F00-T07 (P0)** Bersihkan template Flutter.
   - Ganti `main.dart` menjadi entrypoint minimal (`ProviderScope` +
     placeholder app), hapus counter, ganti `widget_test.dart` menjadi
     smoke test aplikasi.
