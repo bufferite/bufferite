@@ -285,7 +285,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F07-T02 (P0)** Provider tema (system/light/dark) persisten.
 - [x] **F07-T03 (P0)** App shell + bottom navigation 3 tab
   (Home, Library, Settings) dengan state terjaga.
-- [ ] **F07-T04 (P0)** Komponen tombol (primary, secondary, ghost,
+- [x] **F07-T04 (P0)** Komponen tombol (primary, secondary, ghost,
   danger) dan badge (tier, status, unverified).
 - [ ] **F07-T05 (P0)** Komponen kartu step operasi.
   - Drag handle, nama + kategori, toggle enabled, chevron, state
