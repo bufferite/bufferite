@@ -133,6 +133,11 @@ Implementasi plugin MVP:
 - Tanpa akses net/fs kecuali izin disetujui.
 - Regex engine wajib aman dari ReDoS (batas waktu).
 - CSPRNG untuk operasi acak.
+- Kontrak sandbox: `lib/core/runtime/sandbox.dart`. Default timeout 2 detik,
+  memori 64 MiB, dan izin `cpu`; override dilakukan lewat `SandboxConfig`.
+  `SandboxContext` membawa identitas plugin/operasi/step, izin aktif, dan
+  token pembatalan. Runtime DSL/Lua/WASM wajib mengimplementasikan
+  `SandboxRuntime` dan memeriksa konteks sebelum side effect.
 
 ## 9. State Management & DI
 - Riverpod untuk state management.

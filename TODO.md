@@ -223,7 +223,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F05 — Runtime & Sandbox
 
-- [ ] **F05-T01 (P0)** Kontrak sandbox dan konfigurasi resource.
+- [x] **F05-T01 (P0)** Kontrak sandbox dan konfigurasi resource.
   - Batas waktu, memori, izin aktif, dan konteks eksekusi.
   - Acceptance: test konfigurasi default dan override.
 - [ ] **F05-T02 (P0)** Runtime DSL.

@@ -362,6 +362,17 @@ Semua tier tunduk pada:
 - model izin `cpu`, `net`, `file:read`, `file:write`,
 - error terstruktur dan pembungkusan `pluginId`/`stepId`.
 
+Kontrak implementasi sandbox MVP:
+
+- `SandboxConfig` default: timeout 2 detik per operasi, batas memori 64 MiB,
+  izin `cpu`; `cpu` selalu aktif.
+- `SandboxContext` membawa `pluginId`, `operationId`, `stepId`, config, dan
+  token pembatalan. Runtime wajib memanggil `ensureActive()` dan
+  `requirePermission()` sebelum side effect.
+- `SandboxRuntime` adalah antarmuka bersama untuk runtime DSL, Lua, dan WASM.
+- Enforcement timeout/memori dan pembersihan isolate tetap menunggu host
+  isolate F05-T04.
+
 ## 11. Katalog core.berp (Rencana MVP)
 
 Katalog final menunggu keputusan D01 dan diselesaikan bertahap di F13. Daftar
