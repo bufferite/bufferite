@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 59 / 131 |
+| Task MVP selesai | 60 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T01` — layout Recipe Editor |
+| Task berikutnya | `F09-T02` — tambah step lewat Operation Picker |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (236 test, 2026-11-12) |
+| Test suite | Lulus (240 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 0 | Belum |
+| F09 — Fitur Recipe Editor | 11 | 1 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **59** | **Berjalan** |
+| **Total MVP** | **131** | **60** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -154,6 +154,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F08-T04 | Hapus dengan konfirmasi + undo, duplikasi recipe | `lib/features/home/home_page.dart`, `lib/features/recipe/recipe_id.dart` | `flutter test` → 236 pass | `5ff3d2a` |
 | 2026-11-12 | F08-T05 | Navigasi CTA/tap item ke Recipe Editor (baru/terpilih) | `lib/features/home/home_page.dart`, `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 236 pass | `5ff3d2a` |
 | 2026-11-12 | F08-T06 | Widget test Home: list, search, empty, hapus, duplikat, navigasi | `test/features/home/home_page_test.dart` | `flutter test` → 236 pass | `5ff3d2a` |
+| 2026-11-12 | F09-T01 | Layout editor: nama, input, daftar step, output, simpan | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 240 pass | `1876abd` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -660,6 +661,24 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **236 test lulus**.
 - Catatan/risiko: navigasi masih ke editor placeholder; layout nyata di F09.
 - Commit: `5ff3d2a` (kode/test) + commit checkpoint ini.
+
+### CP-025 — 2026-11-12 — F09-T01 Layout Recipe Editor
+
+- Status: Selesai (1/11 task F09).
+- Perubahan:
+  - `RecipeEditorPage` menjadi editor fungsional dasar: field nama, input
+    teks, daftar step (`StepCard` + toggle enabled), panel output
+    (`BufferPanel`), dan tombol Simpan.
+  - Mode baru vs edit (judul "Recipe Baru"/"Edit Recipe").
+- File: `lib/features/recipe/recipe_editor_page.dart`,
+  `test/features/recipe/recipe_editor_page_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **240 test lulus**.
+- Catatan/risiko: Simpan masih toast placeholder; Operation Picker, pipeline,
+  dan persistensi diisi F09-T02+.
+- Commit: `1876abd` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
