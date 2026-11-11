@@ -304,7 +304,7 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F08 — Fitur Home
 
 - [x] **F08-T01 (P0)** Provider daftar recipe (recent + search).
-- [ ] **F08-T02 (P0)** UI Home sesuai wireframe DESIGN §8.1.
+- [x] **F08-T02 (P0)** UI Home sesuai wireframe DESIGN §8.1.
 - [ ] **F08-T03 (P0)** Empty state "Belum ada recipe" + aksi buat baru.
 - [ ] **F08-T04 (P0)** Hapus/duplikasi recipe dengan konfirmasi + undo.
 - [ ] **F08-T05 (P0)** Navigasi ke Recipe Editor (baru/terpilih).
