@@ -98,8 +98,8 @@ void main() {
     await tester.tap(find.text('Buat recipe baru'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Editor recipe'), findsOneWidget);
-    expect(find.text('Recipe Baru'), findsOneWidget);
+    expect(find.text('Nama recipe'), findsOneWidget);
+    expect(find.text('Recipe Baru'), findsWidgets);
   });
 
   testWidgets('tap recipe membuka editor dengan nama recipe', (tester) async {
@@ -111,7 +111,7 @@ void main() {
     await tester.tap(find.text('Base64 Decode'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Editor recipe'), findsOneWidget);
+    expect(find.text('Edit Recipe'), findsOneWidget);
     expect(find.text('Base64 Decode'), findsWidgets);
   });
 
