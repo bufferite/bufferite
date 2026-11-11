@@ -114,4 +114,29 @@ void main() {
     expect(find.text('Editor recipe'), findsOneWidget);
     expect(find.text('Base64 Decode'), findsWidgets);
   });
+
+  testWidgets('swipe kiri menampilkan konfirmasi hapus; Batal menutup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(<Recipe>[_recipe(id: 'a', name: 'Alpha')]));
+    await tester.pump();
+
+    await tester.drag(find.text('Alpha'), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Hapus recipe?'), findsOneWidget);
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hapus recipe?'), findsNothing);
+    expect(find.text('Alpha'), findsOneWidget);
+  });
+
+  testWidgets('menu tile menyediakan aksi Duplikat', (tester) async {
+    await tester.pumpWidget(_host(<Recipe>[_recipe(id: 'a', name: 'Alpha')]));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('Duplikat'), findsOneWidget);
+  });
 }

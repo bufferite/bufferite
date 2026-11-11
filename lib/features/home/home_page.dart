@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/storage/storage_providers.dart';
+import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
 import '../recipe/recipe.dart';
 import '../recipe/recipe_editor_page.dart';
+import '../recipe/recipe_id.dart';
 import '../recipe/recipe_providers.dart';
 
 /// Halaman Home sesuai `DESIGN.md` §8.1.
@@ -107,12 +110,35 @@ class _HomePageState extends ConsumerState<HomePage> {
           const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         final recipe = recipes[index];
-        return _RecipeTile(
-          recipe: recipe,
-          now: now,
-          onTap: () => _openEditor(recipe),
+        return Dismissible(
+          key: ValueKey<String>(recipe.id),
+          direction: DismissDirection.endToStart,
+          background: _dismissBackground(),
+          confirmDismiss: (direction) => _confirmDelete(recipe),
+          onDismissed: (direction) => _deleteRecipe(recipe),
+          child: _RecipeTile(
+            recipe: recipe,
+            now: now,
+            onTap: () => _openEditor(recipe),
+            onDuplicate: () => _duplicateRecipe(recipe),
+          ),
         );
       },
+    );
+  }
+
+  Widget _dismissBackground() {
+    final palette = Theme.of(context).brightness == Brightness.dark
+        ? AppPalette.dark
+        : AppPalette.light;
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: palette.danger.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+      ),
+      child: Icon(Icons.delete_outline, color: palette.danger),
     );
   }
 
@@ -127,6 +153,64 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+
+  Future<bool> _confirmDelete(Recipe recipe) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus recipe?'),
+        content: Text('"${recipe.name}" akan dihapus.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  Future<void> _deleteRecipe(Recipe recipe) async {
+    final repository = ref.read(recipeRepositoryProvider);
+    await repository.delete(recipe.id);
+    _invalidate();
+    if (!mounted) {
+      return;
+    }
+    showAppToast(
+      context,
+      message: 'Recipe dihapus',
+      tone: AppToastTone.warning,
+      undoLabel: 'Undo',
+      onUndo: () {
+        repository.save(recipe).then((_) => _invalidate());
+      },
+    );
+  }
+
+  Future<void> _duplicateRecipe(Recipe recipe) async {
+    final repository = ref.read(recipeRepositoryProvider);
+    await repository.save(duplicateRecipe(recipe));
+    _invalidate();
+    if (!mounted) {
+      return;
+    }
+    showAppToast(
+      context,
+      message: 'Recipe diduplikasi',
+      tone: AppToastTone.success,
+    );
+  }
+
+  void _invalidate() {
+    ref.invalidate(recentRecipesProvider);
+    ref.invalidate(recipeSearchProvider);
+  }
 }
 
 class _RecipeTile extends StatelessWidget {
@@ -134,11 +218,13 @@ class _RecipeTile extends StatelessWidget {
     required this.recipe,
     required this.now,
     required this.onTap,
+    required this.onDuplicate,
   });
 
   final Recipe recipe;
   final DateTime now;
   final VoidCallback onTap;
+  final VoidCallback onDuplicate;
 
   @override
   Widget build(BuildContext context) {
@@ -148,8 +234,18 @@ class _RecipeTile extends StatelessWidget {
       child: ListTile(
         title: Text(recipe.name),
         subtitle: Text('$steps langkah · ${_relativeTime(recipe, now)}'),
-        trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
+        trailing: PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'duplicate') {
+              onDuplicate();
+            }
+          },
+          itemBuilder: (context) => const <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(value: 'duplicate', child: Text('Duplikat')),
+          ],
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.medium),
         ),
@@ -182,7 +278,8 @@ String _relativeTime(Recipe recipe, DateTime now) {
   if (diff.inDays < 30) {
     return '${diff.inDays} hari lalu';
   }
-  return '${updated.toLocal().year}-'
-      '${updated.toLocal().month.toString().padLeft(2, '0')}-'
-      '${updated.toLocal().day.toString().padLeft(2, '0')}';
+  final local = updated.toLocal();
+  return '${local.year}-'
+      '${local.month.toString().padLeft(2, '0')}-'
+      '${local.day.toString().padLeft(2, '0')}';
 }
