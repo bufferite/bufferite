@@ -278,7 +278,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F07 — UI Foundation & Design System
 
-- [ ] **F07-T01 (P0)** Token desain + tema light/dark.
+- [x] **F07-T01 (P0)** Token desain + tema light/dark.
   - Warna, spacing, radius, tipografi sesuai `DESIGN.md` §2–4; font Inter
     dengan fallback sistem (lihat D04).
   - Acceptance: widget test memastikan warna/tema utama benar.
