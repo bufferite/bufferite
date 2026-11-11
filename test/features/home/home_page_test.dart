@@ -90,4 +90,28 @@ void main() {
 
     expect(find.text('Tidak ada recipe cocok'), findsOneWidget);
   });
+
+  testWidgets('aksi buat baru membuka editor', (tester) async {
+    await tester.pumpWidget(_host(const <Recipe>[]));
+    await tester.pump();
+
+    await tester.tap(find.text('Buat recipe baru'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Editor recipe'), findsOneWidget);
+    expect(find.text('Recipe Baru'), findsOneWidget);
+  });
+
+  testWidgets('tap recipe membuka editor dengan nama recipe', (tester) async {
+    await tester.pumpWidget(
+      _host(<Recipe>[_recipe(id: 'a', name: 'Base64 Decode')]),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Base64 Decode'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Editor recipe'), findsOneWidget);
+    expect(find.text('Base64 Decode'), findsWidgets);
+  });
 }

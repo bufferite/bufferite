@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
 import '../recipe/recipe.dart';
+import '../recipe/recipe_editor_page.dart';
 import '../recipe/recipe_providers.dart';
 
 /// Halaman Home sesuai `DESIGN.md` §8.1.
@@ -106,24 +107,38 @@ class _HomePageState extends ConsumerState<HomePage> {
           const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         final recipe = recipes[index];
-        return _RecipeTile(recipe: recipe, now: now);
+        return _RecipeTile(
+          recipe: recipe,
+          now: now,
+          onTap: () => _openEditor(recipe),
+        );
       },
     );
   }
 
   void _startNewRecipe() {
-    // Navigasi ke Recipe Editor diisi pada F08-T05.
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      const SnackBar(content: Text('Recipe Editor segera hadir.')),
+    _openEditor();
+  }
+
+  void _openEditor([Recipe? recipe]) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => RecipeEditorPage(recipe: recipe),
+      ),
     );
   }
 }
 
 class _RecipeTile extends StatelessWidget {
-  const _RecipeTile({required this.recipe, required this.now});
+  const _RecipeTile({
+    required this.recipe,
+    required this.now,
+    required this.onTap,
+  });
 
   final Recipe recipe;
   final DateTime now;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +149,7 @@ class _RecipeTile extends StatelessWidget {
         title: Text(recipe.name),
         subtitle: Text('$steps langkah · ${_relativeTime(recipe, now)}'),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          // Navigasi ke editor diisi pada F08-T05.
-        },
+        onTap: onTap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.medium),
         ),
