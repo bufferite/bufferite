@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/engine/buffer.dart';
+import '../../core/engine/pipeline.dart';
+import '../../core/engine/pipeline_executor.dart';
+import '../../core/error/app_error.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/buffer_panel.dart';
@@ -12,11 +17,13 @@ import '../operations/operation_picker.dart';
 import '../operations/operation_providers.dart';
 import '../operations/step_config_sheet.dart';
 import 'recipe.dart';
+import 'recipe_id.dart';
+import 'recipe_pipeline.dart';
 
 /// Layout Recipe Editor sesuai `DESIGN.md` §8.2.
 ///
-/// F09-T01 menyediakan kerangka: nama, input, daftar step, output, dan aksi
-/// simpan. Pipeline, picker, dan konfigurasi step diisi task F09 berikutnya.
+/// Preview live berjalan lewat pipeline dengan debounce 200 ms; eksekusi lama
+/// dibatalkan saat input berubah.
 class RecipeEditorPage extends ConsumerStatefulWidget {
   const RecipeEditorPage({super.key, this.recipe});
 
@@ -27,9 +34,17 @@ class RecipeEditorPage extends ConsumerStatefulWidget {
 }
 
 class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
+  static const Duration previewDebounce = Duration(milliseconds: 200);
+
   late final TextEditingController _nameController;
   late final TextEditingController _inputController;
   late List<RecipeStep> _steps;
+
+  Timer? _debounce;
+  CancellationToken? _cancellation;
+  String? _previewText;
+  AppError? _previewError;
+  bool _previewing = false;
 
   @override
   void initState() {
@@ -43,10 +58,15 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           : '',
     );
     _steps = List<RecipeStep>.of(recipe?.steps ?? const <RecipeStep>[]);
+    _inputController.addListener(_schedulePreview);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _schedulePreview());
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _cancellation?.cancel();
+    _inputController.removeListener(_schedulePreview);
     _nameController.dispose();
     _inputController.dispose();
     super.dispose();
@@ -55,7 +75,6 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final output = widget.recipe?.output;
 
     return Scaffold(
       appBar: AppBar(
@@ -111,8 +130,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           const SizedBox(height: AppSpacing.sm),
           BufferPanel(
             label: 'Output',
-            kind: output?.kind.name ?? 'text',
-            content: output?.asText(),
+            kind: widget.recipe?.output?.kind.name ?? 'text',
+            content: _previewText,
+            live: _previewing,
+            errorMessage: _previewError?.message,
           ),
         ],
       ),
@@ -150,6 +171,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 enabled: _steps[index].enabled,
                 onEnabledChanged: (value) => setState(() {
                   _steps[index] = _steps[index].copyWith(enabled: value);
+                  _schedulePreview();
                 }),
                 onTap: () => _configureStep(index),
                 onDelete: () => _deleteStep(index),
@@ -166,6 +188,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       final step = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, step);
     });
+    _schedulePreview();
   }
 
   void _deleteStep(int index) {
@@ -173,6 +196,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     setState(() {
       _steps = List<RecipeStep>.of(_steps)..removeAt(index);
     });
+    _schedulePreview();
     showAppToast(
       context,
       message: 'Step dihapus',
@@ -187,15 +211,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           restored.insert(index.clamp(0, restored.length), removed);
           _steps = restored;
         });
+        _schedulePreview();
       },
-    );
-  }
-
-  void _save() {
-    showAppToast(
-      context,
-      message: 'Menyimpan recipe (F09 lanjutan).',
-      tone: AppToastTone.info,
     );
   }
 
@@ -216,6 +233,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         ),
       ];
     });
+    _schedulePreview();
   }
 
   Future<void> _configureStep(int index) async {
@@ -244,5 +262,70 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     setState(() {
       _steps[index] = step.copyWith(args: args);
     });
+    _schedulePreview();
+  }
+
+  void _schedulePreview() {
+    _debounce?.cancel();
+    _debounce = Timer(previewDebounce, _runPreview);
+  }
+
+  Future<void> _runPreview() async {
+    _cancellation?.cancel();
+    final token = CancellationToken();
+    _cancellation = token;
+
+    if (_steps.isEmpty) {
+      setState(() {
+        _previewing = false;
+        _previewText = _inputController.text.isEmpty
+            ? null
+            : _inputController.text;
+        _previewError = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _previewing = true;
+      _previewError = null;
+    });
+
+    final draft = Recipe(
+      id: widget.recipe?.id ?? generateRecipeId(),
+      name: _nameController.text.trim().isEmpty
+          ? 'Draft'
+          : _nameController.text.trim(),
+      steps: _steps,
+      input: TextBuffer(_inputController.text),
+    );
+
+    final executor = PipelineExecutor(
+      registry: ref.read(operationRegistryProvider),
+    );
+    final result = await executor.execute(
+      steps: draft.toPipelineSteps(),
+      input: draft.input,
+      cancellation: token,
+    );
+    if (token.isCancelled || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _previewing = false;
+      _previewError = result.errors.isEmpty ? null : result.errors.first;
+      _previewText = result.output.kind == BufferKind.text
+          ? result.output.asText()
+          : null;
+    });
+  }
+
+  void _save() {
+    showAppToast(
+      context,
+      message: 'Menyimpan recipe (F09 lanjutan).',
+      tone: AppToastTone.info,
+    );
   }
 }
