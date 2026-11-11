@@ -290,7 +290,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F07-T05 (P0)** Komponen kartu step operasi.
   - Drag handle, nama + kategori, toggle enabled, chevron, state
     disabled/error/unsupported.
-- [ ] **F07-T06 (P0)** Komponen buffer panel input/output.
+- [x] **F07-T06 (P0)** Komponen buffer panel input/output.
   - Header, mode mono, copy, expand, empty state, indikator live, banner
     error.
 - [ ] **F07-T07 (P0)** Komponen empty state reusable.
