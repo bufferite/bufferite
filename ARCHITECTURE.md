@@ -110,6 +110,20 @@ Implementasi engine MVP:
   (request/response/progress) menyusul setelah runtime plugin F05 tersedia
   (F03-T04).
 
+Implementasi plugin MVP:
+- Manifest v1: `lib/core/plugin/plugin_manifest.dart`; semver tanpa
+  dependency tambahan di `semantic_version.dart`; izin `cpu`, `net`,
+  `file:read`, `file:write` di `plugin_permission.dart`.
+- Paket `.berp`: `plugin_package.dart` memvalidasi zip sebelum ekstraksi
+  (path traversal, symlink, duplikat, jumlah entri, ukuran per entri/total,
+  dan ukuran manifest). Batas detail ada di `PLUGINS.md` §6.
+- Integritas SHA-256: `plugin_integrity.dart`; metadata terpasang:
+  `installed_plugin.dart`; registrasi operasi manifest:
+  `manifest_registrar.dart`; siklus enable/disable/hapus:
+  `plugin_lifecycle.dart`.
+- Belum diimplementasikan: alur sideload UI (F04-T05), bootstrap aset
+  `core.berp` (F04-T08), dan `PluginManagerService`/provider (F04-T10).
+
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
 - Paket .berp diverifikasi SHA-256 sebelum instalasi.

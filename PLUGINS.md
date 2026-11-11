@@ -128,7 +128,12 @@ Izin yang dikenal: "cpu", "net", "file:read", "file:write".
       "name": "Base32 Decode",
       "category": "Encode/Decode",
       "params": [
-        { "key": "padding", "type": "bool", "default": true }
+        {
+          "key": "padding",
+          "label": "Padding",
+          "type": "boolean",
+          "default": true
+        }
       ],
       "inputType": "bytes",
       "outputType": "bytes"
@@ -153,6 +158,13 @@ Izin yang dikenal: "cpu", "net", "file:read", "file:write".
 - Verifikasi: SHA-256 dari paket .berp dihitung dan dicocokkan dengan hash
   di registry (untuk instalasi via registry) atau dengan hash yang
   disediakan pengguna (untuk sideload). Jika mismatch, instalasi ditolak.
+- Batas keamanan MVP: paket maksimum 32 MiB, maksimum 512 entri, satu
+  entri maksimum 16 MiB, total isi setelah dekompresi maksimum 64 MiB, dan
+  manifest maksimum 512 KiB. Symlink, path traversal, path absolut, dan
+  entri duplikat (tanpa memedulikan kapitalisasi) ditolak.
+- `plugin.manifest.json` wajib berada di root paket dan `entrypoint` wajib
+  ada di dalam paket dengan ekstensi sesuai tier: `.json`/`.yaml`/`.yml`
+  untuk DSL, `.lua` untuk Lua, dan `.wasm` untuk WASM.
 
 ## 7. Registry (registry.json)
 {

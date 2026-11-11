@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 27 / 131 |
+| Task MVP selesai | 35 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F04-T01` — plugin loader (F03-T04 menunggu F05) |
-| Blocker aktif | F03-T04 — host isolate menunggu runtime/plugin F05 |
+| Task berikutnya | `F05-T01` — kontrak sandbox (F04-T05/T08/T10 ditunda) |
+| Blocker aktif | F03-T04 host isolate; F04-T05/T08/T10 menunggu storage/core.berp |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (85 test, 2026-11-11) |
+| Test suite | Lulus (136 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -49,7 +49,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
-| F04 — Sistem Plugin | 11 | 0 | Belum |
+| F04 — Sistem Plugin | 11 | 8 | Sebagian (T05/T08/T10 ditunda) |
 | F05 — Runtime & Sandbox | 9 | 0 | Belum |
 | F06 — Storage | 7 | 0 | Belum |
 | F07 — UI Foundation & Design System | 10 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **27** | **Berjalan** |
+| **Total MVP** | **131** | **35** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -122,6 +122,14 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F03-T06 | Timeout per step + error `runtime.timeout` | `lib/core/engine/pipeline_executor.dart` | `flutter test` → 85 pass | `6ef767e` |
 | 2026-11-11 | F03-T07 | E2E dummy recipe → registry → pipeline | `lib/features/recipe/recipe_pipeline.dart`, `test/features/recipe/recipe_pipeline_test.dart` | `flutter test` → 85 pass | `6ef767e` |
 | 2026-11-11 | F03-T08 | Benchmark 10.000 step no-op | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 39 ms, ~256k step/s | `6ef767e` |
+| 2026-11-11 | F04-T01 | Model + parser manifest v1, semver, validasi entrypoint | `lib/core/plugin/plugin_manifest.dart`, `semantic_version.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T02 | Pembaca `.berp` aman: zip-slip, symlink, duplikat, limit | `lib/core/plugin/plugin_package.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T03 | Verifikator SHA-256 paket/entrypoint | `lib/core/plugin/plugin_integrity.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T04 | Model plugin terpasang, status, dan kompatibilitas versi | `lib/core/plugin/installed_plugin.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T06 | Service enable/disable/hapus + peringatan core | `lib/core/plugin/plugin_lifecycle.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T07 | Model izin/capability + `PermissionGuard` | `lib/core/plugin/plugin_permission.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T09 | Registrasi operasi manifest ke registry | `lib/core/plugin/manifest_registrar.dart` | `flutter test` → 136 pass | `837c8c8` |
+| 2026-11-11 | F04-T11 | Test adversarial manifest, entrypoint, hash, izin | `test/core/plugin_*_test.dart`, `support/plugin_fixtures.dart` | `flutter test` → 136 pass | `837c8c8` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -252,6 +260,36 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
     tersedia dan diuji.
 - Commit: `6ef767e` (kode/test) + commit checkpoint ini.
 
+### CP-006 — 2026-11-11 — F04 Sistem Plugin (sebagian)
+
+- Status: Sebagian (8/11 task F04). T05 sideload, T08 bootstrap core, dan
+  T10 service ditunda sampai storage/UI/core.berp tersedia.
+- Perubahan:
+  - Manifest plugin v1 + parser JSON, validasi ID, semver, tier, entrypoint,
+    izin, operations, dan integrity.
+  - Pembaca `.berp` dengan batas ukuran/entri, deteksi zip-slip, symlink, dan
+    duplikat; verifikasi SHA-256.
+  - Model plugin terpasang + status kompatibilitas; registrasi descriptor
+    manifest; siklus enable/disable/hapus; guard izin.
+  - Test adversarial untuk manifest palsu, entrypoint hilang, hash salah,
+    izin tak dikenal, dan paket berbahaya.
+  - Contoh manifest di `PLUGINS.md` diselaraskan dengan kontrak parameter
+    (`boolean` + label) dan batas paket didokumentasikan.
+- File: `lib/core/plugin/plugin_*.dart`,
+  `lib/core/plugin/semantic_version.dart`, test plugin core, `PLUGINS.md`,
+  `ARCHITECTURE.md`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **136 test lulus**.
+- Catatan/risiko:
+  - Batas ukuran mencegah zip bomb berdasarkan metadata dan hasil dekompresi;
+    library `archive` tetap mendekompresi sebelum ukuran aktual diketahui.
+  - `PermissionGuard` baru menyediakan hook; enforcement di runtime Lua/WASM
+    menunggu F05.
+  - Belum ada ekstraksi atomik/filesystem dan persistensi; menunggu F06.
+- Commit: `837c8c8` (kode/test) + commit checkpoint ini.
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -281,6 +319,8 @@ bagian D.
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
+| 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan storage/filesystem F06 serta UI F07/F11 | Alur instalasi end-to-end belum tersedia | Terbuka |
+| 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Terbuka |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)

@@ -179,19 +179,19 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F04 — Sistem Plugin
 
-- [ ] **F04-T01 (P0)** Model + parser `plugin.manifest.json`.
+- [x] **F04-T01 (P0)** Model + parser `plugin.manifest.json`.
   - Validasi `manifestVersion`, `pluginId`, semver, tier, entrypoint
     relatif, permissions, operations, dan `minAppVersion`.
   - Acceptance: test manifest valid/invalid.
-- [ ] **F04-T02 (P0)** Pembaca paket `.berp` (zip) yang aman.
+- [x] **F04-T02 (P0)** Pembaca paket `.berp` (zip) yang aman.
   - Tolak path traversal, symlink, jumlah entri/ukuran berlebih, dan
     entrypoint di luar root.
   - Acceptance: test zip-slip, zip bomb kecil, dan paket valid.
-- [ ] **F04-T03 (P0)** Verifikator SHA-256.
+- [x] **F04-T03 (P0)** Verifikator SHA-256.
   - Hitung hash paket/entrypoint, bandingkan dengan hash pin/registry/
     input pengguna; mismatch = tolak.
   - Acceptance: test paket dimodifikasi ditolak.
-- [ ] **F04-T04 (P0)** Model plugin terpasang + status.
+- [x] **F04-T04 (P0)** Model plugin terpasang + status.
   - Metadata: id, versi, tier, permissions, source
     (core/registry/sideload), verified/unverified, enabled.
   - Acceptance: test serialisasi dan aturan kompatibilitas versi app.
@@ -199,11 +199,11 @@ Catatan progres: lihat [progress.md](progress.md).
   - Pilih file → preview manifest → consent izin → verifikasi hash →
     ekstrak atomik → daftarkan operasi; bersihkan sisa saat gagal.
   - Acceptance: test instal sukses, hash mismatch, dan izin ditolak.
-- [ ] **F04-T06 (P0)** Siklus hidup plugin.
+- [x] **F04-T06 (P0)** Siklus hidup plugin.
   - Enable/disable/hapus; operasi ikut keluar/masuk registry; peringatan
     saat menghapus/menonaktifkan `core.berp`.
   - Acceptance: test operasi hilang dari picker setelah disable.
-- [ ] **F04-T07 (P0)** Model izin/capability.
+- [x] **F04-T07 (P0)** Model izin/capability.
   - `cpu`, `net`, `file:read`, `file:write`; consent persist; hook
     enforcement untuk runtime.
   - Acceptance: test panggilan tanpa izin menghasilkan error terstruktur.
@@ -211,14 +211,14 @@ Catatan progres: lihat [progress.md](progress.md).
   - Muat aset → verifikasi hash pin → instal first-run → daftarkan
     operasi; bila gagal tampilkan error jelas dan app tetap terbuka.
   - Acceptance: test first-run, already-installed, dan hash mismatch.
-- [ ] **F04-T09 (P0)** Registrasi operasi dari manifest.
+- [x] **F04-T09 (P0)** Registrasi operasi dari manifest.
   - Petakan metadata manifest ke `OperationDescriptor`; tangani tier tak
     didukung dan ID duplikat dengan peringatan.
   - Acceptance: test deskripsi operasi muncul di registry.
 - [ ] **F04-T10 (P0)** `PluginManagerService` + provider Riverpod.
   - Orkestrasi instal, verifikasi, enable/disable, hapus, dan bootstrap.
   - Acceptance: test service dengan storage in-memory.
-- [ ] **F04-T11 (P0)** Test adversarial paket plugin.
+- [x] **F04-T11 (P0)** Test adversarial paket plugin.
   - Manifest palsu, entrypoint hilang, hash salah, izin tak dikenal.
 
 ## F05 — Runtime & Sandbox
