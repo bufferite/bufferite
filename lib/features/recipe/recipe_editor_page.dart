@@ -9,6 +9,7 @@ import '../../core/ui/components/step_card.dart';
 import '../../core/ui/design_tokens.dart';
 import '../operations/operation_picker.dart';
 import '../operations/operation_providers.dart';
+import '../operations/step_config_sheet.dart';
 import 'recipe.dart';
 
 /// Layout Recipe Editor sesuai `DESIGN.md` §8.2.
@@ -140,7 +141,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             onEnabledChanged: (value) => setState(() {
               _steps[index] = _steps[index].copyWith(enabled: value);
             }),
-            onTap: () {},
+            onTap: () => _configureStep(index),
           ),
           if (index < _steps.length - 1) const SizedBox(height: AppSpacing.sm),
         ],
@@ -172,6 +173,34 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           operationId: descriptor.id,
         ),
       ];
+    });
+  }
+
+  Future<void> _configureStep(int index) async {
+    final step = _steps[index];
+    final descriptor = ref
+        .read(operationRegistryProvider)
+        .byId(step.operationId)
+        ?.descriptor;
+    if (descriptor == null) {
+      showAppToast(
+        context,
+        message: 'Operasi ${step.operationId} tidak ditemukan.',
+        tone: AppToastTone.warning,
+      );
+      return;
+    }
+    final args = await showStepConfigSheet(
+      context,
+      title: descriptor.name,
+      params: descriptor.params,
+      initialArgs: step.args,
+    );
+    if (args == null || !mounted) {
+      return;
+    }
+    setState(() {
+      _steps[index] = step.copyWith(args: args);
     });
   }
 }
