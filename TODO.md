@@ -287,7 +287,7 @@ Catatan progres: lihat [progress.md](progress.md).
   (Home, Library, Settings) dengan state terjaga.
 - [x] **F07-T04 (P0)** Komponen tombol (primary, secondary, ghost,
   danger) dan badge (tier, status, unverified).
-- [ ] **F07-T05 (P0)** Komponen kartu step operasi.
+- [x] **F07-T05 (P0)** Komponen kartu step operasi.
   - Drag handle, nama + kategori, toggle enabled, chevron, state
     disabled/error/unsupported.
 - [ ] **F07-T06 (P0)** Komponen buffer panel input/output.
