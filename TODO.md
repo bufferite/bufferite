@@ -124,25 +124,25 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F02 — Model & Validasi Recipe
 
-- [ ] **F02-T01 (P0)** Model recipe v1.
+- [x] **F02-T01 (P0)** Model recipe v1.
   - `Recipe` (schemaVersion, id, name, steps, input, output, meta),
     `RecipeStep` (id, operationId, args, enabled), dan `RecipeMeta`.
   - Acceptance: model immutable + unit test.
-- [ ] **F02-T02 (P0)** Serialisasi JSON v1 (`fromJson`/`toJson`).
+- [x] **F02-T02 (P0)** Serialisasi JSON v1 (`fromJson`/`toJson`).
   - Validasi field wajib, tipe, dan nilai tak dikenal dengan pesan jelas.
   - Acceptance: round-trip test dan test JSON invalid.
-- [ ] **F02-T03 (P0)** Validasi recipe.
+- [x] **F02-T03 (P0)** Validasi recipe.
   - Step ID unik, operationId tidak kosong, args sesuai schema operasi
     (bila registry tersedia), minimal satu step.
   - Acceptance: test kasus valid/invalid.
-- [ ] **F02-T04 (P0)** Kerangka migrasi schema.
+- [x] **F02-T04 (P0)** Kerangka migrasi schema.
   - Registry migrasi per `schemaVersion`; v1 = no-op.
   - Acceptance: test menolak versi lebih baru dan menjalankan migrasi
     berantai.
-- [ ] **F02-T05 (P0)** Codec impor/ekspor `.brecipe` (JSON).
+- [x] **F02-T05 (P0)** Codec impor/ekspor `.brecipe` (JSON).
   - Batas ukuran file, validasi schema, dan error yang ramah.
   - Acceptance: test import/export round-trip.
-- [ ] **F02-T06 (P0)** Dokumentasikan skema recipe v1 di
+- [x] **F02-T06 (P0)** Dokumentasikan skema recipe v1 di
     `operations.md` dan tautkan dari `ARCHITECTURE.md`.
 
 ## F03 — Recipe Engine & Pipeline Executor

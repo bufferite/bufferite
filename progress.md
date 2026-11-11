@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 0 — Fondasi |
 | Milestone aktif | M0 — Fondasi |
-| Task MVP selesai | 14 / 131 |
+| Task MVP selesai | 20 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F02-T01` — model recipe v1 |
+| Task berikutnya | `F03-T01` — pipeline executor |
 | Blocker aktif | Tidak ada |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (47 test, 2026-11-11) |
+| Test suite | Lulus (70 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -47,7 +47,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 |---|---:|---:|---|
 | F00 — Fondasi Proyek & Dokumentasi | 7 | 7 | Selesai |
 | F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
-| F02 — Model & Validasi Recipe | 6 | 0 | Belum |
+| F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 0 | Belum |
 | F04 — Sistem Plugin | 11 | 0 | Belum |
 | F05 — Runtime & Sandbox | 9 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **14** | **Berjalan** |
+| **Total MVP** | **131** | **20** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -109,6 +109,12 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F01-T05 | `OperationRegistry` + availability/duplikasi | `lib/core/plugin/operation_registry.dart`, `test/core/operation_registry_test.dart` | `flutter test` → 47 pass | `5d5df23` |
 | 2026-11-11 | F01-T06 | Contract test harness + fake operation | `test/core/support/*`, `test/core/operation_contract_test.dart` | `flutter test` → 47 pass | `5d5df23` |
 | 2026-11-11 | F01-T07 | Versioning kontrak didokumentasikan | `operations.md` §12, `ARCHITECTURE.md` §6 | Review dokumen | `5d5df23` |
+| 2026-11-11 | F02-T01 | Model `Recipe`, `RecipeStep`, `RecipeMeta` v1 | `lib/features/recipe/recipe.dart` | `flutter test` → 70 pass | `32b8760` |
+| 2026-11-11 | F02-T02 | Serialisasi JSON + validasi field | `lib/features/recipe/recipe.dart`, `test/features/recipe/recipe_test.dart` | `flutter test` → 70 pass | `32b8760` |
+| 2026-11-11 | F02-T03 | Validasi recipe, step, dan args via registry | `lib/features/recipe/recipe.dart` | `flutter test` → 70 pass | `32b8760` |
+| 2026-11-11 | F02-T04 | Kerangka migrasi schema (berantai) | `lib/features/recipe/recipe_codec.dart` | `flutter test` → 70 pass | `32b8760` |
+| 2026-11-11 | F02-T05 | Codec impor/ekspor `.brecipe` + batas 5 MiB | `lib/features/recipe/recipe_codec.dart`, `test/features/recipe/recipe_codec_test.dart` | `flutter test` → 70 pass | `32b8760` |
+| 2026-11-11 | F02-T06 | Dokumentasi skema & implementasi recipe | `operations.md` §8, `ARCHITECTURE.md` §7 | Review dokumen | `32b8760` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -181,6 +187,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: kebijakan error pipeline masih menunggu D06; kontrak sudah
   menyediakan kode error `unsupported` dan konteks `pluginId`/`stepId`.
 - Commit: `5d5df23` (kode/test) + commit checkpoint ini.
+
+### CP-004 — 2026-11-11 — F02 Model & Validasi Recipe
+
+- Status: Selesai (6/6 task F02).
+- Perubahan:
+  - Model `Recipe`, `RecipeStep`, `RecipeMeta` immutable + JSON v1.
+  - Validasi ID UUID v4, nama, jumlah step, step ID unik, operationId,
+    args terhadap registry, dan penolakan input file untuk `.brecipe`.
+  - Codec `.brecipe`: batas 5 MiB, migrasi schema berantai, validasi sebelum
+    dipakai, output cache tidak diekspor.
+  - Dokumentasi skema dan lokasi implementasi diperbarui.
+- File: `lib/features/recipe/recipe.dart`,
+  `lib/features/recipe/recipe_codec.dart`, test recipe, `ARCHITECTURE.md`.
+- Verifikasi:
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **70 test lulus**.
+- Catatan/risiko: migrasi v1 belum punya langkah nyata (v1 = versi saat ini);
+  kerangka sudah diuji dengan skenario v0 → v1.
+- Commit: `32b8760` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
