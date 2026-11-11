@@ -282,7 +282,7 @@ Catatan progres: lihat [progress.md](progress.md).
   - Warna, spacing, radius, tipografi sesuai `DESIGN.md` §2–4; font Inter
     dengan fallback sistem (lihat D04).
   - Acceptance: widget test memastikan warna/tema utama benar.
-- [ ] **F07-T02 (P0)** Provider tema (system/light/dark) persisten.
+- [x] **F07-T02 (P0)** Provider tema (system/light/dark) persisten.
 - [ ] **F07-T03 (P0)** App shell + bottom navigation 3 tab
   (Home, Library, Settings) dengan state terjaga.
 - [ ] **F07-T04 (P0)** Komponen tombol (primary, secondary, ghost,

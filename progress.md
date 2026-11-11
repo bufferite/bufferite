@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 44 / 131 |
+| Task MVP selesai | 45 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F07-T02` — provider tema persisten |
+| Task berikutnya | `F07-T03` — app shell + bottom navigation 3 tab |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (184 test, 2026-11-11) |
+| Test suite | Lulus (188 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -52,7 +52,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F04 — Sistem Plugin | 11 | 8 | Sebagian (T05/T08/T10 ditunda) |
 | F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
 | F06 — Storage | 7 | 7 | Selesai |
-| F07 — UI Foundation & Design System | 10 | 1 | Berjalan |
+| F07 — UI Foundation & Design System | 10 | 2 | Berjalan |
 | F08 — Fitur Home | 6 | 0 | Belum |
 | F09 — Fitur Recipe Editor | 11 | 0 | Belum |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **44** | **Berjalan** |
+| **Total MVP** | **131** | **45** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -139,6 +139,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F06-T06 | PluginPackageStore filesystem staging + rename atomik | `lib/core/plugin/plugin_package_store.dart`, test | `flutter test` → 179 pass | `ba03b03` |
 | 2026-11-11 | F06-T07 | Test storage `sqflite_common_ffi` di seluruh suite | `test/core/app_database_test.dart`, test repository | `flutter test` → 179 pass | `ba03b03` |
 | 2026-11-11 | F07-T01 | Token warna/spacing/radius/tipografi + tema light/dark | `lib/core/ui/design_tokens.dart`, `lib/core/ui/app_theme.dart`, `lib/main.dart` | `flutter test` → 184 pass | `7db1759` |
+| 2026-11-11 | F07-T02 | Provider tema persisten + provider storage Riverpod | `lib/core/ui/theme_provider.dart`, `lib/core/storage/storage_providers.dart`, `lib/main.dart` | `flutter test` → 188 pass | `5753dc4` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -394,6 +395,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **184 test lulus**.
 - Catatan/risiko: font Inter belum dibundel; fallback ke font sistem (D04).
 - Commit: `7db1759` (kode/test) + commit checkpoint ini.
+
+### CP-011 — 2026-11-11 — F07-T02 Provider Tema Persisten
+
+- Status: Selesai (2/10 task F07).
+- Perubahan:
+  - `appDatabaseProvider` dan `settingsRepositoryProvider` Riverpod.
+  - `themeModeProvider` (`AsyncNotifier`) memuat tema dari SQLite dan
+    menyimpannya kembali tanpa mengubah setting lain.
+  - `themeModeFor()` memetakan `AppThemeMode` ke `ThemeMode` Flutter.
+  - `main.dart` memilih tema dari provider.
+- File: `lib/core/storage/storage_providers.dart`,
+  `lib/core/ui/theme_provider.dart`, `lib/main.dart`,
+  `test/core/ui/theme_provider_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **188 test lulus**.
+- Catatan/risiko: saat state masih loading, aplikasi memakai `system` sebagai
+  fallback.
+- Commit: `5753dc4` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
