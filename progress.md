@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 64 / 131 |
+| Task MVP selesai | 65 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T06` — preview live dengan debounce |
+| Task berikutnya | `F09-T07` — tampilan error per step |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (250 test, 2026-11-12) |
+| Test suite | Lulus (253 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 5 | Berjalan |
+| F09 — Fitur Recipe Editor | 11 | 6 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **64** | **Berjalan** |
+| **Total MVP** | **131** | **65** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -159,6 +159,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F09-T05 | Sheet konfigurasi parameter per tipe + validasi | `lib/features/operations/step_config_sheet.dart`, editor | `flutter test` → 247 pass | `cf6ddea` |
 | 2026-11-12 | F09-T03 | Reorder drag and drop + haptic feedback | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 248 pass | `27addfc` |
 | 2026-11-12 | F09-T04 | Hapus step + undo, tombol delete di StepCard | `lib/core/ui/components/step_card.dart`, editor | `flutter test` → 250 pass | `103220f` |
+| 2026-11-12 | F09-T06 | Preview live debounce 200 ms + batalkan eksekusi lama | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 253 pass | `0953910` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -758,6 +759,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: perubahan step hanya di memori editor sampai Simpan
   (F09-T08).
 - Commit: `103220f` (kode/test) + commit checkpoint ini.
+
+### CP-030 — 2026-11-12 — F09-T06 Preview Live
+
+- Status: Selesai (6/11 task F09).
+- Perubahan:
+  - Editor menjalankan preview lewat `PipelineExecutor` dengan debounce
+    200 ms; input listener memicu ulang.
+  - `CancellationToken` membatalkan eksekusi lama saat input berubah.
+  - Output live + indikator "live"; error step pertama tampil sebagai banner;
+    output cache recipe dipakai sebagai nilai awal.
+- File: `lib/features/recipe/recipe_editor_page.dart`,
+  `test/features/recipe/recipe_preview_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **253 test lulus**.
+- Catatan/risiko: preview berjalan di isolate pemanggil; offload isolate
+  menunggu F03-T04.
+- Commit: `0953910` + `c79d725` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
