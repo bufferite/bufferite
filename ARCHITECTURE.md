@@ -85,9 +85,19 @@ abstract class Operation {
 - Detail lengkap di operations.md.
 
 ## 7. Skema Recipe
-Lihat skema JSON recipe v1 (schemaVersion, id, name, steps, input, output,
-meta). Perubahan skema menaikkan schemaVersion. Detail lengkap di
-dokumen skema (plugins.md bagian manifest dan operations.md bagian recipe).
+Skema JSON recipe v1: `schemaVersion`, `id`, `name`, `steps`, `input`,
+`output`, `meta`. Perubahan skema menaikkan `schemaVersion`. Detail lengkap
+di `operations.md` §8.
+
+Implementasi MVP:
+- Model: `lib/features/recipe/recipe.dart` (`Recipe`, `RecipeStep`,
+  `RecipeMeta`, validasi).
+- Codec `.brecipe`: `lib/features/recipe/recipe_codec.dart` (batas 5 MiB,
+  migrasi schema, validasi sebelum dipakai).
+- `output` adalah cache; codec tidak mengekspornya dan tidak mempercayainya
+  saat impor.
+- Input `file` ditolak di `.brecipe` v1; file harus dimaterialisasi engine
+  sebelum masuk pipeline.
 
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
