@@ -62,8 +62,8 @@ final class OperationIO {
 
   factory OperationIO.fromJson(Map<String, Object?> json) {
     return OperationIO(
-      input: _parseBufferKind(json['input']),
-      output: _parseBufferKind(json['output']),
+      input: BufferKind.parse(json['input']),
+      output: BufferKind.parse(json['output']),
     );
   }
 
@@ -159,19 +159,4 @@ final class OperationDescriptor {
       available: available ?? this.available,
     );
   }
-}
-
-BufferKind _parseBufferKind(Object? value) {
-  if (value is String) {
-    for (final kind in BufferKind.values) {
-      if (kind.name == value) {
-        return kind;
-      }
-    }
-  }
-  throw AppError(
-    category: ErrorCategory.validation,
-    code: 'operation.io_invalid',
-    message: 'Tipe buffer I/O tidak dikenal: $value',
-  );
 }

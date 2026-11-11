@@ -3,7 +3,26 @@ import 'dart:typed_data';
 
 import '../error/app_error.dart';
 
-enum BufferKind { text, bytes, file }
+enum BufferKind {
+  text,
+  bytes,
+  file;
+
+  static BufferKind parse(Object? value) {
+    if (value is String) {
+      for (final kind in values) {
+        if (kind.name == value) {
+          return kind;
+        }
+      }
+    }
+    throw AppError(
+      category: ErrorCategory.validation,
+      code: 'operation.io_invalid',
+      message: 'Tipe buffer I/O tidak dikenal: $value',
+    );
+  }
+}
 
 /// Nilai data immutable yang mengalir melalui pipeline.
 sealed class Buffer {
