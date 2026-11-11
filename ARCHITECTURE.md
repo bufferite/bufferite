@@ -131,6 +131,17 @@ Implementasi storage MVP:
   `plugin_permission` (foreign key ke `plugin`, cascade saat plugin dihapus).
 - Factory dan path dapat diinjeksi; test memakai `sqflite_common_ffi` tanpa
   device.
+- Repository: `RecipeRepository` (`lib/features/recipe/recipe_repository.dart`),
+  `PluginRepository` (`lib/features/plugins/plugin_repository.dart`),
+  `SettingsRepository` (`lib/features/settings/settings_repository.dart`), dan
+  `FavoriteRepository` (`lib/features/library/favorite_repository.dart`).
+  Data JSON menjadi sumber kebenaran; kolom terpisah dipakai untuk query dan
+  status.
+- `SettingsRepository` memakai default aman: tema system, timeout 2 detik,
+  memori 64 MiB, log opt-in false; nilai rusak jatuh ke default per-key.
+- `PluginPackageStore` (`lib/core/plugin/plugin_package_store.dart`) menulis
+  paket ke `<root>/<pluginId>/<version>` lewat direktori staging + rename
+  atomik; staging dibersihkan saat gagal dan uninstall.
 
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.

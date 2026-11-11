@@ -260,20 +260,20 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F06-T01 (P0)** Inisialisasi SQLite + migrasi v1.
   - Tabel: recipe, plugin, setting, favorite, plugin_permission.
   - Acceptance: test buka DB, migrasi, dan reopen.
-- [ ] **F06-T02 (P0)** `RecipeRepository`.
+- [x] **F06-T02 (P0)** `RecipeRepository`.
   - CRUD, urut berdasarkan update terakhir, pencarian nama.
   - Acceptance: test CRUD + ordering.
-- [ ] **F06-T03 (P0)** `PluginRepository`.
+- [x] **F06-T03 (P0)** `PluginRepository`.
   - Simpan metadata terpasang, status enable, source, verified.
   - Acceptance: test persist dan reload.
-- [ ] **F06-T04 (P0)** `SettingsRepository`.
+- [x] **F06-T04 (P0)** `SettingsRepository`.
   - Tema, batas sandbox, opt-in log; nilai default aman.
   - Acceptance: test baca/tulis dan fallback default.
-- [ ] **F06-T05 (P0)** `FavoriteRepository` untuk operasi favorit.
-- [ ] **F06-T06 (P0)** Penyimpanan paket plugin di filesystem.
+- [x] **F06-T05 (P0)** `FavoriteRepository` untuk operasi favorit.
+- [x] **F06-T06 (P0)** Penyimpanan paket plugin di filesystem.
   - Direktori per plugin + versi, penulisan atomik, pembersihan saat
     uninstall/gagal.
-- [ ] **F06-T07 (P0)** Test storage dengan `sqflite_common_ffi`.
+- [x] **F06-T07 (P0)** Test storage dengan `sqflite_common_ffi`.
   - Jalankan di CI tanpa device.
 
 ## F07 — UI Foundation & Design System
