@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/ui/app_shell.dart';
 import 'core/ui/app_theme.dart';
 import 'core/ui/theme_provider.dart';
 import 'features/settings/settings_repository.dart';
@@ -25,50 +26,7 @@ class BufferiteApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeModeFor(mode),
-      home: const _BootstrapPlaceholder(),
-    );
-  }
-}
-
-class _BootstrapPlaceholder extends StatelessWidget {
-  const _BootstrapPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Bufferite')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.science_outlined,
-                size: 48,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Belum ada recipe',
-                style: theme.textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Racik data dengan resep. Recipe builder akan tersedia '
-                'setelah fondasi selesai.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: const AppShell(),
     );
   }
 }
