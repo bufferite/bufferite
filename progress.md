@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 63 / 131 |
+| Task MVP selesai | 64 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T04` — enable/disable dan hapus step (undo) |
+| Task berikutnya | `F09-T06` — preview live dengan debounce |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (248 test, 2026-11-12) |
+| Test suite | Lulus (250 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 4 | Berjalan |
+| F09 — Fitur Recipe Editor | 11 | 5 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **63** | **Berjalan** |
+| **Total MVP** | **131** | **64** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -158,6 +158,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F09-T02 | Operation Picker (search, tier badge) + tambah step | `lib/features/operations/operation_picker.dart`, `operation_providers.dart`, editor | `flutter test` → 243 pass | `9fac6a3` |
 | 2026-11-12 | F09-T05 | Sheet konfigurasi parameter per tipe + validasi | `lib/features/operations/step_config_sheet.dart`, editor | `flutter test` → 247 pass | `cf6ddea` |
 | 2026-11-12 | F09-T03 | Reorder drag and drop + haptic feedback | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 248 pass | `27addfc` |
+| 2026-11-12 | F09-T04 | Hapus step + undo, tombol delete di StepCard | `lib/core/ui/components/step_card.dart`, editor | `flutter test` → 250 pass | `103220f` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -738,6 +739,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: reorder hanya di memori editor; persistensi saat Simpan
   (F09-T08).
 - Commit: `27addfc` (kode/test) + commit checkpoint ini.
+
+### CP-029 — 2026-11-12 — F09-T04 Hapus Step & Undo
+
+- Status: Selesai (5/11 task F09).
+- Perubahan:
+  - `StepCard` menerima `onDelete` (tombol hapus).
+  - Editor: hapus step + toast Undo memulihkan pada posisi semula;
+    enable/disable sudah via toggle `StepCard`.
+- File: `lib/core/ui/components/step_card.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `test/core/ui/step_card_test.dart`,
+  `test/features/recipe/recipe_editor_page_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **250 test lulus**.
+- Catatan/risiko: perubahan step hanya di memori editor sampai Simpan
+  (F09-T08).
+- Commit: `103220f` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
