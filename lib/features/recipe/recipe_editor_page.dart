@@ -58,6 +58,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           : '',
     );
     _steps = List<RecipeStep>.of(recipe?.steps ?? const <RecipeStep>[]);
+    _previewText = recipe?.output?.asText();
     _inputController.addListener(_schedulePreview);
     WidgetsBinding.instance.addPostFrameCallback((_) => _schedulePreview());
   }
