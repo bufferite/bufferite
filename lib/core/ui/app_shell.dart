@@ -6,7 +6,11 @@ import 'design_tokens.dart';
 ///
 /// Memakai [IndexedStack] agar state tiap tab terjaga saat berpindah.
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({super.key, this.home = const HomePlaceholder()});
+
+  /// Widget tab Home. Default placeholder sampai F08; komposisi nyata di
+  /// `main.dart`.
+  final Widget home;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -20,10 +24,10 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: const <Widget>[
-          HomePlaceholder(),
-          LibraryPlaceholder(),
-          SettingsPlaceholder(),
+        children: <Widget>[
+          widget.home,
+          const LibraryPlaceholder(),
+          const SettingsPlaceholder(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

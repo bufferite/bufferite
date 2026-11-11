@@ -1,0 +1,175 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/ui/components/empty_state.dart';
+import '../../core/ui/design_tokens.dart';
+import '../recipe/recipe.dart';
+import '../recipe/recipe_providers.dart';
+
+/// Halaman Home sesuai `DESIGN.md` §8.1.
+class HomePage extends ConsumerStatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recipes = _query.isEmpty
+        ? ref.watch(recentRecipesProvider)
+        : ref.watch(recipeSearchProvider(_query));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Bufferite')),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) => setState(() => _query = value.trim()),
+              decoration: const InputDecoration(
+                hintText: 'Cari recipe',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: FilledButton.icon(
+              onPressed: _startNewRecipe,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Recipe Baru'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Text(
+              _query.isEmpty ? 'Recipe Terbaru' : 'Hasil Pencarian',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Expanded(
+            child: recipes.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) => EmptyState(
+                icon: Icons.error_outline,
+                title: 'Gagal memuat recipe',
+                description: error.toString(),
+              ),
+              data: (items) => _list(items),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _list(List<Recipe> recipes) {
+    if (recipes.isEmpty) {
+      return EmptyState(
+        icon: Icons.science_outlined,
+        title: _query.isEmpty ? 'Belum ada recipe' : 'Tidak ada recipe cocok',
+        description: _query.isEmpty
+            ? 'Racik data dengan resep. Recipe builder akan tersedia '
+                  'setelah fondasi selesai.'
+            : 'Coba kata kunci lain.',
+        actionLabel: _query.isEmpty ? 'Buat recipe baru' : null,
+        onAction: _query.isEmpty ? _startNewRecipe : null,
+      );
+    }
+
+    final now = DateTime.now();
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      itemCount: recipes.length,
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, index) {
+        final recipe = recipes[index];
+        return _RecipeTile(recipe: recipe, now: now);
+      },
+    );
+  }
+
+  void _startNewRecipe() {
+    // Navigasi ke Recipe Editor diisi pada F08-T05.
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      const SnackBar(content: Text('Recipe Editor segera hadir.')),
+    );
+  }
+}
+
+class _RecipeTile extends StatelessWidget {
+  const _RecipeTile({required this.recipe, required this.now});
+
+  final Recipe recipe;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final steps = recipe.steps.length;
+    return Card(
+      child: ListTile(
+        title: Text(recipe.name),
+        subtitle: Text('$steps langkah · ${_relativeTime(recipe, now)}'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          // Navigasi ke editor diisi pada F08-T05.
+        },
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+        ),
+        titleTextStyle: theme.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+String _relativeTime(Recipe recipe, DateTime now) {
+  final updated = recipe.meta?.updatedAt;
+  if (updated == null) {
+    return 'baru';
+  }
+  final diff = now.toUtc().difference(updated.toUtc());
+  if (diff.inMinutes < 1) {
+    return 'baru saja';
+  }
+  if (diff.inHours < 1) {
+    return '${diff.inMinutes} menit lalu';
+  }
+  if (diff.inDays < 1) {
+    return '${diff.inHours} jam lalu';
+  }
+  if (diff.inDays == 1) {
+    return 'kemarin';
+  }
+  if (diff.inDays < 30) {
+    return '${diff.inDays} hari lalu';
+  }
+  return '${updated.toLocal().year}-'
+      '${updated.toLocal().month.toString().padLeft(2, '0')}-'
+      '${updated.toLocal().day.toString().padLeft(2, '0')}';
+}
