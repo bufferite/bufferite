@@ -283,7 +283,7 @@ Catatan progres: lihat [progress.md](progress.md).
     dengan fallback sistem (lihat D04).
   - Acceptance: widget test memastikan warna/tema utama benar.
 - [x] **F07-T02 (P0)** Provider tema (system/light/dark) persisten.
-- [ ] **F07-T03 (P0)** App shell + bottom navigation 3 tab
+- [x] **F07-T03 (P0)** App shell + bottom navigation 3 tab
   (Home, Library, Settings) dengan state terjaga.
 - [ ] **F07-T04 (P0)** Komponen tombol (primary, secondary, ghost,
   danger) dan badge (tier, status, unverified).
