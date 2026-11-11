@@ -185,6 +185,19 @@ Semantik:
 7. Pembatalan pengguna menghasilkan `cancelled`, bukan error runtime.
 8. Batas waktu dan memori per step ditegakkan sandbox.
 
+Status implementasi engine:
+
+- `PipelineExecutor` sudah menjalankan step sekuensial, skip disabled/
+  unsupported, timeout per step, pembatalan best-effort, dan stream event.
+- Dua kebijakan error tersedia: `stop` (default) dan
+  `continueWithLastOutput`; keputusan final tetap menunggu D06.
+- Eksekusi masih berjalan di isolate pemanggil. Host isolate pekerja
+  (request/response/progress) belum diaktifkan karena menunggu runtime
+  plugin F05; timeout saat ini tidak dapat menghentikan paksa operasi yang
+  sudah berjalan. Task terkait: F03-T04.
+- Pembersihan isolate dan enforcement memori mengikuti host isolate di
+  F05.
+
 ## 7. Error Terstruktur
 
 Semua error yang menyeberang batas runtime memakai bentuk berikut:

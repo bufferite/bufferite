@@ -99,6 +99,17 @@ Implementasi MVP:
 - Input `file` ditolak di `.brecipe` v1; file harus dimaterialisasi engine
   sebelum masuk pipeline.
 
+Implementasi engine MVP:
+- `PipelineExecutor` (`lib/core/engine/pipeline_executor.dart`) menerima
+  `PipelineStep` dari core, sehingga engine tidak bergantung pada model
+  Recipe di layer feature. Jembatan `Recipe.toPipelineSteps()` ada di
+  `lib/features/recipe/recipe_pipeline.dart`.
+- Event live membawa output tiap step; error dibungkus `pluginId`/`stepId`.
+  Kebijakan default tetap stop sambil menunggu D06.
+- Eksekusi masih berjalan di isolate pemanggil. Host isolate pekerja
+  (request/response/progress) menyusul setelah runtime plugin F05 tersedia
+  (F03-T04).
+
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
 - Paket .berp diverifikasi SHA-256 sebelum instalasi.

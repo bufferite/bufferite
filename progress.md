@@ -27,17 +27,17 @@ Status yang dipakai:
 
 | Item | Nilai |
 |---|---|
-| Fase aktif | Fase 0 — Fondasi |
-| Milestone aktif | M0 — Fondasi |
-| Task MVP selesai | 20 / 131 |
+| Fase aktif | Fase 1 — MVP |
+| Milestone aktif | M1 — Domain & Engine |
+| Task MVP selesai | 27 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F03-T01` — pipeline executor |
-| Blocker aktif | Tidak ada |
+| Task berikutnya | `F04-T01` — plugin loader (F03-T04 menunggu F05) |
+| Blocker aktif | F03-T04 — host isolate menunggu runtime/plugin F05 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (70 test, 2026-11-11) |
+| Test suite | Lulus (85 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -48,7 +48,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F00 — Fondasi Proyek & Dokumentasi | 7 | 7 | Selesai |
 | F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
-| F03 — Recipe Engine & Pipeline Executor | 8 | 0 | Belum |
+| F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
 | F04 — Sistem Plugin | 11 | 0 | Belum |
 | F05 — Runtime & Sandbox | 9 | 0 | Belum |
 | F06 — Storage | 7 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **20** | **Berjalan** |
+| **Total MVP** | **131** | **27** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -115,6 +115,13 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F02-T04 | Kerangka migrasi schema (berantai) | `lib/features/recipe/recipe_codec.dart` | `flutter test` → 70 pass | `32b8760` |
 | 2026-11-11 | F02-T05 | Codec impor/ekspor `.brecipe` + batas 5 MiB | `lib/features/recipe/recipe_codec.dart`, `test/features/recipe/recipe_codec_test.dart` | `flutter test` → 70 pass | `32b8760` |
 | 2026-11-11 | F02-T06 | Dokumentasi skema & implementasi recipe | `operations.md` §8, `ARCHITECTURE.md` §7 | Review dokumen | `32b8760` |
+| 2026-11-11 | F03-T01 | Pipeline executor sekuensial + dispatch registry | `lib/core/engine/pipeline.dart`, `lib/core/engine/pipeline_executor.dart`, `test/core/pipeline_executor_test.dart` | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T02 | Skip step disabled dan operasi unsupported + warning | `lib/core/engine/pipeline_executor.dart` | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T03 | Error per step dengan `pluginId`/`stepId`; policy stop & lanjut | `lib/core/engine/pipeline_executor.dart`, `operations.md` §6 | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T05 | Stream event live, output antar-step, dan pembatalan best-effort | `lib/core/engine/pipeline.dart`, `lib/core/engine/pipeline_executor.dart` | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T06 | Timeout per step + error `runtime.timeout` | `lib/core/engine/pipeline_executor.dart` | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T07 | E2E dummy recipe → registry → pipeline | `lib/features/recipe/recipe_pipeline.dart`, `test/features/recipe/recipe_pipeline_test.dart` | `flutter test` → 85 pass | `6ef767e` |
+| 2026-11-11 | F03-T08 | Benchmark 10.000 step no-op | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 39 ms, ~256k step/s | `6ef767e` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -207,6 +214,44 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   kerangka sudah diuji dengan skenario v0 → v1.
 - Commit: `32b8760` (kode/test) + commit checkpoint ini.
 
+### CP-005 — 2026-11-11 — F03 Pipeline Executor (sebagian)
+
+- Status: Sebagian (7/8 task F03). F03-T04 (isolate) blocked sampai host
+  runtime/plugin F05 tersedia.
+- Perubahan:
+  - Tipe engine `PipelineStep`, `PipelineEvent`, `PipelineResult`,
+    `CancellationToken`, dan `PipelineErrorPolicy`.
+  - `PipelineExecutor` sekuensial: dispatch registry, validasi args, skip
+    disabled/unsupported, error terstruktur, timeout per step, pembatalan,
+    serta callback/stream progres.
+  - Jembatan `Recipe.toPipelineSteps()` dan test end-to-end dummy melalui
+    registry; benchmark 10.000 step no-op.
+  - Dokumentasi status engine diperbarui di `operations.md` dan
+    `ARCHITECTURE.md`.
+- File: `lib/core/engine/pipeline.dart`,
+  `lib/core/engine/pipeline_executor.dart`,
+  `lib/features/recipe/recipe_pipeline.dart`,
+  `test/core/pipeline_executor_test.dart`,
+  `test/features/recipe/recipe_pipeline_test.dart`,
+  `tool/benchmark_pipeline.dart`.
+- Verifikasi:
+  - `dart format lib test tool` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **85 test lulus**.
+  - `dart run tool/benchmark_pipeline.dart` → 10.000 step dalam 39 ms
+    (~256.410 step/detik), 20.001 event.
+- Catatan/risiko:
+  - F03-T04 belum dikerjakan: eksekusi masih di isolate pemanggil dan
+    timeout belum bisa mematikan operasi paksa. Host isolate pekerja
+    membutuhkan registry/runtime plugin dari F04/F05.
+  - F03-T06 sudah menguji timeout in-process; pembersihan isolate dan
+    enforcement memori menyusul F03-T04.
+  - F03-T07 memakai operasi dummy sesuai izin TODO; integrasi penuh dengan
+    plugin loader/runtime diuji ulang setelah F04/F05.
+  - D06 tetap terbuka; default stop, mode `continueWithLastOutput` sudah
+    tersedia dan diuji.
+- Commit: `6ef767e` (kode/test) + commit checkpoint ini.
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -234,7 +279,8 @@ bagian D.
 | 2026-11-11 | D01, F13 | Ruang lingkup operasi `core.berp` belum final | Menentukan jumlah operasi MVP | Terbuka |
 | 2026-11-11 | D02, F05-T03 | Interpreter Lua via WASM belum dipilih | Menunda runtime Lua | Terbuka |
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
-| 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka |
+| 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
+| 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)

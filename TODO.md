@@ -147,15 +147,15 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F03 — Recipe Engine & Pipeline Executor
 
-- [ ] **F03-T01 (P0)** Pipeline executor sekuensial.
+- [x] **F03-T01 (P0)** Pipeline executor sekuensial.
   - `Buffer → step 1 → step 2 → … → output`; dispatch berdasarkan tier
     runtime.
   - Acceptance: test multi-step dengan operasi dummy.
-- [ ] **F03-T02 (P0)** Semantik step nonaktif dan unsupported.
+- [x] **F03-T02 (P0)** Semantik step nonaktif dan unsupported.
   - `enabled=false` dilewati; operasi unsupported dilewati dengan
     peringatan, bukan crash.
   - Acceptance: test kedua kasus.
-- [ ] **F03-T03 (P0)** Error per step.
+- [x] **F03-T03 (P0)** Error per step.
   - Bungkus error dengan `pluginId` + `stepId`; tentukan dan dokumentasikan
     kebijakan stop vs lanjut.
   - Acceptance: test error di tengah pipeline; UI tetap stabil.
@@ -163,17 +163,17 @@ Catatan progres: lihat [progress.md](progress.md).
   - Protokol pesan request/response/progress; tidak memblokir UI.
   - Acceptance: test pipeline berat tetap responsif (fake UI ticker) dan
     data kompleks terkirim dengan benar.
-- [ ] **F03-T05 (P0)** Stream progres dan hasil live.
+- [x] **F03-T05 (P0)** Stream progres dan hasil live.
   - Kirim output antar-step; dukung pembatalan eksekusi.
   - Acceptance: test urutan event dan cancellation.
-- [ ] **F03-T06 (P0)** Integrasi batas waktu sandbox.
+- [x] **F03-T06 (P0)** Integrasi batas waktu sandbox.
   - Timeout per step, error terstruktur, dan pembersihan isolate.
   - Acceptance: test operasi lambat dihentikan.
-- [ ] **F03-T07 (P0)** Test kontrak end-to-end pertama.
+- [x] **F03-T07 (P0)** Test kontrak end-to-end pertama.
   - Recipe contoh (mis. `base64_decode`) berjalan dari `core.berp`
     (boleh memakai dummy sampai F13 selesai).
   - Acceptance: test pipeline + plugin loader + runtime pass.
-- [ ] **F03-T08 (P1)** Benchmark pipeline.
+- [x] **F03-T08 (P1)** Benchmark pipeline.
   - Ukur overhead isolate dan operasi berat; catat hasil di
     `progress.md`.
 
