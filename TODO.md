@@ -297,7 +297,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F07-T08 (P0)** Dialog izin (tidak bisa ditutup via tap luar).
 - [x] **F07-T09 (P0)** Toast/snackbar dengan varian info/success/
   warning/error dan aksi undo.
-- [ ] **F07-T10 (P0)** Audit aksesibilitas dasar.
+- [x] **F07-T10 (P0)** Audit aksesibilitas dasar.
   - Target sentuh 44dp, label semantik, kontras, text scaling 1.3x.
   - Acceptance: widget test text scale + manual checklist DESIGN §15.
 
