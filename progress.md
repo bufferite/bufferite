@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 56 / 131 |
+| Task MVP selesai | 57 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F08-T04` — hapus/duplikasi recipe |
+| Task berikutnya | `F08-T05` — navigasi ke Recipe Editor |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (231 test, 2026-11-12) |
+| Test suite | Lulus (236 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -53,7 +53,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
-| F08 — Fitur Home | 6 | 3 | Berjalan |
+| F08 — Fitur Home | 6 | 4 | Berjalan |
 | F09 — Fitur Recipe Editor | 11 | 0 | Belum |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **56** | **Berjalan** |
+| **Total MVP** | **131** | **57** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -151,6 +151,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F08-T01 | Provider recipe terbaru + pencarian + `recipeRepositoryProvider` | `lib/features/recipe/recipe_providers.dart`, `lib/core/storage/storage_providers.dart` | `flutter test` → 225 pass | `37dd672` |
 | 2026-11-12 | F08-T02 | UI Home: search, tombol baru, daftar recipe + waktu relatif | `lib/features/home/home_page.dart`, `lib/core/ui/app_shell.dart`, `lib/main.dart` | `flutter test` → 229 pass | `bbfe552` |
 | 2026-11-12 | F08-T03 | Empty state + aksi buat baru/tap item → editor placeholder | `lib/features/recipe/recipe_editor_page.dart`, `lib/features/home/home_page.dart` | `flutter test` → 231 pass | `9d43ba7` |
+| 2026-11-12 | F08-T04 | Hapus dengan konfirmasi + undo, duplikasi recipe | `lib/features/home/home_page.dart`, `lib/features/recipe/recipe_id.dart` | `flutter test` → 236 pass | `5ff3d2a` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -620,6 +621,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: emulator `127.0.0.1:7555` terdeteksi; build/run manual belum
   dijalankan. Editor masih placeholder.
 - Commit: `9d43ba7` (kode/test) + commit checkpoint ini.
+
+### CP-023 — 2026-11-12 — F08-T04 Hapus & Duplikasi Recipe
+
+- Status: Selesai (4/6 task F08).
+- Perubahan:
+  - `generateRecipeId` (UUID v4) dan `duplicateRecipe` (ID/nama/step baru,
+    output dibuang, nama dipotong <= 120).
+  - Home: swipe kiri + dialog konfirmasi hapus, toast Undo memulihkan recipe,
+    menu tile "Duplikat"; provider di-invalidate setelah aksi.
+- File: `lib/features/recipe/recipe_id.dart`,
+  `lib/features/home/home_page.dart`, `test/features/recipe/recipe_id_test.dart`,
+  `test/features/home/home_page_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **236 test lulus**.
+- Catatan/risiko: test hapus/duplikasi UI memakai override provider (tanpa DB)
+  karena DB ffi tidak cocok dengan fake-async widget test; persistensi
+  dijamin `RecipeRepository` test. Aksi undo menulis ulang lewat repository.
+- Commit: `5ff3d2a` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
