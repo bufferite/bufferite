@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 51 / 131 |
+| Task MVP selesai | 52 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F07-T09` — toast/snackbar varian + undo |
+| Task berikutnya | `F07-T10` — audit aksesibilitas dasar |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (214 test, 2026-11-11) |
+| Test suite | Lulus (217 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -52,7 +52,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F04 — Sistem Plugin | 11 | 8 | Sebagian (T05/T08/T10 ditunda) |
 | F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
 | F06 — Storage | 7 | 7 | Selesai |
-| F07 — UI Foundation & Design System | 10 | 8 | Berjalan |
+| F07 — UI Foundation & Design System | 10 | 9 | Berjalan |
 | F08 — Fitur Home | 6 | 0 | Belum |
 | F09 — Fitur Recipe Editor | 11 | 0 | Belum |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **51** | **Berjalan** |
+| **Total MVP** | **131** | **52** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -146,6 +146,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F07-T06 | BufferPanel: header, mono, copy, expand, live, error, empty | `lib/core/ui/components/buffer_panel.dart` | `flutter test` → 207 pass | `d552aa1` |
 | 2026-11-11 | F07-T07 | EmptyState reusable: ikon, judul, deskripsi, aksi utama | `lib/core/ui/components/empty_state.dart` | `flutter test` → 210 pass | `2c05b56` |
 | 2026-11-11 | F07-T08 | PermissionDialog: daftar izin, barrier dismissible false, danger net | `lib/core/ui/components/permission_dialog.dart` | `flutter test` → 214 pass | `5c79bed` |
+| 2026-11-11 | F07-T09 | `showAppToast` 4 tone + aksi undo | `lib/core/ui/components/app_toast.dart` | `flutter test` → 217 pass | `9429d5d` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -524,6 +525,21 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: penulisan grant ke `plugin_permission` dilakukan oleh alur
   install (F04-T05/F11).
 - Commit: `5c79bed` (kode/test) + commit checkpoint ini.
+
+### CP-018 — 2026-11-11 — F07-T09 Toast & Undo
+
+- Status: Selesai (9/10 task F07).
+- Perubahan: `showAppToast` dengan tone info/success/warning/error (warna
+  hanya pada ikon), durasi 3 detik, aksi `Undo` opsional.
+- File: `lib/core/ui/components/app_toast.dart`,
+  `test/core/ui/app_toast_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **217 test lulus**.
+- Catatan/risiko: aksi destruktif tetap perlu konfirmasi terpisah; toast
+  hanya menyediakan undo.
+- Commit: `9429d5d` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
