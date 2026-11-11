@@ -20,6 +20,7 @@ class StepCard extends StatelessWidget {
     this.errorMessage,
     this.onEnabledChanged,
     this.onTap,
+    this.onDelete,
   });
 
   final String name;
@@ -32,6 +33,7 @@ class StepCard extends StatelessWidget {
   final String? errorMessage;
   final ValueChanged<bool>? onEnabledChanged;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   bool get _isDisabled => state == StepCardState.disabled || !enabled;
   bool get _isUnsupported => state == StepCardState.unsupported;
@@ -131,6 +133,12 @@ class StepCard extends StatelessWidget {
                   Switch(
                     value: enabled,
                     onChanged: _isUnsupported ? null : onEnabledChanged,
+                  ),
+                if (onDelete != null)
+                  IconButton(
+                    tooltip: 'Hapus step',
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline, size: 20),
                   ),
                 Icon(
                   Icons.chevron_right,

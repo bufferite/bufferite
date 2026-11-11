@@ -92,6 +92,36 @@ void main() {
     expect(names, <String>['core.beta', 'core.alpha']);
   });
 
+  testWidgets('hapus step lalu Undo memulihkan', (tester) async {
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Dua Step',
+      steps: <RecipeStep>[
+        RecipeStep(id: 's1', operationId: 'core.alpha'),
+        RecipeStep(id: 's2', operationId: 'core.beta'),
+      ],
+      input: const TextBuffer('x'),
+    );
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Hapus step').first);
+    await tester.pump();
+    expect(
+      tester.widgetList<StepCard>(find.byType(StepCard)).map((c) => c.name),
+      <String>['core.beta'],
+    );
+
+    final action = tester.widget<SnackBarAction>(find.byType(SnackBarAction));
+    expect(action.label, 'Undo');
+    action.onPressed();
+    await tester.pump();
+    expect(
+      tester.widgetList<StepCard>(find.byType(StepCard)).map((c) => c.name),
+      <String>['core.alpha', 'core.beta'],
+    );
+  });
+
   testWidgets('Simpan menampilkan toast', (tester) async {
     await tester.pumpWidget(_host());
     await tester.tap(find.text('Simpan'));

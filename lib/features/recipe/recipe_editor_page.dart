@@ -152,6 +152,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                   _steps[index] = _steps[index].copyWith(enabled: value);
                 }),
                 onTap: () => _configureStep(index),
+                onDelete: () => _deleteStep(index),
               ),
             ),
           ),
@@ -165,6 +166,29 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       final step = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, step);
     });
+  }
+
+  void _deleteStep(int index) {
+    final removed = _steps[index];
+    setState(() {
+      _steps = List<RecipeStep>.of(_steps)..removeAt(index);
+    });
+    showAppToast(
+      context,
+      message: 'Step dihapus',
+      tone: AppToastTone.warning,
+      undoLabel: 'Undo',
+      onUndo: () {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          final restored = List<RecipeStep>.of(_steps);
+          restored.insert(index.clamp(0, restored.length), removed);
+          _steps = restored;
+        });
+      },
+    );
   }
 
   void _save() {

@@ -101,4 +101,20 @@ void main() {
     final opacity = tester.widget<Opacity>(find.byType(Opacity));
     expect(opacity.opacity, 0.5);
   });
+
+  testWidgets('onDelete menampilkan tombol hapus', (tester) async {
+    var deleted = false;
+    await tester.pumpWidget(
+      _host(
+        StepCard(
+          name: 'XOR',
+          category: 'Crypto',
+          onDelete: () => deleted = true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Hapus step'));
+    expect(deleted, isTrue);
+  });
 }
