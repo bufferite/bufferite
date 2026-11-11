@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 60 / 131 |
+| Task MVP selesai | 61 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T02` — tambah step lewat Operation Picker |
+| Task berikutnya | `F09-T03` — konfigurasi step |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (240 test, 2026-11-12) |
+| Test suite | Lulus (243 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 1 | Berjalan |
+| F09 — Fitur Recipe Editor | 11 | 2 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **60** | **Berjalan** |
+| **Total MVP** | **131** | **61** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -155,6 +155,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F08-T05 | Navigasi CTA/tap item ke Recipe Editor (baru/terpilih) | `lib/features/home/home_page.dart`, `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 236 pass | `5ff3d2a` |
 | 2026-11-12 | F08-T06 | Widget test Home: list, search, empty, hapus, duplikat, navigasi | `test/features/home/home_page_test.dart` | `flutter test` → 236 pass | `5ff3d2a` |
 | 2026-11-12 | F09-T01 | Layout editor: nama, input, daftar step, output, simpan | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 240 pass | `1876abd` |
+| 2026-11-12 | F09-T02 | Operation Picker (search, tier badge) + tambah step | `lib/features/operations/operation_picker.dart`, `operation_providers.dart`, editor | `flutter test` → 243 pass | `9fac6a3` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -679,6 +680,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: Simpan masih toast placeholder; Operation Picker, pipeline,
   dan persistensi diisi F09-T02+.
 - Commit: `1876abd` (kode/test) + commit checkpoint ini.
+
+### CP-026 — 2026-11-12 — F09-T02 Operation Picker
+
+- Status: Selesai (2/11 task F09).
+- Perubahan:
+  - `showOperationPicker` + `OperationPicker`: bottom sheet 85%, search,
+    daftar operasi dengan kategori + badge tier, disable operasi unsupported.
+  - `operationRegistryProvider` in-memory.
+  - Editor: tombol "Tambah step" menambahkan `RecipeStep` dari descriptor.
+- File: `lib/features/operations/operation_picker.dart`,
+  `lib/features/operations/operation_providers.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `test/features/operations/operation_picker_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **243 test lulus**.
+- Catatan/risiko: registry default kosong sampai core.berp dimuat (F13);
+  test meng-override dengan operasi dummy.
+- Commit: `9fac6a3` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 

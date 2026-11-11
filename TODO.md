@@ -314,7 +314,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 - [x] **F09-T01 (P0)** Layout editor: nama, input panel, daftar step,
   output panel, aksi simpan.
-- [ ] **F09-T02 (P0)** Tambah step lewat Operation Picker.
+- [x] **F09-T02 (P0)** Tambah step lewat Operation Picker.
 - [ ] **F09-T03 (P0)** Reorder drag and drop + haptic.
 - [ ] **F09-T04 (P0)** Enable/disable dan hapus step (undo).
 - [ ] **F09-T05 (P0)** Sheet konfigurasi parameter per tipe + validasi.
