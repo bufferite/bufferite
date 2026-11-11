@@ -7,6 +7,8 @@ import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/buffer_panel.dart';
 import '../../core/ui/components/step_card.dart';
 import '../../core/ui/design_tokens.dart';
+import '../operations/operation_picker.dart';
+import '../operations/operation_providers.dart';
 import 'recipe.dart';
 
 /// Layout Recipe Editor sesuai `DESIGN.md` §8.2.
@@ -91,6 +93,16 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           const SizedBox(height: AppSpacing.lg),
           _section(theme, 'Step'),
           const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppButton(
+              label: 'Tambah step',
+              variant: AppButtonVariant.secondary,
+              icon: Icons.add,
+              onPressed: _addStep,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           _stepsView(theme),
           const SizedBox(height: AppSpacing.lg),
           _section(theme, 'Output'),
@@ -142,5 +154,24 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       message: 'Menyimpan recipe (F09 lanjutan).',
       tone: AppToastTone.info,
     );
+  }
+
+  Future<void> _addStep() async {
+    final descriptor = await showOperationPicker(
+      context,
+      registry: ref.read(operationRegistryProvider),
+    );
+    if (descriptor == null || !mounted) {
+      return;
+    }
+    setState(() {
+      _steps = <RecipeStep>[
+        ..._steps,
+        RecipeStep(
+          id: 'step-${_steps.length}-${descriptor.id}',
+          operationId: descriptor.id,
+        ),
+      ];
+    });
   }
 }
