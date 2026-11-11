@@ -293,7 +293,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F07-T06 (P0)** Komponen buffer panel input/output.
   - Header, mode mono, copy, expand, empty state, indikator live, banner
     error.
-- [ ] **F07-T07 (P0)** Komponen empty state reusable.
+- [x] **F07-T07 (P0)** Komponen empty state reusable.
 - [ ] **F07-T08 (P0)** Dialog izin (tidak bisa ditutup via tap luar).
 - [ ] **F07-T09 (P0)** Toast/snackbar dengan varian info/success/
   warning/error dan aksi undo.
