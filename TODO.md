@@ -92,33 +92,33 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F01 — Domain: Buffer, Error, Kontrak Operation
 
-- [ ] **F01-T01 (P0)** Model `Buffer` immutable.
+- [x] **F01-T01 (P0)** Model `Buffer` immutable.
   - Dukung tipe `text`, `bytes`, dan referensi file; konversi
     text↔bytes, encoding, batas ukuran, dan pemotongan preview.
   - Acceptance: unit test konversi, equality, dan preview pass.
-- [ ] **F01-T02 (P0)** Model error terstruktur (sealed class/Result).
+- [x] **F01-T02 (P0)** Model error terstruktur (sealed class/Result).
   - Kategori: validation, plugin, runtime, permission, storage,
     unsupported, cancelled; bawa konteks `pluginId`, `stepId`, dan pesan
     ramah pengguna.
   - Acceptance: test mapping error ke pesan UI; tidak ada exception
     mentah yang bocor ke UI.
-- [ ] **F01-T03 (P0)** Model parameter operasi.
+- [x] **F01-T03 (P0)** Model parameter operasi.
   - Tipe: string, int, bool, enum/select, dan validasi default/wajib.
   - Acceptance: test parsing, validasi, dan nilai default.
-- [ ] **F01-T04 (P0)** Kontrak `Operation`, `OperationIO`,
+- [x] **F01-T04 (P0)** Kontrak `Operation`, `OperationIO`,
     `OperationCategory`, dan `OperationDescriptor`.
   - Sesuaikan dengan `ARCHITECTURE.md` §6; tambahkan `contractVersion`.
   - Acceptance: satu implementasi dummy lulus contract test harness.
-- [ ] **F01-T05 (P0)** `OperationRegistry` in-memory.
+- [x] **F01-T05 (P0)** `OperationRegistry` in-memory.
   - Registrasi, unregister, lookup by id, list by kategori, pencarian,
     dan filter plugin aktif.
   - Acceptance: test duplikasi ID dan operasi unsupported.
-- [ ] **F01-T06 (P0)** Contract test harness berbasis contoh I/O.
+- [x] **F01-T06 (P0)** Contract test harness berbasis contoh I/O.
   - Satu skenario per operasi: input, args, output yang diharapkan,
     error yang diharapkan.
   - Acceptance: harness dapat dijalankan terhadap operasi dummy dan
     operasi `core.berp`.
-- [ ] **F01-T07 (P0)** Dokumentasikan versioning kontrak.
+- [x] **F01-T07 (P0)** Dokumentasikan versioning kontrak.
   - Aturan kenaikan versi kontrak dan kompatibilitas plugin lama.
   - Acceptance: tercatat di `operations.md` dan `ARCHITECTURE.md`.
 

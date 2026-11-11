@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 0 — Fondasi |
 | Milestone aktif | M0 — Fondasi |
-| Task MVP selesai | 7 / 131 |
+| Task MVP selesai | 14 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F01-T01` — model `Buffer` |
+| Task berikutnya | `F02-T01` — model recipe v1 |
 | Blocker aktif | Tidak ada |
-| Baseline analyze | Lulus (0 issue, 2026-11-11) |
-| Baseline test | Lulus (1 test, 2026-11-11) |
+| Analyze | Lulus (0 issue, 2026-11-11) |
+| Test suite | Lulus (47 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -46,7 +46,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | Feature | Total | Selesai | Status |
 |---|---:|---:|---|
 | F00 — Fondasi Proyek & Dokumentasi | 7 | 7 | Selesai |
-| F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 0 | Belum |
+| F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
 | F02 — Model & Validasi Recipe | 6 | 0 | Belum |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 0 | Belum |
 | F04 — Sistem Plugin | 11 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **7** | **Berjalan** |
+| **Total MVP** | **131** | **14** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -102,6 +102,13 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F00-T05 | README diperbaiki, LICENSE MIT, deskripsi paket | `README.md`, `LICENSE`, `pubspec.yaml` | Review manual; referensi `docs/` dihapus | `6d9e175` |
 | 2026-11-11 | F00-T06 | Kontrak Operation, error, skema recipe v1 | `operations.md`, `ARCHITECTURE.md` | Review dokumen; kontrak dirujuk F01 | `6d9e175` |
 | 2026-11-11 | F00-T07 | Template counter dihapus, smoke test baru | `lib/main.dart`, `test/widget_test.dart` | `flutter test` → 1 pass | `6d9e175` |
+| 2026-11-11 | F01-T01 | Model `Buffer` immutable (text/bytes/file) + JSON | `lib/core/engine/buffer.dart`, `test/core/buffer_test.dart` | `flutter test` → 47 pass | `5d5df23` |
+| 2026-11-11 | F01-T02 | `AppError` terstruktur + `Result`/`Ok`/`Err` | `lib/core/error/*.dart`, `test/core/app_error_result_test.dart` | `flutter test` → 47 pass | `5d5df23` |
+| 2026-11-11 | F01-T03 | Parameter operasi + validasi/default | `lib/core/plugin/operation_param.dart`, `test/core/operation_param_test.dart` | `flutter test` → 47 pass | `5d5df23` |
+| 2026-11-11 | F01-T04 | Kontrak `Operation`, IO, kategori, tier, descriptor | `lib/core/plugin/operation.dart` | `flutter analyze` → 0 issue | `5d5df23` |
+| 2026-11-11 | F01-T05 | `OperationRegistry` + availability/duplikasi | `lib/core/plugin/operation_registry.dart`, `test/core/operation_registry_test.dart` | `flutter test` → 47 pass | `5d5df23` |
+| 2026-11-11 | F01-T06 | Contract test harness + fake operation | `test/core/support/*`, `test/core/operation_contract_test.dart` | `flutter test` → 47 pass | `5d5df23` |
+| 2026-11-11 | F01-T07 | Versioning kontrak didokumentasikan | `operations.md` §12, `ARCHITECTURE.md` §6 | Review dokumen | `5d5df23` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -148,6 +155,32 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   tervalidasi saat remote tersedia. `operations.md` memakai kebijakan error
   stop sementara sambil menunggu D06.
 - Commit: `6d9e175` (kode/dokumen) + commit checkpoint ini.
+
+### CP-003 — 2026-11-11 — F01 Domain & Kontrak Operation
+
+- Status: Selesai (7/7 task F01).
+- Perubahan:
+  - Model `Buffer` sealed: text, bytes, file; JSON codec, preview, dan
+    proteksi immutability.
+  - `AppError` + `Result`/`Ok`/`Err` sebagai jalur error tanpa exception
+    mentah ke UI.
+  - Parameter operasi (string/integer/boolean/select), default, validasi,
+    serta penolakan argumen tak dikenal.
+  - Kontrak `Operation`, `OperationIO`, kategori, tier runtime, dan
+    `OperationDescriptor` dengan versioning kontrak.
+  - `OperationRegistry` in-memory: registrasi, pencarian, duplikasi,
+    availability, dan status unsupported.
+  - Contract test harness reusable + operasi palsu (reverse, Base64 decode).
+- File: `lib/core/engine/buffer.dart`, `lib/core/error/app_error.dart`,
+  `lib/core/error/result.dart`, `lib/core/plugin/operation.dart`,
+  `lib/core/plugin/operation_param.dart`,
+  `lib/core/plugin/operation_registry.dart`, dan 5 file test core + support.
+- Verifikasi:
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **47 test lulus**.
+- Catatan/risiko: kebijakan error pipeline masih menunggu D06; kontrak sudah
+  menyediakan kode error `unsupported` dan konteks `pluginId`/`stepId`.
+- Commit: `5d5df23` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
