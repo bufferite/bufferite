@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 36 / 131 |
+| Task MVP selesai | 37 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F06-T01` — SQLite + migrasi (F05-T02/T03 blocked) |
+| Task berikutnya | `F06-T02` — RecipeRepository |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (145 test, 2026-11-11) |
+| Test suite | Lulus (150 test, 2026-11-11) |
 
 ## 3. Progres per Feature
 
@@ -51,7 +51,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
 | F04 — Sistem Plugin | 11 | 8 | Sebagian (T05/T08/T10 ditunda) |
 | F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
-| F06 — Storage | 7 | 0 | Belum |
+| F06 — Storage | 7 | 1 | Berjalan |
 | F07 — UI Foundation & Design System | 10 | 0 | Belum |
 | F08 — Fitur Home | 6 | 0 | Belum |
 | F09 — Fitur Recipe Editor | 11 | 0 | Belum |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **36** | **Berjalan** |
+| **Total MVP** | **131** | **37** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -131,6 +131,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-11 | F04-T09 | Registrasi operasi manifest ke registry | `lib/core/plugin/manifest_registrar.dart` | `flutter test` → 136 pass | `837c8c8` |
 | 2026-11-11 | F04-T11 | Test adversarial manifest, entrypoint, hash, izin | `test/core/plugin_*_test.dart`, `support/plugin_fixtures.dart` | `flutter test` → 136 pass | `837c8c8` |
 | 2026-11-11 | F05-T01 | Kontrak sandbox: config, konteks, izin, cancellation, runtime | `lib/core/runtime/sandbox.dart`, `test/core/sandbox_test.dart` | `flutter test` → 145 pass | `6f0e04a` |
+| 2026-11-11 | F06-T01 | SQLite v1, lima tabel, foreign key, migrasi, reopen | `lib/core/storage/app_database.dart`, `test/core/app_database_test.dart` | `flutter test` → 150 pass | `42da04d` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -313,6 +314,27 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   menunggu D02.
 - Commit: `6f0e04a` (kode/test) + commit checkpoint ini.
 
+### CP-008 — 2026-11-11 — F06-T01 SQLite + Migrasi v1
+
+- Status: Selesai (1/7 task F06).
+- Perubahan:
+  - `AppDatabase` membuka SQLite dengan schema v1, `PRAGMA foreign_keys`,
+    dan migrasi berantai.
+  - Tabel `recipe`, `plugin`, `setting`, `favorite`, dan `plugin_permission`;
+    permission memakai foreign key cascade ke plugin.
+  - Factory/path dapat diinjeksi untuk test `sqflite_common_ffi`.
+  - Test mencakup create, reopen/persistensi, cascade, migrasi v0→v1, dan
+    migrasi yang belum tersedia.
+- File: `lib/core/storage/app_database.dart`,
+  `test/core/app_database_test.dart`, `ARCHITECTURE.md`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **150 test lulus**.
+- Catatan/risiko: repository CRUD dan filesystem paket plugin belum ada
+  (F06-T02–T06). Schema dapat berubah lewat migrasi berikutnya.
+- Commit: `42da04d` (kode/test) + commit checkpoint ini.
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -343,7 +365,7 @@ bagian D.
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
-| 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan storage/filesystem F06 serta UI F07/F11 | Alur instalasi end-to-end belum tersedia | Terbuka |
+| 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan filesystem F06-T06 serta UI F07/F11 | Alur instalasi end-to-end belum tersedia | Terbuka |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Terbuka |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
 

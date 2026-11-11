@@ -124,6 +124,14 @@ Implementasi plugin MVP:
 - Belum diimplementasikan: alur sideload UI (F04-T05), bootstrap aset
   `core.berp` (F04-T08), dan `PluginManagerService`/provider (F04-T10).
 
+Implementasi storage MVP:
+- `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
+  `PRAGMA foreign_keys = ON`, schema v1, dan migrasi berantai.
+- Tabel v1: `recipe`, `plugin`, `setting`, `favorite`, dan
+  `plugin_permission` (foreign key ke `plugin`, cascade saat plugin dihapus).
+- Factory dan path dapat diinjeksi; test memakai `sqflite_common_ffi` tanpa
+  device.
+
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
 - Paket .berp diverifikasi SHA-256 sebelum instalasi.

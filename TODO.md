@@ -257,7 +257,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F06 — Storage
 
-- [ ] **F06-T01 (P0)** Inisialisasi SQLite + migrasi v1.
+- [x] **F06-T01 (P0)** Inisialisasi SQLite + migrasi v1.
   - Tabel: recipe, plugin, setting, favorite, plugin_permission.
   - Acceptance: test buka DB, migrasi, dan reopen.
 - [ ] **F06-T02 (P0)** `RecipeRepository`.
