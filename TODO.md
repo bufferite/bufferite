@@ -341,7 +341,7 @@ Catatan progres: lihat [progress.md](progress.md).
   singkat.
 - [x] **F10-T06 (P0)** Empty state tanpa plugin → arahkan ke Plugin
   Manager/sideload, bukan error.
-- [ ] **F10-T07 (P0)** Widget test picker dan library.
+- [x] **F10-T07 (P0)** Widget test picker dan library.
 
 ## F11 — Fitur Plugin Manager
 

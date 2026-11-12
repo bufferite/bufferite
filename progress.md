@@ -29,7 +29,7 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 75 / 131 |
+| Task MVP selesai | 76 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | `F10-T02` — Operation Picker 85% + chip kategori |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (267 test, 2026-11-12) |
+| Test suite | Lulus (270 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -55,13 +55,13 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
 | F09 — Fitur Recipe Editor | 11 | 11 | Selesai |
-| F10 — Fitur Library & Operation Picker | 7 | 5 | Berjalan |
+| F10 — Fitur Library & Operation Picker | 7 | 7 | Selesai |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **75** | **Berjalan** |
+| **Total MVP** | **131** | **76** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -171,6 +171,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F10-T04 | Provider favorit persisten (`favoritesProvider`) | `lib/features/library/favorite_providers.dart` | `flutter test` → 267 pass | `43e49cc` |
 | 2026-11-12 | F10-T05 | Tab Library: katalog + search + favorit + detail singkat | `lib/features/library/library_page.dart`, `app_shell.dart`, `main.dart` | `flutter test` → 267 pass | `3986f60` |
 | 2026-11-12 | F10-T06 | Empty state Library → tombol ke Plugin Manager (placeholder) | `lib/features/plugins/plugin_manager_page.dart`, `library_page.dart` | `flutter test` → 267 pass | `c1c38ea` |
+| 2026-11-12 | F10-T07 | Widget test picker + library (search, detail, empty → manager) | `test/features/operations/operation_picker_test.dart`, `library_page_test.dart` | `flutter test` → 270 pass | `dbcfd72` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -956,6 +957,21 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **267 test lulus**.
 - Catatan/risiko: Plugin Manager masih placeholder; F11 mengisi sisi nyata.
 - Commit: `c1c38ea` (kode/test) + commit checkpoint ini.
+
+### CP-041 — 2026-11-12 — F10 Selesai
+
+- Status: Selesai (7/7 task F10).
+- Perubahan: widget test Library (daftar, filter pencarian, detail, empty state
+  → Plugin Manager); picker chips sudah teruji di F10-T02. `FavoritesController`
+  dibuat non-final agar dapat di-override di test.
+- File: `test/features/library/library_page_test.dart`,
+  `lib/features/library/favorite_providers.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **270 test lulus**.
+- Catatan/risiko: Plugin Manager masih placeholder (F11).
+- Commit: `dbcfd72` (test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
