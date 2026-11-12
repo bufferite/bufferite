@@ -5,6 +5,7 @@ import 'core/ui/app_shell.dart';
 import 'core/ui/app_theme.dart';
 import 'core/ui/theme_provider.dart';
 import 'features/home/home_page.dart';
+import 'features/library/library_page.dart';
 import 'features/settings/settings_repository.dart';
 
 void main() {
@@ -27,7 +28,7 @@ class BufferiteApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeModeFor(mode),
-      home: const AppShell(home: HomePage()),
+      home: const AppShell(home: HomePage(), library: LibraryPage()),
     );
   }
 }
