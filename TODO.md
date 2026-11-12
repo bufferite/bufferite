@@ -332,7 +332,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 - [x] **F10-T01 (P0)** Provider operasi dari plugin aktif (gabungan
   registry + metadata plugin).
-- [ ] **F10-T02 (P0)** Operation Picker bottom sheet 85% layar.
+- [x] **F10-T02 (P0)** Operation Picker bottom sheet 85% layar.
   - Search sticky, chip kategori, daftar operasi + badge tier, tap untuk
     menambah.
 - [ ] **F10-T03 (P0)** Pencarian dan filter kategori/favorit.

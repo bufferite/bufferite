@@ -29,7 +29,7 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 71 / 131 |
+| Task MVP selesai | 72 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | `F10-T02` — Operation Picker 85% + chip kategori |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (263 test, 2026-11-12) |
+| Test suite | Lulus (265 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -55,13 +55,13 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
 | F09 — Fitur Recipe Editor | 11 | 11 | Selesai |
-| F10 — Fitur Library & Operation Picker | 7 | 1 | Berjalan |
+| F10 — Fitur Library & Operation Picker | 7 | 2 | Berjalan |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **71** | **Berjalan** |
+| **Total MVP** | **131** | **72** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -166,6 +166,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F09-T10 | Input file scoped (batas 5 MiB, BytesBuffer) + hapus file | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 259 pass | `90f825b` |
 | 2026-11-12 | F09-T11 | Widget test alur editor: tambah step, live output, disable, simpan | `test/features/recipe/recipe_editor_page_test.dart` | `flutter test` → 260 pass | `2086cdd` |
 | 2026-11-12 | F10-T01 | Provider katalog operasi (registry + metadata plugin aktif) | `lib/features/library/operation_catalog.dart` | `flutter test` → 263 pass | `282f01b` |
+| 2026-11-12 | F10-T02 | Picker 85% + chip kategori/favorit + search sticky | `lib/features/operations/operation_picker.dart` | `flutter test` → 265 pass | `e29af63` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -887,6 +888,20 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **263 test lulus**.
 - Catatan/risiko: `pluginMetadataProvider` masih kosong sampai F04-T10/T11.
 - Commit: `282f01b` (kode/test) + commit checkpoint ini.
+
+### CP-037 — 2026-11-12 — F10-T02 Picker Chips
+
+- Status: Selesai (2/7 task F10).
+- Perubahan: picker 85% + search sticky + chip kategori dan Favorit
+  (opsional `favorites`), filter gabungan dengan search.
+- File: `lib/features/operations/operation_picker.dart`,
+  `test/features/operations/operation_picker_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **265 test lulus**.
+- Catatan/risiko: sumber favorit masih parameter; provider favorit F10-T04.
+- Commit: `e29af63` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
