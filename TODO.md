@@ -325,7 +325,7 @@ Catatan progres: lihat [progress.md](progress.md).
   tersimpan.
 - [x] **F09-T09 (P0)** Impor/ekspor `.brecipe` dari editor.
 - [x] **F09-T10 (P1)** Input dari file (scoped, tanpa streaming besar).
-- [ ] **F09-T11 (P0)** Widget test alur: tambah step, reorder, disable,
+- [x] **F09-T11 (P0)** Widget test alur: tambah step, reorder, disable,
   live output, simpan, error step.
 
 ## F10 — Fitur Library & Operation Picker
