@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../../core/bootstrap/bootstrap_provider.dart';
+import '../../core/storage/app_database.dart';
+import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/design_tokens.dart';
 import '../../core/ui/theme_provider.dart';
@@ -135,6 +139,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: Text('Kode sumber'),
             subtitle: Text('github.com/bufferite/bufferite'),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          Text('Data', style: theme.textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: _reinstallCore,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Instal ulang core.berp'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: _resetData,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+            ),
+            icon: const Icon(Icons.delete_forever),
+            label: const Text('Reset data'),
+          ),
         ],
       ),
     );
@@ -190,5 +211,91 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
       }
     }
+  }
+
+  Future<void> _reinstallCore() async {
+    final confirmed = await _confirm(
+      'Instal ulang core.berp?',
+      'Bootstrap dijalankan ulang dan operasi inti dipasang kembali bila aset '
+          'tersedia.',
+    );
+    if (!confirmed || !mounted) {
+      return;
+    }
+    ref.invalidate(coreBootstrapProvider);
+    showAppToast(
+      context,
+      message: 'Bootstrap dijalankan ulang',
+      tone: AppToastTone.info,
+    );
+  }
+
+  Future<void> _resetData() async {
+    final confirmed = await _confirm(
+      'Reset data?',
+      'Semua recipe, plugin, dan pengaturan akan dihapus. Tindakan ini tidak '
+          'dapat dibatalkan.',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) {
+      return;
+    }
+    try {
+      final support = await getApplicationSupportDirectory();
+      for (final name in <String>['plugins', 'logs']) {
+        final directory = Directory('${support.path}/$name');
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      }
+      await ref.read(appDatabaseProvider).close();
+      final path = '${await getDatabasesPath()}/${AppDatabase.defaultFileName}';
+      await databaseFactory.deleteDatabase(path);
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Data direset',
+          tone: AppToastTone.success,
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal reset data: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
+  }
+
+  Future<bool> _confirm(
+    String title,
+    String body, {
+    bool destructive = false,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            style: destructive
+                ? FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  )
+                : null,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Lanjut'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 }
