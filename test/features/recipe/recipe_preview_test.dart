@@ -20,6 +20,12 @@ OperationRegistry _registry() {
     pluginVersion: '1.0.0',
     tier: RuntimeTier.dsl,
   );
+  registry.registerOperation(
+    const Base64DecodeOperation(),
+    pluginId: 'dev.bufferite.core',
+    pluginVersion: '1.0.0',
+    tier: RuntimeTier.dsl,
+  );
   return registry;
 }
 
@@ -77,5 +83,36 @@ void main() {
     await tester.pump();
 
     expect(_output(tester), isNull);
+  });
+
+  testWidgets('operasi tidak dikenal menampilkan badge unsupported', (
+    tester,
+  ) async {
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Unknown',
+      steps: <RecipeStep>[RecipeStep(id: 's1', operationId: 'core.tidak_ada')],
+      input: const TextBuffer('abc'),
+    );
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump();
+
+    expect(find.text('unsupported'), findsOneWidget);
+  });
+
+  testWidgets('error step ditampilkan pada kartu step', (tester) async {
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Broken',
+      steps: <RecipeStep>[
+        RecipeStep(id: 's1', operationId: 'test.base64_decode'),
+      ],
+      input: const TextBuffer('%%%'),
+    );
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
   });
 }

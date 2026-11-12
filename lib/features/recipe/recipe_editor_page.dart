@@ -45,6 +45,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   String? _previewText;
   AppError? _previewError;
   bool _previewing = false;
+  Map<String, AppError> _stepErrors = const <String, AppError>{};
 
   @override
   void initState() {
@@ -170,6 +171,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                     ? 'Operasi'
                     : _steps[index].args.keys.join(', '),
                 enabled: _steps[index].enabled,
+                state: _stateFor(_steps[index]),
+                errorMessage: _stepErrors[_steps[index].id]?.message,
                 onEnabledChanged: (value) => setState(() {
                   _steps[index] = _steps[index].copyWith(enabled: value);
                   _schedulePreview();
@@ -313,13 +316,42 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       return;
     }
 
+    final stepErrors = <String, AppError>{
+      for (final error in result.errors)
+        if (error.stepId != null) error.stepId!: error,
+    };
     setState(() {
       _previewing = false;
-      _previewError = result.errors.isEmpty ? null : result.errors.first;
+      _stepErrors = stepErrors;
+      _previewError = _stepErrors.values.isEmpty
+          ? (result.errors.isEmpty ? null : result.errors.first)
+          : null;
       _previewText = result.output.kind == BufferKind.text
           ? result.output.asText()
           : null;
     });
+  }
+
+  StepCardState _stateFor(RecipeStep step) {
+    final error = _stepErrors[step.id];
+    if (error != null) {
+      return error.category == ErrorCategory.unsupported
+          ? StepCardState.unsupported
+          : StepCardState.error;
+    }
+    if (!_isSupported(step)) {
+      return StepCardState.unsupported;
+    }
+    if (!step.enabled) {
+      return StepCardState.disabled;
+    }
+    return StepCardState.normal;
+  }
+
+  bool _isSupported(RecipeStep step) {
+    final registry = ref.read(operationRegistryProvider);
+    final entry = registry.byId(step.operationId);
+    return entry != null && entry.descriptor.isSupported;
   }
 
   void _save() {
