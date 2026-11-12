@@ -336,7 +336,7 @@ Catatan progres: lihat [progress.md](progress.md).
   - Search sticky, chip kategori, daftar operasi + badge tier, tap untuk
     menambah.
 - [ ] **F10-T03 (P0)** Pencarian dan filter kategori/favorit.
-- [ ] **F10-T04 (P0)** Favorit operasi (persist).
+- [x] **F10-T04 (P0)** Favorit operasi (persist).
 - [ ] **F10-T05 (P0)** Tab Library: daftar operasi + pencarian + detail
   singkat.
 - [ ] **F10-T06 (P0)** Empty state tanpa plugin → arahkan ke Plugin
