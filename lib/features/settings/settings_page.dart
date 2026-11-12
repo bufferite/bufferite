@@ -1,19 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/design_tokens.dart';
 import '../../core/ui/theme_provider.dart';
+import 'settings_provider.dart';
 import 'settings_repository.dart';
 
-/// Tab Settings. F12-T01: pilihan tema persisten.
-class SettingsPage extends ConsumerWidget {
+/// Tab Settings. F12: tema, batas sandbox, dan log.
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  final TextEditingController _timeoutController = TextEditingController();
+  final TextEditingController _memoryController = TextEditingController();
+  bool _initialized = false;
+
+  @override
+  void dispose() {
+    _timeoutController.dispose();
+    _memoryController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mode =
         ref.watch(themeModeProvider).asData?.value ?? AppThemeMode.system;
+    final settings =
+        ref.watch(settingsProvider).asData?.value ?? AppSettings.defaults;
+
+    if (!_initialized) {
+      _timeoutController.text = settings.stepTimeout.inMilliseconds.toString();
+      _memoryController.text = (settings.memoryLimitBytes ~/ (1024 * 1024))
+          .toString();
+      _initialized = true;
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -45,8 +72,56 @@ class SettingsPage extends ConsumerWidget {
               ref.read(themeModeProvider.notifier).setMode(selection.first);
             },
           ),
+          const SizedBox(height: AppSpacing.xl),
+          Text('Sandbox', style: theme.textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: _timeoutController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Batas waktu per operasi (ms)',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _memoryController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Batas memori (MiB)'),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          FilledButton(
+            onPressed: _saveLimits,
+            child: const Text('Simpan batas sandbox'),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _saveLimits() async {
+    final timeoutMs = int.tryParse(_timeoutController.text.trim());
+    final memoryMib = int.tryParse(_memoryController.text.trim());
+    if (timeoutMs == null ||
+        timeoutMs <= 0 ||
+        memoryMib == null ||
+        memoryMib <= 0) {
+      showAppToast(
+        context,
+        message: 'Nilai batas harus angka positif.',
+        tone: AppToastTone.error,
+      );
+      return;
+    }
+
+    final controller = ref.read(settingsProvider.notifier);
+    await controller.setStepTimeout(Duration(milliseconds: timeoutMs));
+    await controller.setMemoryLimitBytes(memoryMib * 1024 * 1024);
+    if (mounted) {
+      showAppToast(
+        context,
+        message: 'Batas sandbox disimpan',
+        tone: AppToastTone.success,
+      );
+    }
   }
 }
