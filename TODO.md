@@ -320,7 +320,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F09-T05 (P0)** Sheet konfigurasi parameter per tipe + validasi.
 - [x] **F09-T06 (P0)** Preview live dengan debounce 200 ms.
   - Batalkan eksekusi lama saat input berubah.
-- [ ] **F09-T07 (P0)** Tampilan error per step dan badge unsupported.
+- [x] **F09-T07 (P0)** Tampilan error per step dan badge unsupported.
 - [ ] **F09-T08 (P0)** Simpan, rename, dan guard perubahan belum
   tersimpan.
 - [ ] **F09-T09 (P0)** Impor/ekspor `.brecipe` dari editor.
