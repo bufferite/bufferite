@@ -35,6 +35,18 @@ class PluginManagerPage extends ConsumerWidget {
               child: const Text('Instal dari file'),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              0,
+              AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: OutlinedButton(
+              onPressed: () => _showCatalogInfo(context),
+              child: const Text('Buka katalog'),
+            ),
+          ),
         ],
       ),
       body: plugins.when(
@@ -203,6 +215,26 @@ class PluginManagerPage extends ConsumerWidget {
       context,
       message: ok ? 'Plugin dihapus' : 'Plugin tidak ditemukan',
       tone: ok ? AppToastTone.success : AppToastTone.error,
+    );
+  }
+
+  Future<void> _showCatalogInfo(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Buka katalog plugin?'),
+        content: const Text(
+          'Katalog memerlukan akses internet. Bufferite tetap offline untuk '
+          'data dan resepmu; hanya katalog yang memakai jaringan.\n\n'
+          'Katalog belum tersedia sampai registry Fase 2 dirilis.',
+        ),
+        actions: <Widget>[
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Mengerti'),
+          ),
+        ],
+      ),
     );
   }
 
