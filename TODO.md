@@ -324,7 +324,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F09-T08 (P0)** Simpan, rename, dan guard perubahan belum
   tersimpan.
 - [x] **F09-T09 (P0)** Impor/ekspor `.brecipe` dari editor.
-- [ ] **F09-T10 (P1)** Input dari file (scoped, tanpa streaming besar).
+- [x] **F09-T10 (P1)** Input dari file (scoped, tanpa streaming besar).
 - [ ] **F09-T11 (P0)** Widget test alur: tambah step, reorder, disable,
   live output, simpan, error step.
 
