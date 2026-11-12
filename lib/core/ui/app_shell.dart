@@ -10,6 +10,7 @@ class AppShell extends StatefulWidget {
     super.key,
     this.home = const HomePlaceholder(),
     this.library = const LibraryPlaceholder(),
+    this.settings = const SettingsPlaceholder(),
   });
 
   /// Widget tab Home. Default placeholder sampai F08; komposisi nyata di
@@ -18,6 +19,9 @@ class AppShell extends StatefulWidget {
 
   /// Widget tab Library. Default placeholder sampai F10.
   final Widget library;
+
+  /// Widget tab Settings. Default placeholder sampai F12.
+  final Widget settings;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -31,11 +35,7 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: <Widget>[
-          widget.home,
-          widget.library,
-          const SettingsPlaceholder(),
-        ],
+        children: <Widget>[widget.home, widget.library, widget.settings],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,

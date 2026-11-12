@@ -19,7 +19,7 @@ ThemeMode themeModeFor(AppThemeMode mode) {
   };
 }
 
-final class ThemeModeController extends AsyncNotifier<AppThemeMode> {
+class ThemeModeController extends AsyncNotifier<AppThemeMode> {
   @override
   Future<AppThemeMode> build() async {
     return (await ref.watch(settingsRepositoryProvider).load()).themeMode;
