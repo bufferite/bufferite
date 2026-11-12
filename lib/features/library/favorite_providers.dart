@@ -13,7 +13,7 @@ final favoritesProvider =
       FavoritesController.new,
     );
 
-final class FavoritesController extends AsyncNotifier<Set<String>> {
+class FavoritesController extends AsyncNotifier<Set<String>> {
   @override
   Future<Set<String>> build() async {
     return (await ref.watch(favoriteRepositoryProvider).list()).toSet();
