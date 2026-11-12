@@ -29,7 +29,7 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 73 / 131 |
+| Task MVP selesai | 74 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
@@ -55,13 +55,13 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
 | F09 — Fitur Recipe Editor | 11 | 11 | Selesai |
-| F10 — Fitur Library & Operation Picker | 7 | 3 | Berjalan |
+| F10 — Fitur Library & Operation Picker | 7 | 4 | Berjalan |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **73** | **Berjalan** |
+| **Total MVP** | **131** | **74** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -169,6 +169,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F10-T02 | Picker 85% + chip kategori/favorit + search sticky | `lib/features/operations/operation_picker.dart` | `flutter test` → 265 pass | `e29af63` |
 | 2026-11-12 | F10-T03 | Pencarian + filter kategori/favorit (chip, gabung search) | `lib/features/operations/operation_picker.dart` | `flutter test` → 265 pass | `e29af63` |
 | 2026-11-12 | F10-T04 | Provider favorit persisten (`favoritesProvider`) | `lib/features/library/favorite_providers.dart` | `flutter test` → 267 pass | `43e49cc` |
+| 2026-11-12 | F10-T05 | Tab Library: katalog + search + favorit + detail singkat | `lib/features/library/library_page.dart`, `app_shell.dart`, `main.dart` | `flutter test` → 267 pass | `3986f60` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -923,6 +924,23 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: picker menerima `favorites` sebagai parameter; wiring
   `favoritesProvider` ke picker/Library dilakukan di F10-T05.
 - Commit: `e29af63` + `43e49cc` (kode/test) + commit checkpoint ini.
+
+### CP-039 — 2026-11-12 — F10-T05 Tab Library
+
+- Status: Selesai (5/7 task F10).
+- Perubahan:
+  - `LibraryPage`: daftar operasi dari `operationCatalogProvider`, search
+    nama/ID, toggle favorit (`favoritesProvider`), detail singkat bottom
+    sheet (kategori, tier, plugin, jumlah parameter, status dukungan).
+  - `AppShell` menerima tab Library; `main.dart` memasang `LibraryPage`.
+- File: `lib/features/library/library_page.dart`,
+  `lib/core/ui/app_shell.dart`, `lib/main.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **267 test lulus**.
+- Catatan/risiko: widget test Library menyusul di F10-T07.
+- Commit: `3986f60` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
