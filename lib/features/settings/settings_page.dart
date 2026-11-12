@@ -114,6 +114,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             icon: const Icon(Icons.delete_outline),
             label: const Text('Hapus log'),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          Text('Tentang', style: theme.textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          const ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Bufferite'),
+            subtitle: Text('Versi 1.0.0 · Lisensi MIT'),
+          ),
+          const ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Privasi'),
+            subtitle: Text(
+              'Offline-first. Data dan resep tidak keluar dari perangkat; '
+              'hanya katalog plugin Fase 2 yang memakai jaringan.',
+            ),
+          ),
+          const ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Kode sumber'),
+            subtitle: Text('github.com/bufferite/bufferite'),
+          ),
         ],
       ),
     );
