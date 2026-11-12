@@ -7,10 +7,12 @@ import '../../core/ui/design_tokens.dart';
 
 /// Bottom sheet Operation Picker sesuai `DESIGN.md` §6.4.
 ///
-/// Mengembalikan descriptor terpilih, atau `null` bila ditutup.
+/// Search sticky di atas, chip kategori/favorit, daftar operasi dengan badge
+/// tier. Mengembalikan descriptor terpilih, atau `null` bila ditutup.
 Future<OperationDescriptor?> showOperationPicker(
   BuildContext context, {
   required OperationRegistry registry,
+  Set<String> favorites = const <String>{},
 }) {
   return showModalBottomSheet<OperationDescriptor>(
     context: context,
@@ -18,15 +20,20 @@ Future<OperationDescriptor?> showOperationPicker(
     useSafeArea: true,
     builder: (context) => FractionallySizedBox(
       heightFactor: 0.85,
-      child: OperationPicker(registry: registry),
+      child: OperationPicker(registry: registry, favorites: favorites),
     ),
   );
 }
 
 class OperationPicker extends StatefulWidget {
-  const OperationPicker({super.key, required this.registry});
+  const OperationPicker({
+    super.key,
+    required this.registry,
+    this.favorites = const <String>{},
+  });
 
   final OperationRegistry registry;
+  final Set<String> favorites;
 
   @override
   State<OperationPicker> createState() => _OperationPickerState();
@@ -34,11 +41,14 @@ class OperationPicker extends StatefulWidget {
 
 class _OperationPickerState extends State<OperationPicker> {
   String _query = '';
+  OperationCategory? _category;
+  bool _favoritesOnly = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final results = widget.registry.search(_query, includeUnsupported: true);
+    final chips = _chips();
+    final results = _filtered();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -65,6 +75,24 @@ class _OperationPickerState extends State<OperationPicker> {
             ),
           ),
         ),
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            children: <Widget>[
+              for (final chip in chips) ...<Widget>[
+                FilterChip(
+                  label: Text(chip.label),
+                  selected: chip.selected,
+                  onSelected: (value) => setState(chip.onSelected),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         Expanded(
           child: results.isEmpty
               ? Center(
@@ -93,6 +121,39 @@ class _OperationPickerState extends State<OperationPicker> {
     );
   }
 
+  List<_ChipData> _chips() {
+    return <_ChipData>[
+      _ChipData(
+        label: 'Favorit',
+        selected: _favoritesOnly,
+        onSelected: () => _favoritesOnly = !_favoritesOnly,
+      ),
+      for (final category in OperationCategory.values)
+        _ChipData(
+          label: category.label,
+          selected: _category == category,
+          onSelected: () => _category = _category == category ? null : category,
+        ),
+    ];
+  }
+
+  List<RegisteredOperation> _filtered() {
+    Iterable<RegisteredOperation> items = widget.registry.search(
+      _query,
+      includeUnsupported: true,
+    );
+    final category = _category;
+    if (category != null) {
+      items = items.where((entry) => entry.descriptor.category == category);
+    }
+    if (_favoritesOnly) {
+      items = items.where(
+        (entry) => widget.favorites.contains(entry.descriptor.id),
+      );
+    }
+    return List<RegisteredOperation>.unmodifiable(items);
+  }
+
   Widget _tile(RegisteredOperation entry, ThemeData theme) {
     final descriptor = entry.descriptor;
     return ListTile(
@@ -105,4 +166,16 @@ class _OperationPickerState extends State<OperationPicker> {
           : null,
     );
   }
+}
+
+final class _ChipData {
+  const _ChipData({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
 }

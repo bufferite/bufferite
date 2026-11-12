@@ -79,6 +79,41 @@ void main() {
     expect(find.text('Tidak ada operasi cocok'), findsOneWidget);
   });
 
+  testWidgets('chip kategori memfilter daftar', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(body: OperationPicker(registry: _registry())),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Encode/Decode'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Base64 Decode'), findsOneWidget);
+    expect(find.text('Reverse Text'), findsNothing);
+  });
+
+  testWidgets('chip Favorit hanya menampilkan favorit', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: OperationPicker(
+            registry: _registry(),
+            favorites: const <String>{'test.reverse'},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Favorit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reverse Text'), findsOneWidget);
+    expect(find.text('Base64 Decode'), findsNothing);
+  });
+
   testWidgets('editor menambah step dari picker', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
