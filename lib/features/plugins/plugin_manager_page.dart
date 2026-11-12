@@ -77,16 +77,15 @@ class PluginManagerPage extends ConsumerWidget {
               '${manifest.permissions.map((p) => p.wireName).join(', ')}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          ],
-        ),
-        isThreeLine: true,
-        trailing: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            AppBadge(label: manifest.tier.name),
-            const SizedBox(height: AppSpacing.xs),
-            _statusBadge(status),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: <Widget>[
+                AppBadge(label: manifest.tier.name),
+                _statusBadge(status),
+              ],
+            ),
           ],
         ),
       ),
