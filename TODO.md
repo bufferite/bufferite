@@ -365,15 +365,15 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F12 — Fitur Settings
 
-- [ ] **F12-T01 (P0)** Pilihan tema (system/light/dark) persisten.
-- [ ] **F12-T02 (P1)** Pengaturan sandbox: batas waktu dan memori
+- [x] **F12-T01 (P0)** Pilihan tema (system/light/dark) persisten.
+- [x] **F12-T02 (P1)** Pengaturan sandbox: batas waktu dan memori
   (dengan nilai default aman).
-- [ ] **F12-T03 (P1)** Opt-in log eksekusi plugin + hapus log.
-- [ ] **F12-T04 (P0)** Tentang aplikasi: versi, lisensi, kebijakan
+- [x] **F12-T03 (P1)** Opt-in log eksekusi plugin + hapus log.
+- [x] **F12-T04 (P0)** Tentang aplikasi: versi, lisensi, kebijakan
   privasi offline.
-- [ ] **F12-T05 (P1)** Reinstalasi `core.berp` dan reset data dengan
+- [x] **F12-T05 (P1)** Reinstalasi `core.berp` dan reset data dengan
   konfirmasi.
-- [ ] **F12-T06 (P0)** Widget test Settings.
+- [x] **F12-T06 (P0)** Widget test Settings.
 
 ## F13 — core.berp: Tooling & Operasi
 
