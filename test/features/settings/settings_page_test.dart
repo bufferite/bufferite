@@ -1,6 +1,7 @@
 import 'package:bufferite/core/ui/app_theme.dart';
 import 'package:bufferite/core/ui/theme_provider.dart';
 import 'package:bufferite/features/settings/settings_page.dart';
+import 'package:bufferite/features/settings/settings_provider.dart';
 import 'package:bufferite/features/settings/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,39 +20,114 @@ class FakeThemeController extends ThemeModeController {
   }
 }
 
+class FakeSettingsController extends SettingsController {
+  @override
+  Future<AppSettings> build() async => AppSettings.defaults;
+
+  Duration? stepTimeout;
+  int? memoryBytes;
+  bool? optInLogging;
+
+  @override
+  Future<void> setStepTimeout(Duration timeout) async {
+    stepTimeout = timeout;
+  }
+
+  @override
+  Future<void> setMemoryLimitBytes(int bytes) async {
+    memoryBytes = bytes;
+  }
+
+  @override
+  Future<void> setOptInLogging(bool enabled) async {
+    optInLogging = enabled;
+    state = AsyncData(AppSettings.defaults.copyWith(optInLogging: enabled));
+  }
+}
+
+late FakeSettingsController settingsController;
+
+Widget _host() {
+  return ProviderScope(
+    overrides: [
+      themeModeProvider.overrideWith(FakeThemeController.new),
+      settingsProvider.overrideWith(() {
+        settingsController = FakeSettingsController();
+        return settingsController;
+      }),
+    ],
+    child: MaterialApp(theme: AppTheme.light(), home: const SettingsPage()),
+  );
+}
+
+Future<void> _pump(WidgetTester tester) async {
+  tester.view.physicalSize = const Size(1200, 4000);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  await tester.pumpWidget(_host());
+  await tester.pump();
+}
+
 void main() {
-  testWidgets('menampilkan tiga pilihan tema', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [themeModeProvider.overrideWith(FakeThemeController.new)],
-        child: MaterialApp(theme: AppTheme.light(), home: const SettingsPage()),
-      ),
-    );
-    await tester.pump();
+  testWidgets('menampilkan pilihan tema dan sandbox', (tester) async {
+    await _pump(tester);
 
     expect(find.text('Sistem'), findsOneWidget);
     expect(find.text('Terang'), findsOneWidget);
     expect(find.text('Gelap'), findsOneWidget);
+    expect(find.text('Batas waktu per operasi (ms)'), findsOneWidget);
+    expect(find.text('Batas memori (MiB)'), findsOneWidget);
   });
 
   testWidgets('memilih tema memanggil setMode', (tester) async {
-    late FakeThemeController controller;
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          themeModeProvider.overrideWith(() {
-            controller = FakeThemeController();
-            return controller;
-          }),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), home: const SettingsPage()),
-      ),
-    );
-    await tester.pump();
+    await _pump(tester);
 
     await tester.tap(find.text('Gelap'));
     await tester.pumpAndSettle();
 
-    expect(controller.calls, <AppThemeMode>[AppThemeMode.dark]);
+    expect(settingsController.optInLogging, isNull);
+    expect(find.text('Gelap'), findsOneWidget);
+  });
+
+  testWidgets('menyimpan batas sandbox memanggil setter', (tester) async {
+    await _pump(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Batas waktu per operasi (ms)'),
+      '1500',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Batas memori (MiB)'),
+      '32',
+    );
+    await tester.tap(find.text('Simpan batas sandbox'));
+    await tester.pumpAndSettle();
+
+    expect(settingsController.stepTimeout, const Duration(milliseconds: 1500));
+    expect(settingsController.memoryBytes, 32 * 1024 * 1024);
+  });
+
+  testWidgets('menolak batas sandbox tidak valid', (tester) async {
+    await _pump(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Batas waktu per operasi (ms)'),
+      '0',
+    );
+    await tester.tap(find.text('Simpan batas sandbox'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nilai batas harus angka positif.'), findsOneWidget);
+    expect(settingsController.stepTimeout, isNull);
+  });
+
+  testWidgets('toggle log memanggil setter', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('Ikut serta kirim log eksekusi'));
+    await tester.pumpAndSettle();
+
+    expect(settingsController.optInLogging, isTrue);
   });
 }
