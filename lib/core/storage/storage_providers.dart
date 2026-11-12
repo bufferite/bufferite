@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/plugins/plugin_repository.dart';
 import '../../features/recipe/recipe_repository.dart';
 import '../../features/settings/settings_repository.dart';
 import '../storage/app_database.dart';
@@ -13,4 +14,8 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
 
 final recipeRepositoryProvider = Provider<RecipeRepository>(
   (ref) => RecipeRepository(ref.watch(appDatabaseProvider)),
+);
+
+final pluginRepositoryProvider = Provider<PluginRepository>(
+  (ref) => PluginRepository(ref.watch(appDatabaseProvider)),
 );
