@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 66 / 131 |
+| Task MVP selesai | 67 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T08` — simpan, rename, guard belum tersimpan |
+| Task berikutnya | `F09-T09` — impor/ekspor `.brecipe` |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (255 test, 2026-11-12) |
+| Test suite | Lulus (256 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 7 | Berjalan |
+| F09 — Fitur Recipe Editor | 11 | 8 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **66** | **Berjalan** |
+| **Total MVP** | **131** | **67** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -161,6 +161,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F09-T04 | Hapus step + undo, tombol delete di StepCard | `lib/core/ui/components/step_card.dart`, editor | `flutter test` → 250 pass | `103220f` |
 | 2026-11-12 | F09-T06 | Preview live debounce 200 ms + batalkan eksekusi lama | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 253 pass | `0953910` |
 | 2026-11-12 | F09-T07 | Error per step di StepCard + badge unsupported | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 255 pass | `4aa7151` |
+| 2026-11-12 | F09-T08 | Simpan/rename ke repository + guard dialog perubahan | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 256 pass | `1e49e5d` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -798,6 +799,24 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **255 test lulus**.
 - Catatan/risiko: test editor kini meng-override registry operasi dummy.
 - Commit: `4aa7151` + `6e6ba78` (kode/test) + commit checkpoint ini.
+
+### CP-032 — 2026-11-12 — F09-T08 Simpan & Guard
+
+- Status: Selesai (8/11 task F09).
+- Perubahan:
+  - `_save` memvalidasi draft lalu menyimpan via `recipeRepositoryProvider`
+    (mode baru = UUID v4 baru, mode edit = update); toast sukses + pop hasil.
+  - Guard perubahan belum tersimpan (`PopScope` + dialog "Buang perubahan?").
+  - Rename lewat field nama; `_saving` menonaktifkan tombol saat proses.
+- File: `lib/features/recipe/recipe_editor_page.dart`,
+  `test/features/recipe/recipe_editor_page_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **256 test lulus**.
+- Catatan/risiko: test simpan sukses dengan DB belum ada (DB ffi + fake async);
+  persistensi dijamin `RecipeRepository` test.
+- Commit: `1e49e5d` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
