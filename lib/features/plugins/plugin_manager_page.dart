@@ -6,6 +6,7 @@ import '../../core/plugin/semantic_version.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
+import 'plugin_detail_page.dart';
 import 'plugin_providers.dart';
 
 /// Daftar plugin terpasang sesuai `DESIGN.md` §6.5.
@@ -67,6 +68,11 @@ class PluginManagerPage extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(manifest.name),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => PluginDetailPage(plugin: plugin),
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
