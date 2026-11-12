@@ -330,7 +330,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F10 — Fitur Library & Operation Picker
 
-- [ ] **F10-T01 (P0)** Provider operasi dari plugin aktif (gabungan
+- [x] **F10-T01 (P0)** Provider operasi dari plugin aktif (gabungan
   registry + metadata plugin).
 - [ ] **F10-T02 (P0)** Operation Picker bottom sheet 85% layar.
   - Search sticky, chip kategori, daftar operasi + badge tier, tap untuk
