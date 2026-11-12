@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +39,7 @@ class RecipeEditorPage extends ConsumerStatefulWidget {
 
 class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   static const Duration previewDebounce = Duration(milliseconds: 200);
+  static const int maxInputBytes = 5 * 1024 * 1024;
 
   late final TextEditingController _nameController;
   late final TextEditingController _inputController;
@@ -50,6 +53,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   Map<String, AppError> _stepErrors = const <String, AppError>{};
   bool _dirty = false;
   bool _saving = false;
+  Uint8List? _inputBytes;
+  String? _inputFileName;
 
   @override
   void initState() {
@@ -136,12 +141,27 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             const SizedBox(height: AppSpacing.lg),
             _section(theme, 'Input'),
             const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: _inputController,
-              minLines: 3,
-              maxLines: 8,
-              style: const TextStyle(fontFamily: 'Roboto Mono', fontSize: 14),
-              decoration: const InputDecoration(hintText: 'Tempel data input'),
+            if (_inputBytes != null)
+              _fileInputCard(theme)
+            else
+              TextField(
+                controller: _inputController,
+                minLines: 3,
+                maxLines: 8,
+                style: const TextStyle(fontFamily: 'Roboto Mono', fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: 'Tempel data input',
+                ),
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppButton(
+                label: 'Pilih file',
+                variant: AppButtonVariant.ghost,
+                icon: Icons.attach_file,
+                onPressed: _pickInputFile,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             _section(theme, 'Step'),
@@ -339,7 +359,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           ? 'Draft'
           : _nameController.text.trim(),
       steps: _steps,
-      input: TextBuffer(_inputController.text),
+      input: _inputBuffer(),
     );
 
     final executor = PipelineExecutor(
@@ -462,13 +482,12 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   }
 
   Recipe _buildDraft() {
-    final inputText = _inputController.text;
     final existing = widget.recipe;
     return Recipe(
       id: existing?.id ?? generateRecipeId(),
       name: _nameController.text.trim(),
       steps: _steps,
-      input: TextBuffer(inputText),
+      input: _inputBuffer(),
       meta: existing?.meta,
     );
   }
@@ -543,8 +562,87 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         : '';
     setState(() {
       _steps = List<RecipeStep>.of(recipe.steps);
+      _inputBytes = null;
+      _inputFileName = null;
       _dirty = true;
     });
     _schedulePreview();
+  }
+
+  Widget _fileInputCard(ThemeData theme) {
+    final bytes = _inputBytes!;
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.insert_drive_file_outlined),
+        title: Text(_inputFileName ?? 'file'),
+        subtitle: Text('${bytes.length} byte'),
+        trailing: IconButton(
+          tooltip: 'Hapus file',
+          onPressed: () {
+            setState(() {
+              _inputBytes = null;
+              _inputFileName = null;
+              _dirty = true;
+            });
+            _schedulePreview();
+          },
+          icon: const Icon(Icons.close),
+        ),
+      ),
+    );
+  }
+
+  Buffer _inputBuffer() {
+    final bytes = _inputBytes;
+    return bytes != null
+        ? BytesBuffer(bytes)
+        : TextBuffer(_inputController.text);
+  }
+
+  Future<void> _pickInputFile() async {
+    try {
+      final file = await FilePicker.pickFile(dialogTitle: 'Pilih file input');
+      if (file == null || !mounted) {
+        return;
+      }
+      final path = file.path;
+      if (path == null) {
+        throw const AppError(
+          category: ErrorCategory.storage,
+          code: 'recipe.file_unreadable',
+          message: 'File tidak dapat dibaca.',
+        );
+      }
+      final handle = File(path);
+      final size = handle.lengthSync();
+      if (size > maxInputBytes) {
+        throw AppError(
+          category: ErrorCategory.validation,
+          code: 'recipe.file_too_large',
+          message: 'File melebihi batas ${maxInputBytes ~/ (1024 * 1024)} MiB.',
+          details: <String, Object?>{'size': size},
+        );
+      }
+      final bytes = handle.readAsBytesSync();
+      setState(() {
+        _inputBytes = bytes;
+        _inputFileName = file.name;
+        _inputController.text = '';
+        _dirty = true;
+      });
+      _schedulePreview();
+    } on AppError catch (error) {
+      if (mounted) {
+        showAppToast(context, message: error.message, tone: AppToastTone.error);
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal membaca file: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
   }
 }

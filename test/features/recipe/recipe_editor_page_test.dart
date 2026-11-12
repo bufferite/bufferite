@@ -181,4 +181,9 @@ void main() {
 
     expect(find.textContaining('Nama recipe'), findsWidgets);
   });
+
+  testWidgets('menyediakan aksi pilih file input', (tester) async {
+    await tester.pumpWidget(_host());
+    expect(find.text('Pilih file'), findsOneWidget);
+  });
 }
