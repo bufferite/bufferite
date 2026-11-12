@@ -2,6 +2,7 @@ import 'package:bufferite/core/engine/buffer.dart';
 import 'package:bufferite/core/plugin/operation.dart';
 import 'package:bufferite/core/plugin/operation_registry.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
+import 'package:bufferite/core/ui/components/buffer_panel.dart';
 import 'package:bufferite/core/ui/components/step_card.dart';
 import 'package:bufferite/features/operations/operation_providers.dart';
 import 'package:bufferite/features/recipe/recipe.dart';
@@ -185,5 +186,29 @@ void main() {
   testWidgets('menyediakan aksi pilih file input', (tester) async {
     await tester.pumpWidget(_host());
     expect(find.text('Pilih file'), findsOneWidget);
+  });
+
+  testWidgets('alur: tambah step, live output, disable, simpan invalid', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host());
+
+    await tester.tap(find.text('Tambah step'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reverse Text'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(1), 'abc');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(tester.widget<BufferPanel>(find.byType(BufferPanel)).content, 'cba');
+
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+
+    await tester.tap(find.text('Simpan'));
+    await tester.pump();
+    expect(find.textContaining('Nama recipe'), findsWidgets);
   });
 }
