@@ -339,7 +339,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F10-T04 (P0)** Favorit operasi (persist).
 - [x] **F10-T05 (P0)** Tab Library: daftar operasi + pencarian + detail
   singkat.
-- [ ] **F10-T06 (P0)** Empty state tanpa plugin → arahkan ke Plugin
+- [x] **F10-T06 (P0)** Empty state tanpa plugin → arahkan ke Plugin
   Manager/sideload, bukan error.
 - [ ] **F10-T07 (P0)** Widget test picker dan library.
 
