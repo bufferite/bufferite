@@ -379,7 +379,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ### Tooling & format
 
-- [ ] **F13-T01 (P0)** Spesifikasi authoring operasi core.
+- [x] **F13-T01 (P0)** Spesifikasi authoring operasi core.
   - Struktur source `plugins/core/`, manifest per operasi/paket, format
     DSL/Lua/WASM, dan aturan ID stabil.
 - [ ] **F13-T02 (P0)** Build script `.berp`.

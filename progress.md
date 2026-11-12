@@ -29,12 +29,12 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 92 / 131 |
+| Task MVP selesai | 93 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F13-T01` — spesifikasi authoring operasi core |
+| Task berikutnya | `F13-T02` — build script `.berp` (device-gated: F09-T09/T10, F11 sideload, F15 ditunda) |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-13) |
 | Test suite | Lulus (282 test, 2026-11-13) |
@@ -58,10 +58,10 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F10 — Fitur Library & Operation Picker | 7 | 7 | Selesai |
 | F11 — Fitur Plugin Manager | 9 | 9 | Selesai |
 | F12 — Fitur Settings | 6 | 6 | Selesai |
-| F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
+| F13 — core.berp: Tooling & Operasi | 11 | 1 | Berjalan |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **92** | **Berjalan** |
+| **Total MVP** | **131** | **93** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
