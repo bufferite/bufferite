@@ -1,0 +1,11 @@
+{
+  "manifestVersion": 1,
+  "pluginId": "dev.bufferite.core",
+  "name": "Bufferite Core",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "tier": "dsl",
+  "entrypoint": "operations.json",
+  "permissions": ["cpu"],
+  "operations": []
+}
