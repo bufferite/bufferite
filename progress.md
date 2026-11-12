@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 67 / 131 |
+| Task MVP selesai | 68 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F09-T09` — impor/ekspor `.brecipe` |
+| Task berikutnya | `F09-T10` — input dari file |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
 | Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (256 test, 2026-11-12) |
+| Test suite | Lulus (258 test, 2026-11-12) |
 
 ## 3. Progres per Feature
 
@@ -54,14 +54,14 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
-| F09 — Fitur Recipe Editor | 11 | 8 | Berjalan |
+| F09 — Fitur Recipe Editor | 11 | 9 | Berjalan |
 | F10 — Fitur Library & Operation Picker | 7 | 0 | Belum |
 | F11 — Fitur Plugin Manager | 9 | 0 | Belum |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **67** | **Berjalan** |
+| **Total MVP** | **131** | **68** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -162,6 +162,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F09-T06 | Preview live debounce 200 ms + batalkan eksekusi lama | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 253 pass | `0953910` |
 | 2026-11-12 | F09-T07 | Error per step di StepCard + badge unsupported | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 255 pass | `4aa7151` |
 | 2026-11-12 | F09-T08 | Simpan/rename ke repository + guard dialog perubahan | `lib/features/recipe/recipe_editor_page.dart` | `flutter test` → 256 pass | `1e49e5d` |
+| 2026-11-12 | F09-T09 | Impor/ekspor `.brecipe` via file picker dari editor | `lib/features/recipe/recipe_io.dart`, editor | `flutter test` → 258 pass | `d017dc6` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -817,6 +818,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: test simpan sukses dengan DB belum ada (DB ffi + fake async);
   persistensi dijamin `RecipeRepository` test.
 - Commit: `1e49e5d` (kode/test) + commit checkpoint ini.
+
+### CP-033 — 2026-11-12 — F09-T09 Impor/Ekspor .brecipe
+
+- Status: Selesai (9/11 task F09).
+- Perubahan:
+  - `RecipeIo`: ekspor via `FilePicker.saveFile` (bytes `.brecipe`) dan impor
+    via `FilePicker.pickFile`; error terstruktur (cancelled/storage/codec).
+  - Editor: menu overflow "Impor .brecipe"/"Ekspor .brecipe"; impor mengisi
+    nama/input/step + tandai dirty + preview.
+- File: `lib/features/recipe/recipe_io.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `test/features/recipe/recipe_editor_page_test.dart`.
+- Verifikasi:
+  - `dart format lib test` → sukses.
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **258 test lulus**.
+- Catatan/risiko: file picker tidak tersedia di test, jadi hanya menu/validasi
+  yang diuji; jalur file diuji manual di device.
+- Commit: `d017dc6` (kode/test) + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
