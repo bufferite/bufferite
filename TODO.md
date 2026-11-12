@@ -345,22 +345,22 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F11 — Fitur Plugin Manager
 
-- [ ] **F11-T01 (P0)** Daftar plugin (core/komunitas) dengan versi, tier,
+- [x] **F11-T01 (P0)** Daftar plugin (core/komunitas) dengan versi, tier,
   izin, sumber, status, badge unverified.
-- [ ] **F11-T02 (P0)** Halaman detail plugin: manifest, izin, operasi,
+- [x] **F11-T02 (P0)** Halaman detail plugin: manifest, izin, operasi,
   ukuran, sumber.
-- [ ] **F11-T03 (P0)** Aksi enable/disable/hapus dengan konfirmasi dan
+- [x] **F11-T03 (P0)** Aksi enable/disable/hapus dengan konfirmasi dan
   peringatan core.
-- [ ] **F11-T04 (P0)** Alur sideload UI: pilih file → preview manifest →
+- [x] **F11-T04 (P0)** Alur sideload UI: pilih file → preview manifest →
   dialog izin → hasil.
-- [ ] **F11-T05 (P0)** Integrasi dialog izin untuk `net`, `file:read`,
+- [x] **F11-T05 (P0)** Integrasi dialog izin untuk `net`, `file:read`,
   `file:write`.
-- [ ] **F11-T06 (P1)** Tombol katalog + peringatan akses jaringan;
+- [x] **F11-T06 (P1)** Tombol katalog + peringatan akses jaringan;
   tampilkan "belum tersedia" sampai registry Fase 2.
-- [ ] **F11-T07 (P0)** State kegagalan bootstrap `core.berp` + aksi
+- [x] **F11-T07 (P0)** State kegagalan bootstrap `core.berp` + aksi
   reinstalasi, app tetap bisa dibuka.
-- [ ] **F11-T08 (P0)** Empty state Plugin Manager.
-- [ ] **F11-T09 (P0)** Widget test alur sideload (mock file picker),
+- [x] **F11-T08 (P0)** Empty state Plugin Manager.
+- [x] **F11-T09 (P0)** Widget test alur sideload (mock file picker),
   enable/disable, dan detail.
 
 ## F12 — Fitur Settings

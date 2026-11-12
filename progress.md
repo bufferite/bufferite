@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 76 / 131 |
+| Task MVP selesai | 85 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F10-T02` — Operation Picker 85% + chip kategori |
+| Task berikutnya | `F12-T01` — pilihan tema persisten |
 | Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
-| Analyze | Lulus (0 issue, 2026-11-11) |
-| Test suite | Lulus (270 test, 2026-11-12) |
+| Analyze | Lulus (0 issue, 2026-11-13) |
+| Test suite | Lulus (277 test, 2026-11-13) |
 
 ## 3. Progres per Feature
 
@@ -56,12 +56,12 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F08 — Fitur Home | 6 | 6 | Selesai |
 | F09 — Fitur Recipe Editor | 11 | 11 | Selesai |
 | F10 — Fitur Library & Operation Picker | 7 | 7 | Selesai |
-| F11 — Fitur Plugin Manager | 9 | 0 | Belum |
+| F11 — Fitur Plugin Manager | 9 | 9 | Selesai |
 | F12 — Fitur Settings | 6 | 0 | Belum |
 | F13 — core.berp: Tooling & Operasi | 11 | 0 | Belum |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **76** | **Berjalan** |
+| **Total MVP** | **131** | **85** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -172,6 +172,15 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-12 | F10-T05 | Tab Library: katalog + search + favorit + detail singkat | `lib/features/library/library_page.dart`, `app_shell.dart`, `main.dart` | `flutter test` → 267 pass | `3986f60` |
 | 2026-11-12 | F10-T06 | Empty state Library → tombol ke Plugin Manager (placeholder) | `lib/features/plugins/plugin_manager_page.dart`, `library_page.dart` | `flutter test` → 267 pass | `c1c38ea` |
 | 2026-11-12 | F10-T07 | Widget test picker + library (search, detail, empty → manager) | `test/features/operations/operation_picker_test.dart`, `library_page_test.dart` | `flutter test` → 270 pass | `dbcfd72` |
+| 2026-11-13 | F11-T01 | Daftar plugin terpasang (versi, sumber, izin, tier, status) | `lib/features/plugins/plugin_manager_page.dart`, `plugin_providers.dart` | `flutter test` → 274 pass | `54cab59` |
+| 2026-11-13 | F11-T02 | Halaman detail plugin (manifest, izin, operasi, ukuran) | `lib/features/plugins/plugin_detail_page.dart` | `flutter test` → 274 pass | `39a2d08` |
+| 2026-11-13 | F11-T03 | Enable/disable/hapus + konfirmasi + peringatan core | `lib/features/plugins/plugin_actions.dart`, `plugin_manager_page.dart` | `flutter test` → 274 pass | `19546c7` |
+| 2026-11-13 | F11-T04 | Alur sideload: pilih → preview manifest → instal | `lib/features/plugins/plugin_sideload.dart`, `plugin_manager_page.dart` | `flutter test` → 274 pass | `f9fc0eb` |
+| 2026-11-13 | F11-T05 | Dialog izin net/file:read/file:write saat sideload | `lib/features/plugins/plugin_manager_page.dart` | `flutter test` → 274 pass | `f9fc0eb` |
+| 2026-11-13 | F11-T06 | Tombol katalog + peringatan jaringan ("belum tersedia") | `lib/features/plugins/plugin_manager_page.dart` | `flutter test` → 274 pass | `d6a4cde` |
+| 2026-11-13 | F11-T07 | Gate kegagalan bootstrap core.berp + Coba lagi/Lanjutkan | `lib/core/bootstrap/*`, `lib/main.dart` | `flutter test` → 274 pass | `f4d15d1` |
+| 2026-11-13 | F11-T08 | Empty state Plugin Manager | `lib/features/plugins/plugin_manager_page.dart` | `flutter test` → 274 pass | `54cab59` |
+| 2026-11-13 | F11-T09 | Widget test detail/enable/disable/hapus/sideload | `test/features/plugins/plugin_manager_page_test.dart` | `flutter test` → 277 pass | `4896fce` |
 
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -972,6 +981,22 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   - `flutter test` → **270 test lulus**.
 - Catatan/risiko: Plugin Manager masih placeholder (F11).
 - Commit: `dbcfd72` (test) + commit checkpoint ini.
+
+### CP-042 — 2026-11-13 — F11 Plugin Manager Selesai
+
+- Status: Selesai (9/9 task F11).
+- Perubahan: daftar plugin + detail, aksi enable/disable/hapus dengan
+  konfirmasi & peringatan core, alur sideload `.berp` (preview + dialog izin),
+  tombol katalog dengan peringatan jaringan, gate kegagalan bootstrap
+  `core.berp`, empty state, dan widget test alur.
+- File: `lib/features/plugins/*`, `lib/core/bootstrap/*`, `lib/main.dart`,
+  `test/features/plugins/plugin_manager_page_test.dart`.
+- Verifikasi:
+  - `flutter analyze` → **No issues found**.
+  - `flutter test` → **277 test lulus**.
+- Catatan/risiko: alur file picker nyata belum diuji di device; bootstrap
+  `core.berp` menunggu F13.
+- Commit: `54cab59` … `4896fce` + commit checkpoint ini.
 
 ## 7. Template Checkpoint Baru
 
