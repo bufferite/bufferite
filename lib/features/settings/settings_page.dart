@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/design_tokens.dart';
@@ -93,6 +96,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             onPressed: _saveLimits,
             child: const Text('Simpan batas sandbox'),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          Text('Privasi & Log', style: theme.textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Ikut serta kirim log eksekusi'),
+            subtitle: const Text(
+              'Default mati. Log tidak pernah dikirim tanpa izin.',
+            ),
+            value: settings.optInLogging,
+            onChanged: (value) =>
+                ref.read(settingsProvider.notifier).setOptInLogging(value),
+          ),
+          OutlinedButton.icon(
+            onPressed: _clearLogs,
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Hapus log'),
+          ),
         ],
       ),
     );
@@ -122,6 +143,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         message: 'Batas sandbox disimpan',
         tone: AppToastTone.success,
       );
+    }
+  }
+
+  Future<void> _clearLogs() async {
+    try {
+      final support = await getApplicationSupportDirectory();
+      final logs = Directory('${support.path}/logs');
+      if (logs.existsSync()) {
+        logs.deleteSync(recursive: true);
+      }
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Log dihapus',
+          tone: AppToastTone.success,
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal menghapus log: $error',
+          tone: AppToastTone.error,
+        );
+      }
     }
   }
 }
