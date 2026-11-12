@@ -141,11 +141,25 @@ void main() {
     );
   });
 
-  testWidgets('Simpan menampilkan toast', (tester) async {
+  testWidgets('Simpan menolak recipe tidak valid', (tester) async {
     await tester.pumpWidget(_host());
     await tester.tap(find.text('Simpan'));
     await tester.pump();
 
-    expect(find.textContaining('Menyimpan recipe'), findsOneWidget);
+    expect(find.textContaining('Nama recipe'), findsWidgets);
+  });
+
+  testWidgets('perubahan belum tersimpan dijaga dialog', (tester) async {
+    await tester.pumpWidget(_host());
+    await tester.enterText(find.byType(TextField).first, 'Draft');
+    await tester.pump();
+
+    final popped = await tester.binding.handlePopRoute();
+    expect(popped, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Buang perubahan?'), findsOneWidget);
+
+    await tester.tap(find.text('Buang'));
+    await tester.pumpAndSettle();
   });
 }
