@@ -19,6 +19,7 @@ import '../operations/operation_providers.dart';
 import '../operations/step_config_sheet.dart';
 import 'recipe.dart';
 import 'recipe_id.dart';
+import 'recipe_io.dart';
 import 'recipe_pipeline.dart';
 
 /// Layout Recipe Editor sesuai `DESIGN.md` §8.2.
@@ -90,6 +91,26 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         appBar: AppBar(
           title: Text(widget.recipe == null ? 'Recipe Baru' : 'Edit Recipe'),
           actions: <Widget>[
+            PopupMenuButton<String>(
+              tooltip: 'Lainnya',
+              onSelected: (value) {
+                if (value == 'export') {
+                  _exportRecipe();
+                } else if (value == 'import') {
+                  _importRecipe();
+                }
+              },
+              itemBuilder: (context) => const <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'import',
+                  child: Text('Impor .brecipe'),
+                ),
+                PopupMenuItem<String>(
+                  value: 'export',
+                  child: Text('Ekspor .brecipe'),
+                ),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
@@ -450,5 +471,80 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       input: TextBuffer(inputText),
       meta: existing?.meta,
     );
+  }
+
+  Future<void> _exportRecipe() async {
+    final draft = _buildDraft();
+    final errors = draft.validate();
+    if (errors.isNotEmpty) {
+      showAppToast(
+        context,
+        message: errors.first.message,
+        tone: AppToastTone.error,
+      );
+      return;
+    }
+    try {
+      final path = await RecipeIo().export(draft);
+      if (!mounted || path == null) {
+        return;
+      }
+      showAppToast(
+        context,
+        message: 'Recipe diekspor',
+        tone: AppToastTone.success,
+      );
+    } on AppError catch (error) {
+      if (mounted) {
+        showAppToast(context, message: error.message, tone: AppToastTone.error);
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal mengekspor recipe: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
+  }
+
+  Future<void> _importRecipe() async {
+    try {
+      final imported = await RecipeIo().import();
+      if (!mounted) {
+        return;
+      }
+      _applyImported(imported);
+      showAppToast(
+        context,
+        message: 'Recipe diimpor',
+        tone: AppToastTone.success,
+      );
+    } on AppError catch (error) {
+      if (mounted && error.category != ErrorCategory.cancelled) {
+        showAppToast(context, message: error.message, tone: AppToastTone.error);
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal mengimpor recipe: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
+  }
+
+  void _applyImported(Recipe recipe) {
+    _nameController.text = recipe.name;
+    _inputController.text = recipe.input.kind == BufferKind.text
+        ? recipe.input.asText()
+        : '';
+    setState(() {
+      _steps = List<RecipeStep>.of(recipe.steps);
+      _dirty = true;
+    });
+    _schedulePreview();
   }
 }

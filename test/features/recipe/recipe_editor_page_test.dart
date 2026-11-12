@@ -162,4 +162,23 @@ void main() {
     await tester.tap(find.text('Buang'));
     await tester.pumpAndSettle();
   });
+
+  testWidgets('menu menyediakan impor dan ekspor .brecipe', (tester) async {
+    await tester.pumpWidget(_host());
+    await tester.tap(find.byTooltip('Lainnya'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Impor .brecipe'), findsOneWidget);
+    expect(find.text('Ekspor .brecipe'), findsOneWidget);
+  });
+
+  testWidgets('ekspor recipe tidak valid menampilkan error', (tester) async {
+    await tester.pumpWidget(_host());
+    await tester.tap(find.byTooltip('Lainnya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ekspor .brecipe'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nama recipe'), findsWidgets);
+  });
 }
