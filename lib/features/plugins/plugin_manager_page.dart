@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/error/app_error.dart';
 import '../../core/plugin/installed_plugin.dart';
+import '../../core/plugin/plugin_permission.dart';
 import '../../core/plugin/semantic_version.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
+import '../../core/ui/components/permission_dialog.dart';
 import '../../core/ui/design_tokens.dart';
 import 'plugin_actions.dart';
 import 'plugin_detail_page.dart';
 import 'plugin_providers.dart';
+import 'plugin_sideload.dart';
 
 /// Daftar plugin terpasang sesuai `DESIGN.md` §6.5.
 class PluginManagerPage extends ConsumerWidget {
@@ -24,11 +28,11 @@ class PluginManagerPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Plugin Manager'),
         actions: <Widget>[
-          const Padding(
-            padding: EdgeInsets.all(AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: OutlinedButton(
-              onPressed: null,
-              child: Text('Instal dari file'),
+              onPressed: () => _sideload(context, ref),
+              child: const Text('Instal dari file'),
             ),
           ),
         ],
@@ -200,5 +204,76 @@ class PluginManagerPage extends ConsumerWidget {
       message: ok ? 'Plugin dihapus' : 'Plugin tidak ditemukan',
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
+  }
+
+  Future<void> _sideload(BuildContext context, WidgetRef ref) async {
+    final service = ref.read(pluginSideloadProvider);
+    try {
+      final package = await service.pick();
+      if (package == null || !context.mounted) {
+        return;
+      }
+      final manifest = package.manifest;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Instal plugin?'),
+          content: Text(
+            '${manifest.name} v${manifest.version}\n'
+            '${manifest.pluginId}\n'
+            'Izin: ${manifest.permissions.map((p) => p.wireName).join(', ')}',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Instal'),
+            ),
+          ],
+        ),
+      );
+      if (!(confirmed ?? false) || !context.mounted) {
+        return;
+      }
+
+      final requested = manifest.permissions
+          .where((permission) => permission != PluginPermission.cpu)
+          .toSet();
+      if (requested.isNotEmpty) {
+        final granted = await showPermissionDialog(
+          context,
+          pluginName: manifest.name,
+          permissions: requested,
+        );
+        if (!granted || !context.mounted) {
+          return;
+        }
+      }
+
+      final plugin = await service.install(package);
+      if (!context.mounted) {
+        return;
+      }
+      showAppToast(
+        context,
+        message: '${plugin.manifest.name} terpasang',
+        tone: AppToastTone.success,
+      );
+    } on AppError catch (error) {
+      if (context.mounted) {
+        showAppToast(context, message: error.message, tone: AppToastTone.error);
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal memasang plugin: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
   }
 }
