@@ -1,18 +1,23 @@
 import 'package:bufferite/core/engine/buffer.dart';
+import 'package:bufferite/core/plugin/operation.dart';
+import 'package:bufferite/core/plugin/operation_registry.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
 import 'package:bufferite/core/ui/components/step_card.dart';
+import 'package:bufferite/features/operations/operation_providers.dart';
 import 'package:bufferite/features/recipe/recipe.dart';
 import 'package:bufferite/features/recipe/recipe_editor_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../core/support/fake_operations.dart';
+
 Recipe _recipe() {
   return Recipe(
     id: '11111111-1111-4111-8111-111111111111',
     name: 'Base64 Decode',
     steps: <RecipeStep>[
-      RecipeStep(id: 'step-1', operationId: 'core.base64_decode'),
+      RecipeStep(id: 'step-1', operationId: 'test.base64_decode'),
     ],
     input: const TextBuffer('SGVsbG8='),
     output: const TextBuffer('Hello'),
@@ -20,7 +25,21 @@ Recipe _recipe() {
 }
 
 Widget _host({Recipe? recipe}) {
+  final registry = OperationRegistry()
+    ..registerOperation(
+      const ReverseTextOperation(),
+      pluginId: 'dev.bufferite.core',
+      pluginVersion: '1.0.0',
+      tier: RuntimeTier.dsl,
+    )
+    ..registerOperation(
+      const Base64DecodeOperation(),
+      pluginId: 'dev.bufferite.core',
+      pluginVersion: '1.0.0',
+      tier: RuntimeTier.dsl,
+    );
   return ProviderScope(
+    overrides: [operationRegistryProvider.overrideWithValue(registry)],
     child: MaterialApp(
       theme: AppTheme.light(),
       home: RecipeEditorPage(recipe: recipe),
@@ -52,7 +71,7 @@ void main() {
 
     expect(find.text('Edit Recipe'), findsOneWidget);
     expect(find.text('Base64 Decode'), findsOneWidget);
-    expect(find.text('core.base64_decode'), findsOneWidget);
+    expect(find.text('test.base64_decode'), findsOneWidget);
     expect(find.text('Hello'), findsOneWidget);
   });
 
