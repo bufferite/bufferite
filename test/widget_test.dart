@@ -1,3 +1,4 @@
+import 'package:bufferite/core/bootstrap/bootstrap_provider.dart';
 import 'package:bufferite/core/storage/app_database.dart';
 import 'package:bufferite/core/storage/storage_providers.dart';
 import 'package:bufferite/features/recipe/recipe.dart';
@@ -22,6 +23,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(database),
           recentRecipesProvider.overrideWith((ref) => const <Recipe>[]),
+          coreBootstrapProvider.overrideWith(
+            (ref) async => const CoreBootstrapResult.ready(),
+          ),
         ],
         child: const BufferiteApp(),
       ),

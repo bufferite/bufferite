@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/bootstrap/bootstrap_gate.dart';
 import 'core/ui/app_shell.dart';
 import 'core/ui/app_theme.dart';
 import 'core/ui/theme_provider.dart';
@@ -28,7 +29,9 @@ class BufferiteApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeModeFor(mode),
-      home: const AppShell(home: HomePage(), library: LibraryPage()),
+      home: const BootstrapGate(
+        child: AppShell(home: HomePage(), library: LibraryPage()),
+      ),
     );
   }
 }
