@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
+import '../plugins/plugin_manager_page.dart';
 import 'favorite_providers.dart';
 import 'operation_catalog.dart';
 
@@ -50,12 +51,18 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           ),
           Expanded(
             child: catalog.isEmpty
-                ? const EmptyState(
+                ? EmptyState(
                     icon: Icons.extension_outlined,
                     title: 'Belum ada operasi',
                     description:
                         'Pasang plugin dari file atau buka katalog untuk '
                         'menambah operasi.',
+                    actionLabel: 'Buka Plugin Manager',
+                    onAction: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => const PluginManagerPage(),
+                      ),
+                    ),
                   )
                 : items.isEmpty
                 ? Center(
