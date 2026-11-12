@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/semantic_version.dart';
 import '../../core/ui/components/app_badge.dart';
+import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
+import 'plugin_actions.dart';
 import 'plugin_detail_page.dart';
 import 'plugin_providers.dart';
 
@@ -52,7 +54,7 @@ class PluginManagerPage extends ConsumerWidget {
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (context, index) =>
-                    _tile(context, items[index], appVersion),
+                    _tile(context, ref, items[index], appVersion),
               ),
       ),
     );
@@ -60,6 +62,7 @@ class PluginManagerPage extends ConsumerWidget {
 
   Widget _tile(
     BuildContext context,
+    WidgetRef ref,
     InstalledPlugin plugin,
     SemanticVersion appVersion,
   ) {
@@ -72,6 +75,23 @@ class PluginManagerPage extends ConsumerWidget {
           MaterialPageRoute<void>(
             builder: (context) => PluginDetailPage(plugin: plugin),
           ),
+        ),
+        trailing: PopupMenuButton<String>(
+          tooltip: 'Aksi plugin',
+          onSelected: (value) {
+            if (value == 'toggle') {
+              _toggleEnabled(context, ref, plugin);
+            } else if (value == 'remove') {
+              _confirmRemove(context, ref, plugin);
+            }
+          },
+          itemBuilder: (context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'toggle',
+              child: Text(plugin.enabled ? 'Nonaktifkan' : 'Aktifkan'),
+            ),
+            const PopupMenuItem<String>(value: 'remove', child: Text('Hapus')),
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,5 +134,71 @@ class PluginManagerPage extends ConsumerWidget {
         tone: AppBadgeTone.danger,
       ),
     };
+  }
+
+  Future<void> _toggleEnabled(
+    BuildContext context,
+    WidgetRef ref,
+    InstalledPlugin plugin,
+  ) async {
+    final target = !plugin.enabled;
+    final ok = await ref
+        .read(pluginActionsProvider)
+        .setEnabled(plugin.pluginId, target);
+    if (!context.mounted) {
+      return;
+    }
+    showAppToast(
+      context,
+      message: ok
+          ? (target ? 'Plugin diaktifkan' : 'Plugin dinonaktifkan')
+          : 'Plugin tidak ditemukan',
+      tone: ok ? AppToastTone.success : AppToastTone.error,
+    );
+  }
+
+  Future<void> _confirmRemove(
+    BuildContext context,
+    WidgetRef ref,
+    InstalledPlugin plugin,
+  ) async {
+    final isCore = plugin.pluginId == corePluginId;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isCore ? 'Hapus plugin core?' : 'Hapus plugin?'),
+        content: Text(
+          isCore
+              ? 'Plugin core menyediakan operasi bawaan. Menghapusnya membuat '
+                    'operasi inti tidak tersedia sampai direinstalasi.'
+              : '"${plugin.manifest.name}" akan dihapus.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+    if (!(confirmed ?? false) || !context.mounted) {
+      return;
+    }
+    final ok = await ref.read(pluginActionsProvider).remove(plugin.pluginId);
+    if (!context.mounted) {
+      return;
+    }
+    showAppToast(
+      context,
+      message: ok ? 'Plugin dihapus' : 'Plugin tidak ditemukan',
+      tone: ok ? AppToastTone.success : AppToastTone.error,
+    );
   }
 }
