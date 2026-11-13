@@ -424,7 +424,7 @@ Catatan progres: lihat [progress.md](progress.md).
   - Zip-slip, zip bomb, symlink, path absolut, ukuran berlebih.
 - [ ] **F14-T03 (P0)** Test bypass izin.
   - Net/fs dari DSL, Lua, dan WASM tanpa consent harus gagal.
-- [ ] **F14-T04 (P0)** Keamanan regex.
+- [x] **F14-T04 (P0)** Keamanan regex.
   - Timeout/batas panjang untuk mencegah ReDoS di DSL dan utility.
 - [ ] **F14-T05 (P0)** CSPRNG untuk operasi acak.
 - [ ] **F14-T06 (P0)** Audit "offline by default".

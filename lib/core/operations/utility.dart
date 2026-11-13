@@ -2,6 +2,7 @@ import '../engine/buffer.dart';
 import '../error/app_error.dart';
 import '../plugin/operation.dart';
 import '../plugin/operation_param.dart';
+import 'safe_regex.dart';
 
 /// Operasi Utility untuk `core.berp` (F13-T08).
 const OperationIO _textToText = OperationIO(
@@ -178,12 +179,14 @@ final class RegexReplaceOperation implements Operation {
         ? args['replacement']! as String
         : '';
     final ignoreCase = args['ignore_case'] == true;
-    try {
-      final regex = RegExp(pattern, caseSensitive: !ignoreCase);
-      return TextBuffer(input.asText().replaceAll(regex, replacement));
-    } on FormatException {
-      throw _invalid('Pola regex tidak valid.');
-    }
+    return TextBuffer(
+      SafeRegex.replaceAll(
+        input.asText(),
+        pattern: pattern,
+        replacement: replacement,
+        ignoreCase: ignoreCase,
+      ),
+    );
   }
 }
 
