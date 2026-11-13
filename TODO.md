@@ -418,7 +418,7 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F14 — Keamanan & Kualitas
 
-- [ ] **F14-T01 (P0)** Threat model singkat (aset, aktor, jalur serang,
+- [x] **F14-T01 (P0)** Threat model singkat (aset, aktor, jalur serang,
   mitigasi).
 - [ ] **F14-T02 (P0)** Test adversarial paket & filesystem.
   - Zip-slip, zip bomb, symlink, path absolut, ukuran berlebih.
