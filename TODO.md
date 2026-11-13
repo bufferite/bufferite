@@ -207,7 +207,7 @@ Catatan progres: lihat [progress.md](progress.md).
   - `cpu`, `net`, `file:read`, `file:write`; consent persist; hook
     enforcement untuk runtime.
   - Acceptance: test panggilan tanpa izin menghasilkan error terstruktur.
-- [ ] **F04-T08 (P0)** Bootstrap `core.berp`.
+- [x] **F04-T08 (P0)** Bootstrap `core.berp`.
   - Muat aset → verifikasi hash pin → instal first-run → daftarkan
     operasi; bila gagal tampilkan error jelas dan app tetap terbuka.
   - Acceptance: test first-run, already-installed, dan hash mismatch.

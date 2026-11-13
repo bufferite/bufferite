@@ -29,7 +29,7 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 114 / 131 |
+| Task MVP selesai | 115 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 1 | Berjalan |
 | F14 — Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **114** | **Berjalan** |
+| **Total MVP** | **131** | **115** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -204,6 +204,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
 | 2026-11-14 | F15-T04 | Versi `1.0.0+1` + changelog rilis | `CHANGELOG.md`, `pubspec.yaml` | Review dokumen | `6051fb2` |
 | 2026-11-14 | F15-T05 | Smoke test build+install+launch di emulator 127.0.0.1:7555 | `android/gradle.properties`, APK debug | `adb install` + launch OK, screenshot diverifikasi | `faed942` |
+| 2026-11-14 | F04-T08 | core.berp dibundel di `assets/` + auto-install saat bootstrap | `assets/core.berp`, `lib/core/bootstrap/core_bootstrap_service.dart`, `bootstrap_provider.dart` | `flutter test` ? 333 lulus | `bb450fc` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
