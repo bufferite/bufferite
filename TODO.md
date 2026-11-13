@@ -412,7 +412,7 @@ Catatan progres: lihat [progress.md](progress.md).
     keamanan.
 - [x] **F13-T10 (P0)** Audit lisensi semua operasi yang diadaptasi.
   - Catat sumber, lisensi, dan atribusi di manifest/README paket.
-- [ ] **F13-T11 (P1)** Ukuran paket dan lazy load.
+- [x] **F13-T11 (P1)** Ukuran paket dan lazy load.
   - Ukur ukuran `core.berp`, terapkan kompresi/pemisahan paket bila
     melebihi target.
 

@@ -75,3 +75,7 @@ terhadap `core.berp` hasil build (bukan implementasi tiruan).
 
 Operasi yang diadaptasi dari sumber lain wajib mencatat sumber, lisensi, dan
 atribusi di manifest/README (F13-T10).
+
+## 7. Ukuran paket dan lazy load
+
+Target MVP: core.berp < 2 MiB. Bila melebihi target, pisahkan operasi berukuran besar ke paket terpisah dan muat saat dibutuhkan (F13-T11). Ukuran diukur otomatis oleh 	est/tool/core_package_size_test.dart.
