@@ -430,7 +430,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F14-T06 (P0)** Audit "offline by default".
   - Pastikan tidak ada dependency/fungsi jaringan yang aktif tanpa aksi
     pengguna.
-- [ ] **F14-T07 (P0)** Integration test end-to-end.
+- [x] **F14-T07 (P0)** Integration test end-to-end.
   - Bootstrap → sideload plugin → buat recipe multi-step → simpan →
     ekspor → impor → jalankan.
 - [ ] **F14-T08 (P1)** Uji performa dan memori.
