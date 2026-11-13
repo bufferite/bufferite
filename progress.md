@@ -35,7 +35,7 @@ Status yang dipakai:
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | â€” |
 | Task berikutnya | `F13-T02` â€” build script `.berp` (device-gated: F09-T09/T10, F11 sideload, F15 ditunda) |
-| Blocker aktif | F03-T04 host isolate; F05-T02/D08; F05-T03/D02 |
+| Blocker aktif | Device-gated: F03-T04, F04-T05/T08/T10, F09-T09/T10, F14-T08/T09, F15; keputusan D02/D08/D06/D07 |
 | Analyze | Lulus (0 issue, 2026-11-13) |
 | Test suite | Lulus (334 test, 2026-11-14) |
 
@@ -182,6 +182,23 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-13 | F11-T08 | Empty state Plugin Manager | `lib/features/plugins/plugin_manager_page.dart` | `flutter test` â†’ 274 pass | `54cab59` |
 | 2026-11-13 | F11-T09 | Widget test detail/enable/disable/hapus/sideload | `test/features/plugins/plugin_manager_page_test.dart` | `flutter test` â†’ 277 pass | `4896fce` |
 
+| 2026-11-14 | F13-T04 | Operasi Encode/Decode core (Base64/Hex/URL/HTML/Base32) | `lib/core/operations/encode_decode.dart` | `flutter test` ? 306 pass | `60f45b7` |
+| 2026-11-14 | F13-T05 | Operasi hash/kripto dasar (MD5/SHA-1/256/512, HMAC) | `lib/core/operations/hash.dart` | `flutter test` ? 306 pass | `bf70e86` |
+| 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` ? 306 pass | `c80edae` |
+| 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` ? 311 pass | `9b7dc7d` |
+| 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` ? 317 pass | `4067c56` |
+| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) — DITUNDA (review keamanan) | — | Belum | — |
+| 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
+| 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` ? 334 pass | `ac30e3e` |
+| 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
+| 2026-11-14 | F14-T02 | Test adversarial paket (tercakup `plugin_package_test.dart`) | `test/core/plugin_package_test.dart` | `flutter test` ? 325 pass | `fbbc0fe` |
+| 2026-11-14 | F14-T03 | Test bypass izin (guard + SandboxContext) | `test/core/permission_bypass_test.dart` | `flutter test` ? 325 pass | `89c1466` |
+| 2026-11-14 | F14-T04 | Safe regex anti-ReDoS + integrasi RegexReplace | `lib/core/operations/safe_regex.dart` | `flutter test` ? 325 pass | `60aec35` |
+| 2026-11-14 | F14-T05 | CSPRNG random ops (Random.secure) | `lib/core/operations/random_ops.dart` | `flutter test` ? 329 pass | `ed5c3a6` |
+| 2026-11-14 | F14-T06 | Audit offline-by-default (scan lib/ + pubspec) | `test/core/offline_audit_test.dart` | `flutter test` ? 331 pass | `cb6d364` |
+| 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` ? 332 pass | `3cfd542` |
+| 2026-11-14 | F14-T08 | Uji performa/memori — DITUNDA (sebagian device) | — | Belum | — |
+| 2026-11-14 | F14-T09 | QA desain DESIGN §15 — DITUNDA (manual/device) | — | Belum | — |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -997,6 +1014,23 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: alur file picker nyata belum diuji di device; bootstrap
   `core.berp` menunggu F13.
 - Commit: `54cab59` â€¦ `4896fce` + commit checkpoint ini.
+
+### CP-043 — 2026-11-14 — F13 core.berp (10/11)
+
+- Status: Sebagian (10/11). T09 kripto lanjutan ditunda menunggu review keamanan.
+- Perubahan: tooling authoring + build `.berp` deterministik, gate integritas &
+  ukuran, operasi encode/decode, hash, format, analysis, utility, audit lisensi.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
+- Catatan: XML prettify dilewati (opsional); operasi core di Dart (`lib/core/operations`).
+
+### CP-044 — 2026-11-14 — F14 Keamanan & Kualitas (6/9)
+
+- Status: Sebagian (6/9). T08 perf dan T09 QA desain ditunda (device/manual).
+- Perubahan: threat model, test adversarial paket, bypass izin, safe regex,
+  CSPRNG, audit offline, integration test end-to-end non-device.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
+- Catatan: non-device praktis selesai; sisa wajib device (F15, F03-T04,
+  F04-T05/T08/T10) dan keputusan D02/D08.
 
 ## 7. Template Checkpoint Baru
 
