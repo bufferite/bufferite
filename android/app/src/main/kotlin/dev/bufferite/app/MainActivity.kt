@@ -1,4 +1,4 @@
-package com.example.bufferite
+package dev.bufferite.app
 
 import io.flutter.embedding.android.FlutterActivity
 
