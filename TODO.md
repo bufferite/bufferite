@@ -449,9 +449,9 @@ Catatan progres: lihat [progress.md](progress.md).
 - [ ] **F15-T03 (P0)** Teks privasi offline + lisensi pihak ketiga.
 - [ ] **F15-T04 (P0)** Versi rilis `1.0.0+1` dan changelog rilis.
 - [x] **F15-T05 (P0)** Smoke test build Android di device/emulator.
-- [ ] **F15-T06 (P0)** Jalankan seluruh checklist `AGENT.md` §7 dan
+- [x] **F15-T06 (P0)** Jalankan seluruh checklist `AGENT.md` §7 dan
   `ROADMAP.md` Fase 1.
-- [ ] **F15-T07 (P0)** Commit rilis + tag lokal `v1.0.0` (tanpa push).
+- [x] **F15-T07 (P0)** Commit rilis + tag lokal `v1.0.0` (tanpa push).
 
 ---
 
