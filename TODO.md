@@ -426,8 +426,8 @@ Catatan progres: lihat [progress.md](progress.md).
   - Net/fs dari DSL, Lua, dan WASM tanpa consent harus gagal.
 - [x] **F14-T04 (P0)** Keamanan regex.
   - Timeout/batas panjang untuk mencegah ReDoS di DSL dan utility.
-- [ ] **F14-T05 (P0)** CSPRNG untuk operasi acak.
-- [ ] **F14-T06 (P0)** Audit "offline by default".
+- [x] **F14-T05 (P0)** CSPRNG untuk operasi acak.
+- [x] **F14-T06 (P0)** Audit "offline by default".
   - Pastikan tidak ada dependency/fungsi jaringan yang aktif tanpa aksi
     pengguna.
 - [ ] **F14-T07 (P0)** Integration test end-to-end.
