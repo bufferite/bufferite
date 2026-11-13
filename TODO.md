@@ -410,7 +410,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [ ] **F13-T09 (P1)** Operasi kripto lanjutan.
   - AES encrypt/decrypt, XOR, HMAC varian; hanya setelah review
     keamanan.
-- [ ] **F13-T10 (P0)** Audit lisensi semua operasi yang diadaptasi.
+- [x] **F13-T10 (P0)** Audit lisensi semua operasi yang diadaptasi.
   - Catat sumber, lisensi, dan atribusi di manifest/README paket.
 - [ ] **F13-T11 (P1)** Ukuran paket dan lazy load.
   - Ukur ukuran `core.berp`, terapkan kompresi/pemisahan paket bila

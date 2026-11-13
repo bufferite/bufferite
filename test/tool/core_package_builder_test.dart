@@ -39,7 +39,7 @@ void main() {
     expect(first.archiveBytes, second.archiveBytes);
     expect(first.files, <String>[
       'plugin.manifest.json',
-        'src/util/reverse.json',
+      'src/util/reverse.json',
     ]);
   });
 
