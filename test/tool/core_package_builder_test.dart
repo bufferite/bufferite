@@ -38,8 +38,8 @@ void main() {
     expect(first.sha256, second.sha256);
     expect(first.archiveBytes, second.archiveBytes);
     expect(first.files, <String>[
-      'manifest/core.manifest.json',
-      'src/util/reverse.json',
+      'plugin.manifest.json',
+        'src/util/reverse.json',
     ]);
   });
 
@@ -51,7 +51,7 @@ void main() {
     const builder = CorePackageBuilder();
     final result = builder.build(source);
 
-    expect(result.files, <String>['manifest/core.manifest.json']);
+    expect(result.files, <String>['plugin.manifest.json']);
   });
 
   test('buildTo menulis arsip dan hash', () {

@@ -39,7 +39,11 @@ final class CorePackageBuilder {
       if (relative == 'README.md' || relative.endsWith('.sha256')) {
         continue;
       }
-      entries[relative] = entity.readAsBytesSync();
+      // Manifest paket harus berada di root arsip (PLUGINS.md).
+      final archiveName = relative == 'manifest/core.manifest.json'
+          ? 'plugin.manifest.json'
+          : relative;
+      entries[archiveName] = entity.readAsBytesSync();
     }
 
     final names = entries.keys.toList()..sort();
