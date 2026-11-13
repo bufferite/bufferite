@@ -19,7 +19,7 @@ android {
         applicationId = "dev.bufferite.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 21 // MVP: Android 5.0+
+        minSdk = flutter.minSdkVersion // MVP: Android 5.0+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

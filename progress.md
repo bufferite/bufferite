@@ -29,7 +29,7 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 â€” MVP |
 | Milestone aktif | M1 â€” Domain & Engine |
-| Task MVP selesai | 109 / 131 |
+| Task MVP selesai | 113 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di Â§5.
 | F13 â€” core.berp: Tooling & Operasi | 11 | 1 | Berjalan |
 | F14 â€” Keamanan & Kualitas | 9 | 0 | Belum |
 | F15 â€” Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **109** | **Berjalan** |
+| **Total MVP** | **131** | **113** | **Berjalan** |
 | F16 â€” Backlog Fase 2 | 8 | 0 | Belum |
 | F17 â€” Backlog Fase 3 | 5 | 0 | Belum |
 | D â€” Keputusan Manusia | 10 | 0 | Terbuka |
@@ -199,6 +199,10 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` ? 332 pass | `3cfd542` |
 | 2026-11-14 | F14-T08 | Uji performa/memori — DITUNDA (sebagian device) | — | Belum | — |
 | 2026-11-14 | F14-T09 | QA desain DESIGN §15 — DITUNDA (manual/device) | — | Belum | — |
+| 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
+| 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
+| 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
+| 2026-11-14 | F15-T04 | Versi `1.0.0+1` + changelog rilis | `CHANGELOG.md`, `pubspec.yaml` | Review dokumen | `6051fb2` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
