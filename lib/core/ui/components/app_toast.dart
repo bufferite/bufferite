@@ -38,6 +38,9 @@ void showAppToast(
     ..showSnackBar(
       SnackBar(
         duration: duration,
+        // Flutter 3.44 membuat SnackBar beraksi persisten secara default; toast
+        // harus tetap hilang sendiri.
+        persist: false,
         content: Row(
           children: <Widget>[
             Icon(icon, size: 20, color: color),

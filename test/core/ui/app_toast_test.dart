@@ -55,6 +55,9 @@ void main() {
     final action = tester.widget<SnackBarAction>(find.byType(SnackBarAction));
     expect(action.label, 'Undo');
 
+    final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(snackBar.persist, isFalse);
+
     action.onPressed();
     await tester.pump();
     expect(undone, isTrue);
