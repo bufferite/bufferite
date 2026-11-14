@@ -205,6 +205,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F15-T04 | Versi `1.0.0+1` + changelog rilis | `CHANGELOG.md`, `pubspec.yaml` | Review dokumen | `6051fb2` |
 | 2026-11-14 | F15-T05 | Smoke test build+install+launch di emulator 127.0.0.1:7555 | `android/gradle.properties`, APK debug | `adb install` + launch OK, screenshot diverifikasi | `faed942` |
 | 2026-11-14 | F04-T08 | Manifest core digenerate dari operasi inti + executor didaftarkan saat bootstrap | `core_operations.dart`, `tool/build_core_berp.dart`, `plugins/core/operations.json` | `flutter test` (335 lulus); emulator: Library menampilkan 33 operasi, preview base64 `1` -> `MQ==` | `90dafd7` |
+| 2026-11-15 | UX | Toast tidak menumpuk/menggantung, tombol Plugin Manager di Library, chevron step jadi tombol Atur step | `app_toast.dart` (`persist: false`), `library_page.dart`, `step_card.dart`, `step_config_sheet.dart` | `flutter test` (338 lulus); emulator: toast hilang ~3 dtk, Plugin Manager terbuka dari Library, sheet parameter tampil | `9f417ba`, `5ef3b0d` |
 | 2026-11-14 | F04-T08 | core.berp dibundel di `assets/` + auto-install saat bootstrap | `assets/core.berp`, `lib/core/bootstrap/core_bootstrap_service.dart`, `bootstrap_provider.dart` | `flutter test` ? 333 lulus | `bb450fc` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -1052,6 +1053,21 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   menjalankan `core.base64_encode` (`1` -> `MQ==`).
 - Catatan/risiko: `core.berp` wajib dibangun ulang dengan
   `dart run tool/build_core_berp.dart` setiap operasi inti berubah.
+
+### CP-046 - 2026-11-15 - Perbaikan UX hasil uji emulator
+
+- Status: Selesai
+- Perubahan: SnackBar dengan aksi Undo dipaksa `persist: false` dan toast lama
+  dibuang sebelum menampilkan yang baru; Library mendapat aksi AppBar "Kelola
+  plugin"; chevron step menjadi tombol "Atur step" dan sheet tanpa parameter
+  memberi keterangan.
+- File: `lib/core/ui/components/app_toast.dart`, `lib/features/library/library_page.dart`,
+  `lib/core/ui/components/step_card.dart`, `lib/features/operations/step_config_sheet.dart`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` -> 338 lulus; emulator:
+  toast hilang ~3 detik, Plugin Manager terbuka dari Library, sheet parameter
+  `Find & Replace` menampilkan field Cari/Ganti.
+- Catatan/risiko: akar toast menggantung adalah default `persist = action != null`
+  di Flutter 3.44, bukan mode aksesibilitas.
 
 ## 7. Template Checkpoint Baru
 
