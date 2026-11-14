@@ -227,9 +227,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                   index: index,
                   child: StepCard(
                     name: _steps[index].operationId,
-                    category: _steps[index].args.keys.isEmpty
-                        ? 'Operasi'
-                        : _steps[index].args.keys.join(', '),
+                    category: descriptor?.category.label ?? 'Operasi',
                     enabled: _steps[index].enabled,
                     state: _stateFor(_steps[index]),
                     errorMessage: _stepErrors[_steps[index].id]?.message,
