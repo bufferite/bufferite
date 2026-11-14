@@ -204,6 +204,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         style: theme.textTheme.bodySmall,
       );
     }
+    final registry = ref.read(operationRegistryProvider);
     return ReorderableListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -211,28 +212,38 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       onReorderItem: _reorder,
       children: <Widget>[
         for (var index = 0; index < _steps.length; index++)
-          Padding(
+          Builder(
             key: ValueKey<String>(_steps[index].id),
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: ReorderableDelayedDragStartListener(
-              index: index,
-              child: StepCard(
-                name: _steps[index].operationId,
-                category: _steps[index].args.keys.isEmpty
-                    ? 'Operasi'
-                    : _steps[index].args.keys.join(', '),
-                enabled: _steps[index].enabled,
-                state: _stateFor(_steps[index]),
-                errorMessage: _stepErrors[_steps[index].id]?.message,
-                onEnabledChanged: (value) => setState(() {
-                  _steps[index] = _steps[index].copyWith(enabled: value);
-                  _dirty = true;
-                  _schedulePreview();
-                }),
-                onTap: () => _configureStep(index),
-                onDelete: () => _deleteStep(index),
-              ),
-            ),
+            builder: (context) {
+              final descriptor = registry
+                  .byId(_steps[index].operationId)
+                  ?.descriptor;
+              // Operasi tanpa parameter tidak perlu tombol atur (chevron).
+              final configurable =
+                  descriptor == null || descriptor.params.isNotEmpty;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ReorderableDelayedDragStartListener(
+                  index: index,
+                  child: StepCard(
+                    name: _steps[index].operationId,
+                    category: _steps[index].args.keys.isEmpty
+                        ? 'Operasi'
+                        : _steps[index].args.keys.join(', '),
+                    enabled: _steps[index].enabled,
+                    state: _stateFor(_steps[index]),
+                    errorMessage: _stepErrors[_steps[index].id]?.message,
+                    onEnabledChanged: (value) => setState(() {
+                      _steps[index] = _steps[index].copyWith(enabled: value);
+                      _dirty = true;
+                      _schedulePreview();
+                    }),
+                    onTap: configurable ? () => _configureStep(index) : null,
+                    onDelete: () => _deleteStep(index),
+                  ),
+                ),
+              );
+            },
           ),
       ],
     );

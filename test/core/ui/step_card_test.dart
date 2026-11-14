@@ -117,4 +117,22 @@ void main() {
     await tester.tap(find.byTooltip('Hapus step'));
     expect(deleted, isTrue);
   });
+
+  testWidgets('tanpa aksi atur tidak menampilkan chevron', (tester) async {
+    await tester.pumpWidget(
+      _host(const StepCard(name: 'Base64 Encode', category: 'Encode/Decode')),
+    );
+
+    expect(find.byIcon(Icons.chevron_right), findsNothing);
+    expect(find.byTooltip('Atur step'), findsNothing);
+  });
+
+  testWidgets('aksi atur menampilkan chevron', (tester) async {
+    await tester.pumpWidget(
+      _host(StepCard(name: 'Slice', category: 'Utility', onTap: () {})),
+    );
+
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byTooltip('Atur step'), findsOneWidget);
+  });
 }

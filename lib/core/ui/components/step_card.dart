@@ -145,14 +145,6 @@ class StepCard extends StatelessWidget {
                     tooltip: 'Atur step',
                     onPressed: _isUnsupported ? null : onTap,
                     icon: const Icon(Icons.chevron_right, size: 24),
-                  )
-                else
-                  Icon(
-                    Icons.chevron_right,
-                    size: 24,
-                    color: _isUnsupported
-                        ? palette.textMuted
-                        : palette.textSecondary,
                   ),
               ],
             ),
