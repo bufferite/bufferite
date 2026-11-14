@@ -6,8 +6,11 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/operations/operation_providers.dart';
 import '../error/app_error.dart';
+import '../operations/core_operations.dart';
 import '../plugin/installed_plugin.dart';
 import '../plugin/manifest_registrar.dart';
+import '../plugin/operation.dart';
+import '../plugin/operation_registry.dart';
 import '../plugin/plugin_package.dart';
 import '../plugin/plugin_package_store.dart';
 import '../storage/storage_providers.dart';
@@ -59,11 +62,41 @@ final class CoreBootstrapService {
       installPath: installPath,
     );
     await _ref.read(pluginRepositoryProvider).save(plugin);
-    ManifestRegistrar(
-      _ref.read(operationRegistryProvider),
-    ).register(package.manifest);
     return plugin;
   }
+
+  /// Mendaftarkan operasi core (dan plugin lain) ke registry runtime.
+  ///
+  /// Executor hanya tersedia untuk operasi core karena tier lain belum punya
+  /// runtime (D02). Operasi plugin lain tetap didaftarkan sebagai unsupported.
+  void registerOperations(List<InstalledPlugin> plugins) {
+    final registrar = ManifestRegistrar(_ref.read(operationRegistryProvider));
+    for (final plugin in plugins) {
+      registrar.register(
+        plugin.manifest,
+        enabled: plugin.enabled,
+        executorFor: plugin.pluginId == corePluginId ? _coreExecutorFor : null,
+      );
+    }
+  }
+
+  /// Mendaftarkan satu manifest plugin yang baru dipasang/diaktifkan.
+  void registerPlugin(InstalledPlugin plugin) {
+    ManifestRegistrar(_ref.read(operationRegistryProvider)).register(
+      plugin.manifest,
+      enabled: plugin.enabled,
+      executorFor: plugin.pluginId == corePluginId ? _coreExecutorFor : null,
+    );
+  }
+
+  OperationRegistry get registry => _ref.read(operationRegistryProvider);
+
+  static Operation? _coreExecutorFor(String operationId) =>
+      coreOperationsById[operationId];
+
+  /// Apakah manifest core yang terpasang sudah memuat operasi.
+  static bool isUsableCore(InstalledPlugin plugin) =>
+      plugin.manifest.operations.isNotEmpty;
 }
 
 final coreBootstrapServiceProvider = Provider<CoreBootstrapService>(

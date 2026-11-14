@@ -1,0 +1,354 @@
+{
+  "operations": [
+    {
+      "id": "core.base64_encode",
+      "name": "Base64 Encode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.base64_decode",
+      "name": "Base64 Decode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.hex_encode",
+      "name": "Hex Encode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.hex_decode",
+      "name": "Hex Decode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.url_encode",
+      "name": "URL Encode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.url_decode",
+      "name": "URL Decode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.html_entity_encode",
+      "name": "HTML Entity Encode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.html_entity_decode",
+      "name": "HTML Entity Decode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.base32_encode",
+      "name": "Base32 Encode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.base32_decode",
+      "name": "Base32 Decode",
+      "category": "Encode/Decode",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.json_prettify",
+      "name": "JSON Prettify",
+      "category": "Format",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.json_minify",
+      "name": "JSON Minify",
+      "category": "Format",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.jwt_decode",
+      "name": "JWT Decode",
+      "category": "Format",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.entropy",
+      "name": "Entropy",
+      "category": "Analysis",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.frequency",
+      "name": "Byte Frequency",
+      "category": "Analysis",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.file_type",
+      "name": "Detect File Type",
+      "category": "Analysis",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.strings",
+      "name": "Extract Strings",
+      "category": "Analysis",
+      "params": [
+        {
+          "key": "min_length",
+          "label": "Panjang minimum",
+          "type": "integer",
+          "default": 4,
+          "required": false,
+          "min": 1,
+          "max": 256
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.md5",
+      "name": "MD5",
+      "category": "Crypto",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.sha1",
+      "name": "SHA-1",
+      "category": "Crypto",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.sha256",
+      "name": "SHA-256",
+      "category": "Crypto",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.sha512",
+      "name": "SHA-512",
+      "category": "Crypto",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.hmac_sha256",
+      "name": "HMAC-SHA256",
+      "category": "Crypto",
+      "params": [
+        {
+          "key": "key",
+          "label": "Kunci",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.upper_case",
+      "name": "Upper Case",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.lower_case",
+      "name": "Lower Case",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.title_case",
+      "name": "Title Case",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.reverse",
+      "name": "Reverse",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.find_replace",
+      "name": "Find & Replace",
+      "category": "Utility",
+      "params": [
+        {
+          "key": "find",
+          "label": "Cari",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "replace",
+          "label": "Ganti",
+          "type": "string",
+          "default": "",
+          "required": false
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.regex_replace",
+      "name": "Regex Replace",
+      "category": "Utility",
+      "params": [
+        {
+          "key": "pattern",
+          "label": "Pola",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "replacement",
+          "label": "Ganti",
+          "type": "string",
+          "default": "",
+          "required": false
+        },
+        {
+          "key": "ignore_case",
+          "label": "Abaikan huruf besar/kecil",
+          "type": "boolean",
+          "default": false,
+          "required": false
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.slice",
+      "name": "Slice",
+      "category": "Utility",
+      "params": [
+        {
+          "key": "start",
+          "label": "Mulai",
+          "type": "integer",
+          "default": 0,
+          "required": false,
+          "min": 0
+        },
+        {
+          "key": "end",
+          "label": "Selesai (opsional)",
+          "type": "integer",
+          "required": false,
+          "min": 0
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.sort_lines",
+      "name": "Sort Lines",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.unique_lines",
+      "name": "Unique Lines",
+      "category": "Utility",
+      "params": [],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.random_hex",
+      "name": "Random Hex",
+      "category": "Crypto",
+      "params": [
+        {
+          "key": "length",
+          "label": "Panjang (byte)",
+          "type": "integer",
+          "default": 16,
+          "required": false,
+          "min": 1
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    },
+    {
+      "id": "core.random_bytes",
+      "name": "Random Bytes",
+      "category": "Crypto",
+      "params": [
+        {
+          "key": "length",
+          "label": "Panjang (byte)",
+          "type": "integer",
+          "default": 16,
+          "required": false,
+          "min": 1
+        }
+      ],
+      "inputType": "text",
+      "outputType": "text"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/plugins/plugin_repository.dart';
 import '../storage/storage_providers.dart';
 import 'core_bootstrap_service.dart';
 
@@ -18,17 +19,20 @@ final class CoreBootstrapResult {
 
 /// Memeriksa core.berp; bila belum terpasang, memasang versi bundel dari aset.
 ///
-/// Tidak melempar error: kegagalan dikembalikan sebagai status agar UI tetap
-/// dapat dibuka.
+/// Setelah itu semua plugin terpasang didaftarkan ke registry agar operasinya
+/// tersedia setiap kali aplikasi dibuka. Tidak melempar error: kegagalan
+/// dikembalikan sebagai status agar UI tetap dapat dibuka.
 final coreBootstrapProvider = FutureProvider<CoreBootstrapResult>((ref) async {
   try {
-    final repository = ref.watch(pluginRepositoryProvider);
+    final PluginRepository repository = ref.watch(pluginRepositoryProvider);
+    final service = ref.read(coreBootstrapServiceProvider);
+
     final existing = await repository.byId(bootstrapCorePluginId);
-    if (existing != null && existing.enabled) {
-      return const CoreBootstrapResult.ready();
+    if (existing == null || !CoreBootstrapService.isUsableCore(existing)) {
+      await service.installBundledCore();
     }
 
-    await ref.read(coreBootstrapServiceProvider).installBundledCore();
+    service.registerOperations(await repository.list());
     return const CoreBootstrapResult.ready();
   } on Object catch (error) {
     return CoreBootstrapResult.failed('Bootstrap gagal: $error');
