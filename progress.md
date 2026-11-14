@@ -1,7 +1,7 @@
 # progress.md â€” Bufferite Progress Checkpoints
 
 Versi: 1.0
-Terakhir diperbarui: 2026-11-11
+Terakhir diperbarui: 2026-11-15
 Sumber daftar task: [TODO.md](TODO.md)
 
 ---
@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | `F13-T02` â€” build script `.berp` (device-gated: F09-T09/T10, F11 sideload, F15 ditunda) |
 | Blocker aktif | Device-gated: F03-T04, F04-T05/T08/T10, F09-T09/T10, F14-T08/T09, F15; keputusan D02/D08/D06/D07 |
 | Analyze | Lulus (0 issue, 2026-11-13) |
-| Test suite | Lulus (334 test, 2026-11-14) |
+| Test suite | Lulus (335 test, 2026-11-14) |
 
 ## 3. Progres per Feature
 
@@ -187,7 +187,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` ? 306 pass | `c80edae` |
 | 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` ? 311 pass | `9b7dc7d` |
 | 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` ? 317 pass | `4067c56` |
-| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) — DITUNDA (review keamanan) | — | Belum | — |
+| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) ï¿½ DITUNDA (review keamanan) | ï¿½ | Belum | ï¿½ |
 | 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
 | 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` ? 334 pass | `ac30e3e` |
 | 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
@@ -197,13 +197,14 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F14-T05 | CSPRNG random ops (Random.secure) | `lib/core/operations/random_ops.dart` | `flutter test` ? 329 pass | `ed5c3a6` |
 | 2026-11-14 | F14-T06 | Audit offline-by-default (scan lib/ + pubspec) | `test/core/offline_audit_test.dart` | `flutter test` ? 331 pass | `cb6d364` |
 | 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` ? 332 pass | `3cfd542` |
-| 2026-11-14 | F14-T08 | Uji performa/memori — DITUNDA (sebagian device) | — | Belum | — |
-| 2026-11-14 | F14-T09 | QA desain DESIGN §15 — DITUNDA (manual/device) | — | Belum | — |
+| 2026-11-14 | F14-T08 | Uji performa/memori ï¿½ DITUNDA (sebagian device) | ï¿½ | Belum | ï¿½ |
+| 2026-11-14 | F14-T09 | QA desain DESIGN ï¿½15 ï¿½ DITUNDA (manual/device) | ï¿½ | Belum | ï¿½ |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
 | 2026-11-14 | F15-T04 | Versi `1.0.0+1` + changelog rilis | `CHANGELOG.md`, `pubspec.yaml` | Review dokumen | `6051fb2` |
 | 2026-11-14 | F15-T05 | Smoke test build+install+launch di emulator 127.0.0.1:7555 | `android/gradle.properties`, APK debug | `adb install` + launch OK, screenshot diverifikasi | `faed942` |
+| 2026-11-14 | F04-T08 | Manifest core digenerate dari operasi inti + executor didaftarkan saat bootstrap | `core_operations.dart`, `tool/build_core_berp.dart`, `plugins/core/operations.json` | `flutter test` (335 lulus); emulator: Library menampilkan 33 operasi, preview base64 `1` -> `MQ==` | `90dafd7` |
 | 2026-11-14 | F04-T08 | core.berp dibundel di `assets/` + auto-install saat bootstrap | `assets/core.berp`, `lib/core/bootstrap/core_bootstrap_service.dart`, `bootstrap_provider.dart` | `flutter test` ? 333 lulus | `bb450fc` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
@@ -1021,7 +1022,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `core.berp` menunggu F13.
 - Commit: `54cab59` â€¦ `4896fce` + commit checkpoint ini.
 
-### CP-043 — 2026-11-14 — F13 core.berp (10/11)
+### CP-043 ï¿½ 2026-11-14 ï¿½ F13 core.berp (10/11)
 
 - Status: Sebagian (10/11). T09 kripto lanjutan ditunda menunggu review keamanan.
 - Perubahan: tooling authoring + build `.berp` deterministik, gate integritas &
@@ -1029,7 +1030,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
 - Catatan: XML prettify dilewati (opsional); operasi core di Dart (`lib/core/operations`).
 
-### CP-044 — 2026-11-14 — F14 Keamanan & Kualitas (6/9)
+### CP-044 ï¿½ 2026-11-14 ï¿½ F14 Keamanan & Kualitas (6/9)
 
 - Status: Sebagian (6/9). T08 perf dan T09 QA desain ditunda (device/manual).
 - Perubahan: threat model, test adversarial paket, bypass izin, safe regex,
@@ -1037,6 +1038,20 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
 - Catatan: non-device praktis selesai; sisa wajib device (F15, F03-T04,
   F04-T05/T08/T10) dan keputusan D02/D08.
+
+### CP-045 - 2026-11-15 - F04-T08 core.berp bundel + executor
+
+- Status: Selesai
+- Perubahan: manifest core digenerate dari 33 operasi inti; entrypoint DSL
+  `operations.json` ikut dibuat; bootstrap memasang core dari aset lalu
+  mendaftarkan executor Dart setiap aplikasi dibuka.
+- File: `lib/core/operations/core_operations.dart`, `tool/build_core_berp.dart`,
+  `lib/core/bootstrap/core_bootstrap_service.dart`, `assets/core.berp`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` -> 335 lulus;
+  emulator `127.0.0.1:7555` -> Library menampilkan 33 operasi core dan preview
+  menjalankan `core.base64_encode` (`1` -> `MQ==`).
+- Catatan/risiko: `core.berp` wajib dibangun ulang dengan
+  `dart run tool/build_core_berp.dart` setiap operasi inti berubah.
 
 ## 7. Template Checkpoint Baru
 
@@ -1069,7 +1084,7 @@ bagian D.
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Terbuka |
-| 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Terbuka |
+| 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
