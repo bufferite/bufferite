@@ -100,6 +100,14 @@ class _StepConfigSheetState extends State<StepConfigSheet> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             children: <Widget>[
+              if (widget.params.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: Text(
+                    'Operasi ini tidak punya parameter.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
               for (final param in widget.params) _field(param),
               if (_error != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.sm),

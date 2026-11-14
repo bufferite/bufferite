@@ -81,4 +81,14 @@ void main() {
 
     expect(find.text('Plugin Manager'), findsOneWidget);
   });
+
+  testWidgets('tombol kelola plugin selalu tersedia di AppBar', (tester) async {
+    await tester.pumpWidget(_host(registry: _registry()));
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Kelola plugin'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Plugin Manager'), findsOneWidget);
+  });
 }

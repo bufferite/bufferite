@@ -140,13 +140,20 @@ class StepCard extends StatelessWidget {
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete_outline, size: 20),
                   ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 24,
-                  color: _isUnsupported
-                      ? palette.textMuted
-                      : palette.textSecondary,
-                ),
+                if (onTap != null)
+                  IconButton(
+                    tooltip: 'Atur step',
+                    onPressed: _isUnsupported ? null : onTap,
+                    icon: const Icon(Icons.chevron_right, size: 24),
+                  )
+                else
+                  Icon(
+                    Icons.chevron_right,
+                    size: 24,
+                    color: _isUnsupported
+                        ? palette.textMuted
+                        : palette.textSecondary,
+                  ),
               ],
             ),
           ),

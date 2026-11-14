@@ -35,7 +35,20 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Library')),
+      appBar: AppBar(
+        title: const Text('Library'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'Kelola plugin',
+            icon: const Icon(Icons.extension_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const PluginManagerPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

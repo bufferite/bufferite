@@ -74,4 +74,46 @@ void main() {
     expect(find.byType(SnackBarAction), findsNothing);
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
   });
+
+  testWidgets('toast baru menggantikan toast lama tanpa menumpuk', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(() {
+        final context = tester.element(find.text('Trigger'));
+        showAppToast(context, message: 'Pertama');
+        showAppToast(context, message: 'Kedua');
+      }),
+    );
+
+    await tester.tap(find.text('Trigger'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Kedua'), findsOneWidget);
+    expect(find.text('Pertama'), findsNothing);
+  });
+
+  testWidgets('toast hilang otomatis walau accessibleNavigation aktif', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child: _host(() {
+          final context = tester.element(find.text('Trigger'));
+          showAppToast(context, message: 'Sementara', undoLabel: 'Undo');
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Trigger'));
+    await tester.pump();
+    expect(find.text('Sementara'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sementara'), findsNothing);
+  });
 }
