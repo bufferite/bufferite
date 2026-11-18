@@ -1327,6 +1327,18 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   Langkah berikutnya membangun wasmtime C API (Windows lalu Android).
 - Commit: `27a5019`
 
+### CP-061 — 2026-11-19 — Spike wasmtime C API (Windows)
+
+- Status: Selesai
+- Perubahan: `wasmtime.dll` 48.0.9 dibangun dari `wasmtime-c-api-impl`
+  (fitur `wasi`, `cranelift`, `gc`, `gc-drc`) + harness C. Lua WASM EH
+  berjalan: `print(2+2)` → `4`; `pcall(error)` → `false boom` (exit 0).
+- File: `WASM_ENGINE_PLAN.md`.
+- Verifikasi: `wt_test.exe` exit 0 untuk kedua kasus; DLL 14,9 MB.
+- Catatan/risiko: `wasm_exceptions` digerbangi fitur `gc` dan engine menuntut
+  kolektor (`gc-drc`). Android cross-compile (NDK + Rust targets) berikutnya.
+- Commit: `<hash>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
