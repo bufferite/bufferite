@@ -40,8 +40,8 @@ Rilis MVP Bufferite.
 - Batas sandbox default: timeout 2 dtk, memori 64 MiB, izin `cpu`.
 
 ### Diketahui belum ada
-- Runtime Lua memakai `lua_dart` (Lua 5.5.1 via FFI, prebuilt + hash paket);
-  tier WASM belum punya engine.
+- Runtime Lua memakai `lua_dart` (Lua 5.5.1 via FFI, prebuilt + hash paket),
+  di isolate dengan sandbox + timeout; tier WASM ditunda ke 1.1.
 - Runtime DSL sudah ada (`DSL.md`); integrasi ke loader plugin menunggu
   F05-T07.
 - Host isolate pekerja (F03-T04) dan enforcement memori belum aktif.

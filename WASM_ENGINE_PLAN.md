@@ -1,7 +1,7 @@
 # Rencana Port Engine WASM (F05 lanjutan)
 
-Status: direncanakan. Lua saat ini berjalan lewat `lua_dart` (FFI) dengan
-isolate + timeout; tier WASM belum punya engine.
+Status: **ditunda ke 1.1** (keputusan 2026-11-19). 1.0 memakai `lua_dart`
+(FFI) yang sudah berjalan di isolate dengan sandbox + timeout.
 
 ## Kenapa bukan `wasm_run`
 

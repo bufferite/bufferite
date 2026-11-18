@@ -34,7 +34,7 @@ Status yang dipakai:
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F05-T06` — runtime tier WASM (butuh engine WASI/EH baru); target rilis 2026-12-31 |
+| Task berikutnya | — (scope 1.0 dibekukan; `F05-T06..T09` + `F14-T03` ke 1.1) |
 | Blocker aktif | F05-T06..T09 (engine WASM: rencana di WASM_ENGINE_PLAN.md), F14-T03 (runtime WASM belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (414 test, 2026-11-19) |
@@ -1283,6 +1283,20 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   native Lua sampai proses berakhir; normal path selalu `state.close()`.
   Engine WASM nanti memakai protokol isolate yang sama.
 - Commit: `ef086f6`
+
+### CP-058 — 2026-11-19 — Scope 1.0 dibekukan; port WASM ditunda
+
+- Status: Selesai
+- Perubahan: `F05-T06..T09` dan `F14-T03` ditunda ke 1.1 sesuai fallback D07.
+  Scope 1.0: DSL + Lua (`lua_dart`, isolate + sandbox + timeout) + 38 operasi
+  core. Rencana engine WAMR disimpan di `WASM_ENGINE_PLAN.md`.
+- File: `TODO.md`, `progress.md`, `CHANGELOG.md`, `RELEASE_CHECKLIST.md`,
+  `WASM_ENGINE_PLAN.md`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 414 lulus;
+  integration test Lua di emulator sudah lulus (CP-057).
+- Catatan/risiko: MVP 126/131; tag rilis belum dibuat. Lua memakai FFI,
+  deviasi engine dari WASM tercatat di D02.
+- Commit: `<hash>`
 
 ## 7. Template Checkpoint Baru
 

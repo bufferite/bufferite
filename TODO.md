@@ -272,6 +272,10 @@ Catatan progres: lihat [progress.md](progress.md).
   - Operasi yang sama (contoh) dijalankan di DSL, Lua, dan WASM dengan
     hasil setara.
 
+> Catatan 2026-11-19: F05-T06..T09 dan F14-T03 **ditunda ke 1.1**
+> (fallback D07). Scope 1.0 = DSL + Lua (`lua_dart`, isolate + sandbox) +
+> 38 operasi core. Rencana engine WASM ada di `WASM_ENGINE_PLAN.md`.
+
 ## F06 — Storage
 
 - [x] **F06-T01 (P0)** Inisialisasi SQLite + migrasi v1.
