@@ -1200,7 +1200,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: D09 dan penegakan D06 baru berlaku saat F05-T07/T08
   diimplementasikan. Bila runtime tetap tertahan, rilis 1.0 tanpa tier
   Lua/WASM sesuai D07.
-- Commit: `<cp053>`
+- Commit: `c19fed9`
 
 ## 7. Template Checkpoint Baru
 
