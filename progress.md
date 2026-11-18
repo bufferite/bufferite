@@ -35,7 +35,7 @@ Status yang dipakai:
 | Keputusan terbuka | 8 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`) |
-| Blocker aktif | F05-T04 (ABI/stdin + native `wasm_run`), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
+| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (382 test, 2026-11-19) |
 
@@ -1186,7 +1186,7 @@ bagian D.
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
-| 2026-11-19 | F05-T04 | Aset Lua siap; instantiasi `wasm_run` (native lib Android) + ABI input belum diuji | Runtime Lua belum bisa dipakai | Terbuka |
+| 2026-11-19 | F05-T04 | Aset Lua siap; `wasm_run` 0.2.0+2 gagal init (codegen FRB 2.12.0 vs runtime DLL 2.13.0, bug upstream) | Runtime Lua belum bisa dijalankan | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
