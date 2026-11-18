@@ -1296,7 +1296,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   integration test Lua di emulator sudah lulus (CP-057).
 - Catatan/risiko: MVP 126/131; tag rilis belum dibuat. Lua memakai FFI,
   deviasi engine dari WASM tercatat di D02.
-- Commit: `<hash>`
+- Commit: `1c952d6`
 
 ## 7. Template Checkpoint Baru
 
