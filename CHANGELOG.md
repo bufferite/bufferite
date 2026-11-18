@@ -39,7 +39,8 @@ Rilis MVP Bufferite.
 
 ### Diketahui belum ada
 - Aset `lua_runtime.wasm` (Lua 5.4.6 WASI) sudah dibundel & dipin;
-  instansiasi runtime menunggu F05-T04.
+  instansiasi runtime menunggu runtime WASM yang mendukung `wasi_unstable`
+  dan wasm-EH (wasmtime 14 belum).
 - Runtime DSL sudah ada (`DSL.md`); integrasi ke loader plugin menunggu
   F05-T07.
 - Host isolate pekerja (F03-T04) dan enforcement memori belum aktif.

@@ -35,7 +35,7 @@ Status yang dipakai:
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`); target rilis 2026-12-31 |
-| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F14-T03 (runtime belum ada) |
+| Blocker aktif | F05-T04..T09 (wasmtime 14 di `wasm_run` tidak mendukung wasm-EH/WASI preview0), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (405 test, 2026-11-19) |
 
@@ -1222,6 +1222,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   isolate. Enforcement memori belum ada (Dart tidak menyediakan batas heap).
 - Commit: `c4211d1`
 
+### CP-055 — 2026-11-19 — Investigasi F05-T04 (blocked)
+
+- Status: Blocked
+- Perubahan: pin `flutter_rust_bridge` 2.12.0 — pub me-resolve 2.13.0
+  sementara kode `wasm_run` 0.2.0+2 digenerate untuk 2.12.0, sehingga
+  `wasm_run` gagal init. Setelah pin, runtime berhasil diinisialisasi.
+  Percobaan lanjutan: build native `wasm_run` (Rust, FRB 2.12) dan build
+  Lua 5.4.8 ke `wasm32-wasi` dengan zig.
+- File: `pubspec.yaml`, `pubspec.lock`, `TODO.md`, `progress.md`,
+  `CHANGELOG.md`.
+- Verifikasi: `WasmRunLibrary.setUp()` + `wasmRuntimeFeatures()` berhasil
+  (DLL native 2.12 maupun rilis 2.13). Aset Lua lama ditolak:
+  `cannot find definition for import wasi_unstable::fd_prestat_get`.
+  Build Lua WASI preview1 gagal karena Lua membutuhkan setjmp/longjmp →
+  wasm-EH, yang tidak didukung wasmtime 14 (dipakai `wasm_run`).
+- Catatan/risiko: F05-T04..T09 butuh runtime WASM baru (wasmtime dengan
+  wasm-EH + WASI preview1) atau fork `wasm_run`; fallback D07 (rilis 1.0
+  DSL-only) tetap berlaku.
+- Commit: `<cp055>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1255,7 +1275,7 @@ bagian D.
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
-| 2026-11-19 | F05-T04 | Aset Lua siap; `wasm_run` 0.2.0+2 gagal init (codegen FRB 2.12.0 vs runtime DLL 2.13.0, bug upstream) | Runtime Lua belum bisa dijalankan | Terbuka |
+| 2026-11-19 | F05-T04 | FRB mismatch diperbaiki (pin `flutter_rust_bridge` 2.12.0; runtime init OK). Blocker baru: aset Lua memakai `wasi_unstable`, dan Lua butuh wasm-EH (setjmp/longjmp) yang tidak didukung wasmtime 14 di `wasm_run` | Runtime Lua belum bisa dijalankan | Terbuka (butuh runtime baru) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

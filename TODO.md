@@ -250,6 +250,11 @@ Catatan progres: lihat [progress.md](progress.md).
     `wasm_run` di isolate.
   - Hash mismatch = tolak eksekusi dengan pesan jelas.
   - Acceptance: test hash mismatch dan runtime valid.
+  - Catatan 2026-11-19: `wasm_run` gagal init karena pub me-resolve
+    `flutter_rust_bridge` 2.13.0 vs codegen 2.12.0; sudah dipin 2.12.0 dan
+    runtime init berhasil. Aset Lua memakai `wasi_unstable`; build WASI
+    preview1 membutuhkan wasm-EH untuk setjmp/longjmp Lua, yang tidak
+    didukung wasmtime 14 di `wasm_run`.
 - [ ] **F05-T05 (P0)** Host API Lua yang terbatas.
   - Entrypoint `transform(input, args)`; stdlib tanpa `os`, `io`,
     `package`, `debug`; akses net/fs hanya lewat izin.
