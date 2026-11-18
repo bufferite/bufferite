@@ -32,25 +32,50 @@ final class SafeRegex {
     required String replacement,
     bool ignoreCase = false,
   }) {
+    checkInput(input);
+    return input.replaceAll(
+      compile(pattern: pattern, ignoreCase: ignoreCase),
+      replacement,
+    );
+  }
+
+  /// Mengganti kecocokan pertama dengan aman.
+  static String replaceFirst(
+    String input, {
+    required String pattern,
+    required String replacement,
+    bool ignoreCase = false,
+  }) {
+    checkInput(input);
+    return input.replaceFirst(
+      compile(pattern: pattern, ignoreCase: ignoreCase),
+      replacement,
+    );
+  }
+
+  /// Compile pola dengan validasi panjang, input, dan heuristik ReDoS.
+  static RegExp compile({required String pattern, bool ignoreCase = false}) {
     if (pattern.isEmpty) {
       throw _invalid('Parameter "pattern" wajib diisi.');
     }
     if (pattern.length > maxPatternLength) {
       throw _invalid('Pola melebihi batas $maxPatternLength karakter.');
     }
-    if (input.length > maxInputLength) {
-      throw _invalid('Input melebihi batas $maxInputLength karakter.');
-    }
     if (_nestedQuantifier.hasMatch(pattern)) {
       throw _invalid('Pola berisi kuantifier bersarang yang berisiko ReDoS.');
     }
 
-    final RegExp regex;
     try {
-      regex = RegExp(pattern, caseSensitive: !ignoreCase);
+      return RegExp(pattern, caseSensitive: !ignoreCase);
     } on FormatException {
       throw _invalid('Pola regex tidak valid.');
     }
-    return input.replaceAll(regex, replacement);
+  }
+
+  /// Validasi panjang input sebelum regex dijalankan.
+  static void checkInput(String input) {
+    if (input.length > maxInputLength) {
+      throw _invalid('Input melebihi batas $maxInputLength karakter.');
+    }
   }
 }

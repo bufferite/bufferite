@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 120 / 131 |
+| Task MVP selesai | 121 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
-| Keputusan terbuka | 10 |
+| Keputusan terbuka | 8 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F13-T09` — review keamanan kripto lanjutan; lalu `F05` (butuh D02/D08) |
-| Blocker aktif | D02/D08 (runtime DSL/Lua), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
-| Analyze | Lulus (0 issue, 2026-11-15) |
-| Test suite | Lulus (359 test, 2026-11-15) |
+| Task berikutnya | `F05-T03` — siapkan `lua_runtime.wasm` (wasi-sdk) + pin hash; lalu `F05-T04` |
+| Blocker aktif | F05-T03 (build WASI + ABI stdin), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
+| Analyze | Lulus (0 issue, 2026-11-19) |
+| Test suite | Lulus (379 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -50,7 +50,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
-| F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
+| F05 — Runtime & Sandbox | 9 | 2 | Sebagian (T03 butuh aset Lua) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 10 | Sebagian (T09 review keamanan) |
 | F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **120** | **Berjalan** |
+| **Total MVP** | **131** | **121** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -199,6 +199,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` → 332 pass | `3cfd542` |
 | 2026-11-15 | F14-T08 | Uji performa/memori: benchmark 10k step + input 5 MiB | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 285.714 step/s; 5 MiB base64 48 ms, RSS +22,5 MiB | — |
 | 2026-11-15 | F14-T09 | QA desain DESIGN §15: kontras, touch target, dark mode, text scale 2x, layar 320x568 & 820x1180 | `test/core/ui/accessibility_test.dart` | `flutter test` → 359 lulus | — |
+| 2026-11-19 | F05-T02 | Runtime DSL: map, regex replace, konversi unit, rename JSON + batas keamanan | `lib/core/runtime/dsl_runtime.dart`, `DSL.md` | `flutter test` → 20 lulus; `flutter analyze` 0 issue | `e987058` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -207,10 +208,10 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F04-T08 | Manifest core digenerate dari operasi inti + executor didaftarkan saat bootstrap | `core_operations.dart`, `tool/build_core_berp.dart`, `plugins/core/operations.json` | `flutter test` (335 lulus); emulator: Library menampilkan 33 operasi, preview base64 `1` -> `MQ==` | `90dafd7` |
 | 2026-11-15 | UX | Toast tidak menumpuk/menggantung, tombol Plugin Manager di Library, chevron step jadi tombol Atur step | `app_toast.dart` (`persist: false`), `library_page.dart`, `step_card.dart`, `step_config_sheet.dart` | `flutter test` (338 lulus); emulator: toast hilang ~3 dtk, Plugin Manager terbuka dari Library, sheet parameter tampil | `9f417ba`, `5ef3b0d` |
 | 2026-11-15 | UX | Chevron disembunyikan untuk operasi tanpa parameter; kategori step memakai kategori operasi; sheet semua operasi berparameter diuji | `step_card.dart`, `recipe_editor_page.dart`, `test/features/operations/core_params_sheet_test.dart` | `flutter test` (349 lulus); emulator: Slice/Extract Strings/Regex Replace membuka sheet, Base64 Encode tanpa chevron | `1abb4d3`, `df40c33` |
-| 2026-11-15 | F04-T10 | `PluginManagerService` + provider Riverpod: instal, enable/disable, hapus, bootstrap | `lib/features/plugins/plugin_manager_service.dart`, `plugin_actions.dart`, `plugin_sideload.dart`, `core_bootstrap_service.dart` | `flutter test` (359 lulus); emulator: daftar plugin segar setelah instal | `b5a1eaa` |
-| 2026-11-15 | F10-T03 | Library: filter chip Semua/Favorit/kategori + nama plugin di kartu | `lib/features/library/library_page.dart`, `operation_catalog.dart` | `flutter test` (359 lulus); emulator: chip + "Bufferite Core" tampil | `b5a1eaa` |
-| 2026-11-15 | F04-T05 | Sideload end-to-end di emulator | `lib/features/plugins/plugin_sideload.dart` | emulator: `sample.berp` → preview `Sample Pack` → Instal → muncul di Library (`unverified`) | `b5a1eaa` |
-| 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `b5a1eaa` |
+| 2026-11-15 | F04-T10 | `PluginManagerService` + provider Riverpod: instal, enable/disable, hapus, bootstrap | `lib/features/plugins/plugin_manager_service.dart`, `plugin_actions.dart`, `plugin_sideload.dart`, `core_bootstrap_service.dart` | `flutter test` (359 lulus); emulator: daftar plugin segar setelah instal | `be0e346` |
+| 2026-11-15 | F10-T03 | Library: filter chip Semua/Favorit/kategori + nama plugin di kartu | `lib/features/library/library_page.dart`, `operation_catalog.dart` | `flutter test` (359 lulus); emulator: chip + "Bufferite Core" tampil | `be0e346` |
+| 2026-11-15 | F04-T05 | Sideload end-to-end di emulator | `lib/features/plugins/plugin_sideload.dart` | emulator: `sample.berp` → preview `Sample Pack` → Instal → muncul di Library (`unverified`) | `be0e346` |
+| 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `be0e346` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1113,7 +1114,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: MuMu (Android 12) tidak merender ikon splash sistem —
   hanya warna latar tema yang tampil. Pra-Android 12 memakai
   `launch_background.xml` (logo + warna tema) dan belum diuji di API < 31.
-- Commit: `b5a1eaa`
+- Commit: `be0e346`
+
+### CP-049 — 2026-11-19 — F05-T02 Runtime DSL + keputusan D02/D08
+
+- Status: Selesai
+- Perubahan: skema DSL v1 (`map`, `regex_replace`, `convert_unit`, `rename`)
+  dengan parser ketat (versi 1, maks 200 step, field tak dikenal ditolak);
+  `SafeRegex` dipecah agar `compile`/`replaceFirst` dapat dipakai ulang;
+  runtime DSL hanya butuh izin `cpu`, memeriksa pembatalan antar step, dan
+  menolak `FileBuffer` yang belum dimaterialisasi; keputusan D02 (Lua 5.4
+  MIT → WASI via `wasm_run`) dan D08 dicatat.
+- File: `lib/core/runtime/dsl_runtime.dart`,
+  `lib/core/operations/safe_regex.dart`,
+  `test/core/runtime/dsl_runtime_test.dart`, `DSL.md`, `TODO.md`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 379 lulus
+  (20 test DSL baru).
+- Catatan/risiko: timeout DSL masih menunggu host isolate (F03-T04). Aset
+  `lua_runtime.wasm` belum ada; F05-T03 membutuhkan wasi-sdk dan strategi
+  input (stdin/preopen) yang belum diputuskan.
+- Commit: `e987058`
 
 ## 7. Template Checkpoint Baru
 
@@ -1127,7 +1147,7 @@ Salin format berikut saat menyelesaikan task:
 - File: <path utama>
 - Verifikasi: `<perintah>` → <hasil>
 - Catatan/risiko: <jika ada>
-- Commit: `b5a1eaa`
+- Commit: `be0e346`
 ```
 
 Dan tambahkan baris di §5 serta perbarui angka di §2 dan §3.
@@ -1140,17 +1160,19 @@ bagian D.
 | Tanggal | Terkait | Blocker/Keputusan | Dampak | Status |
 |---|---|---|---|---|
 | 2026-11-11 | D01, F13 | Ruang lingkup operasi `core.berp` belum final | Menentukan jumlah operasi MVP | Terbuka |
-| 2026-11-11 | D02, F05-T03 | Interpreter Lua via WASM belum dipilih | Menunda runtime Lua | Terbuka |
-| 2026-11-11 | D08, F05-T02 | Skema DSL final belum ditetapkan | Menunda implementasi runtime DSL | Terbuka |
+| 2026-11-11 | D02, F05-T03 | Interpreter Lua via WASM belum dipilih | Menunda runtime Lua | Selesai (D02; aset Lua belum ada) |
+| 2026-11-11 | D08, F05-T02 | Skema DSL final belum ditetapkan | Menunda implementasi runtime DSL | Selesai (D08, CP-049) |
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
+| 2026-11-19 | F05-T03 | Build `lua_runtime.wasm` (wasi-sdk) + ABI stdin belum tersedia | Runtime Lua belum bisa diinstansiasi | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
 | Tanggal | ID | Keputusan | Alasan | Dampak |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 2026-11-19 | D02 | Lua 5.4 (MIT) → WASI, dijalankan `wasm_run` + `wasm_run_flutter`, hash dipin | wasmoon/Fengari butuh glue JS; omnilua tanpa build WASI | F05-T03 memakai wasi-sdk |
+| 2026-11-19 | D08 | Skema DSL v1: map, regex_replace, convert_unit, rename; 200 step, regex 512 char, input 1 MiB, hanya cpu | Batas aman & minimal; tanpa eval/loop | F05-T02 selesai (`DSL.md`) |

@@ -230,10 +230,12 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F05-T01 (P0)** Kontrak sandbox dan konfigurasi resource.
   - Batas waktu, memori, izin aktif, dan konteks eksekusi.
   - Acceptance: test konfigurasi default dan override.
-- [ ] **F05-T02 (P0)** Runtime DSL.
+- [x] **F05-T02 (P0)** Runtime DSL.
   - Definisikan skema JSON/YAML: mapping, regex replace, konversi unit,
     rename; regex aman dengan timeout.
   - Acceptance: test tiap transformasi + input invalid.
+  - Verifikasi: `DSL.md`; `flutter test test/core/runtime/dsl_runtime_test.dart`
+    (20 lulus); `flutter analyze` 0 issue.
 - [ ] **F05-T03 (P0)** Siapkan `lua_runtime.wasm`.
   - Finalisasi interpreter (lihat keputusan D02), catat lisensi, simpan
     aset, dan pin SHA-256.
@@ -484,14 +486,18 @@ Catatan progres: lihat [progress.md](progress.md).
 
 - [ ] **D01** Finalisasi ruang lingkup "hampir semua operasi CyberChef"
   untuk MVP (daftar operasi P0 vs pasca-MVP).
-- [ ] **D02** Pilih interpreter Lua yang dikompilasi ke WASM (omnilua atau
-  alternatif) + lisensi.
+- [x] **D02** Lua 5.4 (PUC-Rio, MIT) dikompilasi ke WASI (wasi-sdk) →
+  `lua_runtime.wasm`, dijalankan via `wasm_run` + `wasm_run_flutter`, hash
+  di-pin. Alternatif ditolak: wasmoon (glue JS), Fengari (VM JS), omnilua
+  (tidak ada build WASI siap pakai).
 - [ ] **D03** Tentukan ukuran maksimum `core.berp` dan strategi lazy load.
 - [ ] **D04** Finalisasi font: Inter dibundel vs system font.
 - [ ] **D05** Konfirmasi lisensi MIT untuk inti dan `core.berp`.
 - [ ] **D06** Kebijakan error pipeline: berhenti di step error atau lanjut
   dengan output terakhir + peringatan.
 - [ ] **D07** Target waktu rilis MVP.
-- [ ] **D08** Finalisasi skema DSL (field, operator, dan batas keamanan).
+- [x] **D08** Skema DSL v1 (`DSL.md`): `map`, `regex_replace`,
+  `convert_unit`, `rename`; batas 200 step, regex 512 karakter, input 1 MiB;
+  hanya izin `cpu`; field tak dikenal ditolak.
 - [ ] **D09** Strategi cache runtime untuk banyak plugin.
 - [ ] **D10** Apakah plugin DSL dibungkus `.berp` (rekomendasi: ya).

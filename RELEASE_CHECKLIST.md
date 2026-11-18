@@ -1,6 +1,6 @@
 # Release Checklist MVP (F15-T06)
 
-Verifikasi `AGENT.md` §7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
+Verifikasi `AGENT.md` ï¿½7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
 
 | Item | Status | Bukti |
 |---|---|---|
@@ -9,7 +9,7 @@ Verifikasi `AGENT.md` §7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
 | Tidak ada operasi di-hardcode di inti | OK | operasi = plugin (`lib/core/operations` = paket core) |
 | Unit test logika baru + lulus | OK | `flutter test` ? 334 lulus |
 | Test kontrak terhadap core.berp | SEBAGIAN | `test/tool/*` build+decode; runner nyata menunggu runtime (D02) |
-| Tanpa dependency baru tanpa alasan | OK | dicatat di `ARCHITECTURE.md` §12 |
+| Tanpa dependency baru tanpa alasan | OK | dicatat di `ARCHITECTURE.md` ï¿½12 |
 | Operasi berat di isolate | BELUM | F03-T04 ditunda |
 | Verifikasi SHA-256 runtime WASM & .berp | SEBAGIAN | `.berp` OK (`plugin_integrity_test`); WASM menunggu D02 |
 | UI layar kecil/besar + dark mode | SEBAGIAN | widget test + smoke emulator (dark); layar besar manual |
@@ -23,9 +23,9 @@ Tercapai: engine + recipe + pipeline, sistem plugin (manifest/paket/izin),
 storage, UI foundation, Home, Recipe Editor, Library, Plugin Manager, Settings,
 core.berp tooling + operasi inti, keamanan dasar.
 
-Tertunda (dicatat): runtime Lua/WASM (D02), skema DSL (D08), host isolate
+Tertunda (dicatat): aset runtime Lua/WASM (D02 sudah diputuskan), host isolate
 (F03-T04), enforcement izin runtime, katalog daring Fase 2, sebagian verifikasi
 device.
 
 Kesimpulan: MVP memenuhi Definisi Done untuk lingkup non-device; item tertunda
-dilacak di `progress.md` §8 Blocker.
+dilacak di `progress.md` ï¿½8 Blocker.
