@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 121 / 131 |
+| Task MVP selesai | 122 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 8 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F05-T03` — siapkan `lua_runtime.wasm` (wasi-sdk) + pin hash; lalu `F05-T04` |
-| Blocker aktif | F05-T03 (build WASI + ABI stdin), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
+| Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`) |
+| Blocker aktif | F05-T04 (ABI/stdin + native `wasm_run`), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (379 test, 2026-11-19) |
+| Test suite | Lulus (382 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -50,7 +50,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
-| F05 — Runtime & Sandbox | 9 | 2 | Sebagian (T03 butuh aset Lua) |
+| F05 — Runtime & Sandbox | 9 | 3 | Sebagian (T04 butuh wasm_run native) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 10 | Sebagian (T09 review keamanan) |
 | F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **121** | **Berjalan** |
+| **Total MVP** | **131** | **122** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -199,7 +199,8 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` → 332 pass | `3cfd542` |
 | 2026-11-15 | F14-T08 | Uji performa/memori: benchmark 10k step + input 5 MiB | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 285.714 step/s; 5 MiB base64 48 ms, RSS +22,5 MiB | — |
 | 2026-11-15 | F14-T09 | QA desain DESIGN §15: kontras, touch target, dark mode, text scale 2x, layar 320x568 & 820x1180 | `test/core/ui/accessibility_test.dart` | `flutter test` → 359 lulus | — |
-| 2026-11-19 | F05-T02 | Runtime DSL: map, regex replace, konversi unit, rename JSON + batas keamanan | `lib/core/runtime/dsl_runtime.dart`, `DSL.md` | `flutter test` → 20 lulus; `flutter analyze` 0 issue | `e987058` |
+| 2026-11-19 | F05-T02 | Runtime DSL: map, regex replace, konversi unit, rename JSON + batas keamanan | `lib/core/runtime/dsl_runtime.dart`, `DSL.md` | `flutter test` → 20 lulus; `flutter analyze` 0 issue | `20a7b52` |
+| 2026-11-19 | F05-T03 | Bundel `lua_runtime.wasm` (Lua 5.4.6 WASI) + pin SHA-256 | `assets/lua_runtime.wasm`, `lib/core/runtime/lua_runtime_asset.dart`, `test/core/runtime/lua_runtime_asset_test.dart` | `flutter test` → 3 lulus; hash `02754c98…0c84` | `<hash>` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1133,7 +1134,24 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: timeout DSL masih menunggu host isolate (F03-T04). Aset
   `lua_runtime.wasm` belum ada; F05-T03 membutuhkan wasi-sdk dan strategi
   input (stdin/preopen) yang belum diputuskan.
-- Commit: `e987058`
+- Commit: `20a7b52`
+
+### CP-050 — 2026-11-19 — F05-T03 aset Lua WASI + pin hash
+
+- Status: Selesai
+- Perubahan: aset `lua_runtime.wasm` (Lua 5.4.6, build WASI
+  `@antonz/lua-wasi@5.4.6`, MIT) dibundel; SHA-256 dan ukuran dipin di
+  `lua_runtime_asset.dart`; lisensi dicatat.
+- File: `assets/lua_runtime.wasm`,
+  `lib/core/runtime/lua_runtime_asset.dart`,
+  `test/core/runtime/lua_runtime_asset_test.dart`,
+  `THIRD_PARTY_LICENSES.md`, `pubspec.yaml`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 382 lulus;
+  hash aset `02754c9822caf5112e9a2ccaec3dd29076bf37b51d65cb886ae1606389370c84`.
+- Catatan/risiko: aset belum dijalankan. `wasm_run` di Android memerlukan
+  `wasm_run_flutter`; mekanisme input (stdin/preopen) dan isolasi masih
+  terbuka (F05-T04, F03-T04).
+- Commit: `<hash>`
 
 ## 7. Template Checkpoint Baru
 
@@ -1168,7 +1186,7 @@ bagian D.
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
-| 2026-11-19 | F05-T03 | Build `lua_runtime.wasm` (wasi-sdk) + ABI stdin belum tersedia | Runtime Lua belum bisa diinstansiasi | Terbuka |
+| 2026-11-19 | F05-T04 | Aset Lua siap; instantiasi `wasm_run` (native lib Android) + ABI input belum diuji | Runtime Lua belum bisa dipakai | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

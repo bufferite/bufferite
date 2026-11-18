@@ -64,6 +64,7 @@ flutter:
 
   assets:
     - assets/core.berp
+    - assets/lua_runtime.wasm
 
   # To add assets to your application, add an assets section, like this:
   # assets:

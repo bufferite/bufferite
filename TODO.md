@@ -236,10 +236,13 @@ Catatan progres: lihat [progress.md](progress.md).
   - Acceptance: test tiap transformasi + input invalid.
   - Verifikasi: `DSL.md`; `flutter test test/core/runtime/dsl_runtime_test.dart`
     (20 lulus); `flutter analyze` 0 issue.
-- [ ] **F05-T03 (P0)** Siapkan `lua_runtime.wasm`.
+- [x] **F05-T03 (P0)** Siapkan `lua_runtime.wasm`.
   - Finalisasi interpreter (lihat keputusan D02), catat lisensi, simpan
     aset, dan pin SHA-256.
   - Acceptance: hash terdokumentasi dan cocok dengan file aset.
+  - Verifikasi: `assets/lua_runtime.wasm` (329.167 byte, SHA-256
+    `02754c98…0c84`) dari `@antonz/lua-wasi@5.4.6` (Lua 5.4.6, MIT);
+    `flutter test test/core/runtime/lua_runtime_asset_test.dart` (3 lulus).
 - [ ] **F05-T04 (P0)** Verifikasi + instantiasi runtime Lua via
     `wasm_run` di isolate.
   - Hash mismatch = tolak eksekusi dengan pesan jelas.
