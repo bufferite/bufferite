@@ -205,7 +205,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F05-T03 | Aset `lua_runtime.wasm` (WASI) — **digantikan** `lua_dart`; file & hash dihapus | — | — | `c44ae53` |
 | 2026-11-19 | F05-T04 | Runtime Lua `lua_dart` (Lua 5.5.1 FFI): sandbox, batas memori, 10 test | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 10 lulus; `type(io)`/`os.execute` nil | `aa6cc4a` |
 | 2026-11-19 | F05-T05 | Host API `transform(input, args)` + stdlib terbatas; akses terlarang → error terstruktur | `lib/core/runtime/lua_runtime.dart` | `flutter test` → `runtime.lua_error` untuk `io.open` | `aa6cc4a` |
-| 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `<hash>` |
+| 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `ef086f6` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1282,7 +1282,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: kill isolate setelah grace dapat meninggalkan alokasi
   native Lua sampai proses berakhir; normal path selalu `state.close()`.
   Engine WASM nanti memakai protokol isolate yang sama.
-- Commit: `<hash>`
+- Commit: `ef086f6`
 
 ## 7. Template Checkpoint Baru
 
