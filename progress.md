@@ -1325,7 +1325,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `f7ad57f97fd93b79d3c6a0076bd03023dc7fc13546f2ca3525537c3beb3e5dea`.
 - Catatan/risiko: aset + wasi-sdk hanya ada di `build/` (belum dibundel).
   Langkah berikutnya membangun wasmtime C API (Windows lalu Android).
-- Commit: `<hash>`
+- Commit: `27a5019`
 
 ## 7. Template Checkpoint Baru
 
