@@ -200,7 +200,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-15 | F14-T08 | Uji performa/memori: benchmark 10k step + input 5 MiB | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 285.714 step/s; 5 MiB base64 48 ms, RSS +22,5 MiB | — |
 | 2026-11-15 | F14-T09 | QA desain DESIGN §15: kontras, touch target, dark mode, text scale 2x, layar 320x568 & 820x1180 | `test/core/ui/accessibility_test.dart` | `flutter test` → 359 lulus | — |
 | 2026-11-19 | F05-T02 | Runtime DSL: map, regex replace, konversi unit, rename JSON + batas keamanan | `lib/core/runtime/dsl_runtime.dart`, `DSL.md` | `flutter test` → 20 lulus; `flutter analyze` 0 issue | `20a7b52` |
-| 2026-11-19 | F05-T03 | Bundel `lua_runtime.wasm` (Lua 5.4.6 WASI) + pin SHA-256 | `assets/lua_runtime.wasm`, `lib/core/runtime/lua_runtime_asset.dart`, `test/core/runtime/lua_runtime_asset_test.dart` | `flutter test` → 3 lulus; hash `02754c98…0c84` | `<hash>` |
+| 2026-11-19 | F05-T03 | Bundel `lua_runtime.wasm` (Lua 5.4.6 WASI) + pin SHA-256 | `assets/lua_runtime.wasm`, `lib/core/runtime/lua_runtime_asset.dart`, `test/core/runtime/lua_runtime_asset_test.dart` | `flutter test` → 3 lulus; hash `02754c98…0c84` | `c44ae53` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1151,7 +1151,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: aset belum dijalankan. `wasm_run` di Android memerlukan
   `wasm_run_flutter`; mekanisme input (stdin/preopen) dan isolasi masih
   terbuka (F05-T04, F03-T04).
-- Commit: `<hash>`
+- Commit: `c44ae53`
 
 ## 7. Template Checkpoint Baru
 
