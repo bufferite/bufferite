@@ -1,50 +1,55 @@
 # Rencana Port Engine WASM (F05 lanjutan)
 
-Status: **ditunda ke 1.1** (keputusan 2026-11-19). 1.0 memakai `lua_dart`
-(FFI) yang sudah berjalan di isolate dengan sandbox + timeout.
+Status: **spike selesai (2026-11-19)**. Aset Lua→WASM terbukti valid; engine
+host yang dipilih berubah dari WAMR ke **wasmtime C API** karena WAMR belum
+mendukung encoding EH yang dipakai Lua. 1.0 tetap memakai `lua_dart`.
 
-## Kenapa bukan `wasm_run`
+## Hasil spike
 
-- `wasm_run` 0.2.0 membawa **wasmtime 14** yang tidak mendukung
-  wasm exception-handling (EH).
-- Lua membutuhkan setjmp/longjmp → wasm-EH saat dikompilasi ke WASI.
-- `wasmi` juga belum mendukung EH.
-- Menaikkan wasmtime di `wasm_run` berarti porting ±250 pemakaian API
-  (wasmtime 14 → 50+), bukan sekadar ganti versi.
+| Uji | Hasil |
+|---|---|
+| Build Lua 5.4.8 → `wasm32-wasip1` + EH (`wasi-sdk 34`, `-mllvm -wasm-enable-sjlj -mllvm -wasm-use-legacy-eh=false`) | Berhasil, 712.907 byte |
+| `print(2+2)` di Node 24 (WASI + `--experimental-wasm-exnref`) | `4` |
+| `pcall(error)` di Node | `false  boom` (exit 0) |
+| `iwasm` (WAMR 2.4.3, classic interp, EH, ref-types) dengan aset legacy EH | `print` jalan, `pcall` crash |
+| Uji minimal `setjmp/longjmp` di WAMR | Crash (access violation) |
+| Aset new-EH di WAMR | `unsupported opcode 1f` (`try_table`) |
 
-## Engine yang dipilih: WAMR
+Kesimpulan: WAMR 2.4.3 hanya mendukung EH legacy dan implementasinya tidak
+kompatibel dengan SjLj Lua; WAMR tidak bisa menjadi host.
 
-- Ringan (~60 KB interpreter, ~21 KB libc-wasi), mendukung Android/Windows,
-  WASI, dan **exception handling**.
-- Lisensi Apache-2.0 + LLVM exception (kompatibel dengan MIT app).
-- C API stabil; bisa dibungkus Dart FFI tanpa codegen besar.
+## Engine yang dipilih: wasmtime (C API)
+
+- Wasmtime ≥ versi yang mendukung exception handling (encoding new/EH).
+- C API stabil (`wasmtime.h`), bisa dibungkus Dart FFI tanpa codegen besar.
+- WASI preview1, stdout capture, fuel/epoch untuk timeout.
+- Lisensi Apache-2.0 WITH LLVM-exception.
 
 ## Langkah
 
-1. **Toolchain Lua EH**
-   - Unduh wasi-sdk (Windows, ~620 MB) atau gunakan clang-20 + sysroot.
-   - Build: `clang --target=wasm32-wasi -O2 -mllvm -wasm-enable-sjlj ...`
-     dengan patch `setsignal` dan `l_signalT` (sudah dicoba di zig; backend
-     zig gagal, jadi wajib clang wasi-sdk).
-   - Hasil: `assets/lua_runtime.wasm` + SHA-256 dipin.
-2. **Build WAMR**
-   - Windows: CMake + MSVC, `WAMR_BUILD_WASI=1`, EH aktif.
-   - Android: NDK 28.2 (sudah terpasang) + CMake, ABI arm64-v8a,
-     armeabi-v7a, x86_64.
-   - Hasil: `wasm_engine.dll` / `libwasm_engine.so` per ABI.
+1. **Aset Lua** (selesai di spike)
+   - Simpan `lua_runtime.wasm` (712.907 byte, SHA-256
+     `f7ad57f97fd93b79d3c6a0076bd03023dc7fc13546f2ca3525537c3beb3e5dea`).
+   - Dokumentasikan perintah build (wasi-sdk 34 + patch `setsignal`,
+     `l_tmpnam`, stub `system`/`tmpfile`).
+2. **Build wasmtime C API**
+   - Windows: crate `wasmtime-c-api-impl` (versi terbaru) → `wasmtime.dll`.
+   - Android: NDK 28.2 + Rust targets (arm64-v8a, armeabi-v7a, x86_64).
+   - Verifikasi `print(2+2)` + `pcall(error)` di Windows.
 3. **Dart FFI**
-   - Init runtime, load module, instantiate, `wasm_application_execute_main`
-     dengan argv `lua -e <script>`.
-   - Tangkap stdout (callback `os_printf`/fd_write) dan error.
-   - Bungkus sebagai `SandboxRuntime` + isolate + interrupt.
-4. **Integrasi & verifikasi**
-   - Ganti `LuaRuntime` FFI-lua dengan engine WASM (atau pilih per tier).
-   - Test: Lua transform, sandbox, timeout, hash mismatch, Android.
-   - Perbarui D02, PLUGINS/ARCHITECTURE, dan THIRD_PARTY_LICENSES.
+   - `wasm_engine_new`, `wasmtime_module_new`, `wasmtime_linker_new`,
+     `wasmtime_context_set_wasi`, instantiate, `_start`.
+   - Tangkap stdout via `wasi_config` callback; timeout lewat epoch/fuel.
+   - Bungkus `SandboxRuntime` + isolate (pola sama dengan CP-057).
+4. **Integrasi**
+   - Pilih runtime per tier: `lua`/`wasm` memakai engine WASM; DSL tetap Dart.
+   - Test: transform, sandbox, timeout, hash mismatch, Android.
+   - Perbarui D02, PLUGINS/ARCHITECTURE, THIRD_PARTY_LICENSES.
 
 ## Risiko
 
-- Ukuran APK bertambah (engine + Lua WASM).
-- WAMR WASI stdout perlu hook platform; belum divalidasi.
-- Build cross-ABI menambah waktu rilis; jadwalkan di luar jalur 1.0
-  (D07: fallback 1.0 DSL-only bila belum siap).
+- Ukuran APK bertambah (engine native + 0,7 MB Lua WASM).
+- Cross-compile wasmtime untuk Android butuh Rust targets + NDK (berat).
+- Callback stdout C→Dart perlu `NativeCallable`; jika gagal, pakai pipe/preopen
+  file untuk output.
+- Fallback D07 (1.0 DSL+Lua FFI) tetap berlaku bila port tidak selesai.
