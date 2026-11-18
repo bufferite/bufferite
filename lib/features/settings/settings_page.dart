@@ -6,11 +6,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../core/bootstrap/bootstrap_provider.dart';
+import '../../core/bootstrap/core_bootstrap_service.dart';
 import '../../core/storage/app_database.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/design_tokens.dart';
 import '../../core/ui/theme_provider.dart';
+import '../operations/operation_providers.dart';
+import '../plugins/plugin_manager_service.dart';
+import '../plugins/plugin_providers.dart';
 import 'settings_provider.dart';
 import 'settings_repository.dart';
 
@@ -222,12 +226,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (!confirmed || !mounted) {
       return;
     }
-    ref.invalidate(coreBootstrapProvider);
-    showAppToast(
-      context,
-      message: 'Bootstrap dijalankan ulang',
-      tone: AppToastTone.info,
-    );
+    try {
+      await ref.read(coreBootstrapServiceProvider).installBundledCore();
+      await ref.read(pluginManagerServiceProvider).restore();
+      ref.invalidate(coreBootstrapProvider);
+      ref.invalidate(installedPluginsProvider);
+      ref.read(operationsRevisionProvider.notifier).bump();
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Core.berp dipasang ulang',
+          tone: AppToastTone.success,
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: 'Gagal memasang ulang core: $error',
+          tone: AppToastTone.error,
+        );
+      }
+    }
   }
 
   Future<void> _resetData() async {
