@@ -1240,7 +1240,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: F05-T04..T09 butuh runtime WASM baru (wasmtime dengan
   wasm-EH + WASI preview1) atau fork `wasm_run`; fallback D07 (rilis 1.0
   DSL-only) tetap berlaku.
-- Commit: `<cp055>`
+- Commit: `ec18813`
 
 ## 7. Template Checkpoint Baru
 
