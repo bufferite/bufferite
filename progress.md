@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 122 / 131 |
+| Task MVP selesai | 123 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 8 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`) |
-| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
+| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F03-T04 (host isolate), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (382 test, 2026-11-19) |
+| Test suite | Lulus (400 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -58,10 +58,10 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F10 — Fitur Library & Operation Picker | 7 | 7 | Selesai |
 | F11 — Fitur Plugin Manager | 9 | 9 | Selesai |
 | F12 — Fitur Settings | 6 | 6 | Selesai |
-| F13 — core.berp: Tooling & Operasi | 11 | 10 | Sebagian (T09 review keamanan) |
+| F13 — core.berp: Tooling & Operasi | 11 | 11 | Selesai |
 | F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **122** | **Berjalan** |
+| **Total MVP** | **131** | **123** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -187,7 +187,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` → 306 pass | `c80edae` |
 | 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` → 311 pass | `9b7dc7d` |
 | 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` → 317 pass | `4067c56` |
-| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) — DITUNDA (review keamanan) | — | Belum | — |
+| 2026-11-19 | F13-T09 | Kripto lanjutan: AES-CBC/CTR, XOR, HMAC-SHA1/512 + review keamanan | `lib/core/operations/crypto.dart`, `SECURITY_REVIEW_CRYPTO.md` | `flutter test` → 400 lulus; vektor NIST CTR & HMAC | `<hash>` |
 | 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
 | 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` → 334 pass | `ac30e3e` |
 | 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
@@ -1153,6 +1153,24 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   terbuka (F05-T04, F03-T04).
 - Commit: `c44ae53`
 
+### CP-051 — 2026-11-19 — F13-T09 kripto lanjutan + review keamanan
+
+- Status: Selesai
+- Perubahan: AES-CBC (PKCS#7) & AES-CTR, XOR, HMAC-SHA1/512 ditambahkan;
+  ECB tidak disediakan dan GCM ditunda; kunci/IV wajib hex dengan panjang
+  valid; input dibatasi 5 MiB; parameter kunci ditandai `secret`.
+- File: `lib/core/operations/crypto.dart`,
+  `lib/core/operations/hash.dart`,
+  `lib/core/operations/core_operations.dart`,
+  `SECURITY_REVIEW_CRYPTO.md`, `test/core/operations/crypto_test.dart`,
+  `operations.md`, `assets/core.berp`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 400 lulus;
+  keystream AES-CTR cocok NIST SP 800-38A, HMAC-SHA1/512 cocok vektor
+  referensi; `core.berp` dibangun ulang (SHA-256 `7237a996…1bba`).
+- Catatan/risiko: CBC/CTR tanpa autentikasi; zeroization Dart tidak
+  dijamin; GCM, KDF, dan kripto asimetris di luar cakupan.
+- Commit: `<cp051>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1165,7 +1183,7 @@ Salin format berikut saat menyelesaikan task:
 - File: <path utama>
 - Verifikasi: `<perintah>` → <hasil>
 - Catatan/risiko: <jika ada>
-- Commit: `be0e346`
+- Commit: `<hash>`
 ```
 
 Dan tambahkan baris di §5 serta perbarui angka di §2 dan §3.

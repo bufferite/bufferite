@@ -382,7 +382,7 @@ test kontrak, dan entri dokumentasi sebelum dianggap selesai.
 | Kategori | Operasi P0 | Tier awal |
 |---|---|---|
 | Encode/Decode | Base64 encode/decode, Base32 encode/decode, Hex encode/decode, URL encode/decode, HTML entity encode/decode | `lua`/`dsl` |
-| Crypto | MD5, SHA-1, SHA-256, SHA-512, HMAC-SHA256 | `lua`/`wasm` |
+| Crypto | MD5, SHA-1, SHA-256, SHA-512, HMAC-SHA1/256/512, AES-CBC/CTR, XOR | `lua`/`wasm` |
 | Format | JSON prettify/minify, JWT decode (tanpa verifikasi), XML prettify | `lua`/`dsl` |
 | Analysis | Entropy, frequency, magic bytes, string extraction | `lua`/`wasm` |
 | Utility | Case conversion, reverse, find & replace, regex replace, slice, sort lines, unique lines | `dsl`/`lua` |
@@ -393,6 +393,9 @@ Catatan keamanan:
   keduanya bukan untuk keamanan.
 - Operasi acak wajib memakai CSPRNG.
 - Operasi regex wajib memiliki batas waktu dan panjang input.
+- AES hanya CBC/CTR (tanpa autentikasi); ECB tidak disediakan. Detail dan
+  risiko diterima ada di `SECURITY_REVIEW_CRYPTO.md`.
+- XOR adalah obfuscation, bukan enkripsi.
 
 ## 12. Kompatibilitas
 

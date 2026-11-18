@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<String> _run(Operation operation, String input) async {
   final output = await operation.execute(
     TextBuffer(input),
-    operation is HmacSha256Operation
+    operation is HmacOperation
         ? const <String, Object?>{'key': 'key'}
         : const <String, Object?>{},
   );
@@ -38,7 +38,7 @@ void main() {
 
   test('HMAC-SHA256 vektor dikenal', () async {
     final result = await _run(
-      const HmacSha256Operation(),
+      const HmacOperation(sha256, 'core.hmac_sha256', 'HMAC-SHA256'),
       'The quick brown fox jumps over the lazy dog',
     );
     expect(
@@ -49,10 +49,11 @@ void main() {
 
   test('HMAC tanpa key menolak', () async {
     expect(
-      () => const HmacSha256Operation().execute(
-        const TextBuffer('x'),
-        const <String, Object?>{},
-      ),
+      () => const HmacOperation(
+        sha256,
+        'core.hmac_sha256',
+        'HMAC-SHA256',
+      ).execute(const TextBuffer('x'), const <String, Object?>{}),
       throwsA(isA<Object>()),
     );
   });
@@ -63,7 +64,9 @@ void main() {
       'core.sha1',
       'core.sha256',
       'core.sha512',
+      'core.hmac_sha1',
       'core.hmac_sha256',
+      'core.hmac_sha512',
     ]);
   });
 }

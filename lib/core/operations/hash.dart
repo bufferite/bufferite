@@ -46,14 +46,18 @@ final class HashOperation implements Operation {
   }
 }
 
-final class HmacSha256Operation implements Operation {
-  const HmacSha256Operation();
+final class HmacOperation implements Operation {
+  const HmacOperation(this._algorithm, this._id, this._name);
+
+  final Hash _algorithm;
+  final String _id;
+  final String _name;
 
   @override
-  String get id => 'core.hmac_sha256';
+  String get id => _id;
 
   @override
-  String get name => 'HMAC-SHA256';
+  String get name => _name;
 
   @override
   OperationCategory get category => OperationCategory.crypto;
@@ -81,7 +85,7 @@ final class HmacSha256Operation implements Operation {
         message: 'Parameter "key" wajib diisi.',
       );
     }
-    final hmac = Hmac(sha256, utf8.encode(key));
+    final hmac = Hmac(_algorithm, utf8.encode(key));
     return TextBuffer(hmac.convert(utf8.encode(input.asText())).toString());
   }
 }
@@ -92,5 +96,7 @@ final List<Operation> hashOperations = <Operation>[
   HashOperation(sha1, 'core.sha1', 'SHA-1'),
   HashOperation(sha256, 'core.sha256', 'SHA-256'),
   HashOperation(sha512, 'core.sha512', 'SHA-512'),
-  const HmacSha256Operation(),
+  HmacOperation(sha1, 'core.hmac_sha1', 'HMAC-SHA1'),
+  HmacOperation(sha256, 'core.hmac_sha256', 'HMAC-SHA256'),
+  HmacOperation(sha512, 'core.hmac_sha512', 'HMAC-SHA512'),
 ];

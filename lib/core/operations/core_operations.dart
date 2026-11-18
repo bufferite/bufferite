@@ -1,5 +1,6 @@
 import '../plugin/operation.dart';
 import 'analysis.dart';
+import 'crypto.dart';
 import 'encode_decode.dart';
 import 'format.dart';
 import 'hash.dart';
@@ -33,6 +34,7 @@ final List<Operation> coreOperations = List<Operation>.unmodifiable(<Operation>[
   const StringsOperation(),
   // Crypto.
   ...hashOperations,
+  ...cryptoOperations,
   // Utility.
   const UpperCaseOperation(),
   const LowerCaseOperation(),

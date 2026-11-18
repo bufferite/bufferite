@@ -26,9 +26,11 @@ Rilis MVP Bufferite.
 - Settings: tema, batas sandbox, opt-in log + hapus log, tentang, reinstal
   core.berp, reset data.
 - core.berp tooling: authoring spec, build deterministik + hash, operasi
-  encode/decode, hash, format, analysis, utility; audit lisensi & ukuran.
+  encode/decode, hash, format, analysis, utility, AES-CBC/CTR, XOR, dan
+  HMAC-SHA1/256/512; audit lisensi & ukuran.
 - Keamanan: threat model, test adversarial paket, bypass izin, safe regex
-  (anti-ReDoS), CSPRNG, audit offline-default, integration test end-to-end.
+  (anti-ReDoS), CSPRNG, audit offline-default, integration test end-to-end,
+  review kripto lanjutan (`SECURITY_REVIEW_CRYPTO.md`).
 
 ### Keamanan
 - Tanpa izin INTERNET di manifest utama; offline-by-default.

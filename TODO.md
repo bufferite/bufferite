@@ -416,9 +416,12 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F13-T08 (P0)** Operasi Utility.
   - Upper/lower/title case, reverse, find & replace, regex replace,
     slice, sort lines, unique lines.
-- [ ] **F13-T09 (P1)** Operasi kripto lanjutan.
+- [x] **F13-T09 (P1)** Operasi kripto lanjutan.
   - AES encrypt/decrypt, XOR, HMAC varian; hanya setelah review
     keamanan.
+  - Verifikasi: `SECURITY_REVIEW_CRYPTO.md`; AES-CBC/CTR + XOR + HMAC
+    SHA-1/512; `flutter test test/core/operations/crypto_test.dart`
+    (13 lulus); core.berp dibangun ulang.
 - [x] **F13-T10 (P0)** Audit lisensi semua operasi yang diadaptasi.
   - Catat sumber, lisensi, dan atribusi di manifest/README paket.
 - [x] **F13-T11 (P1)** Ukuran paket dan lazy load.
