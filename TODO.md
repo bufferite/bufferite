@@ -490,20 +490,31 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## D — Keputusan yang Harus Diambil Manusia
 
-- [ ] **D01** Finalisasi ruang lingkup "hampir semua operasi CyberChef"
-  untuk MVP (daftar operasi P0 vs pasca-MVP).
+- [x] **D01** Ruang lingkup MVP: **38 operasi core** yang sudah ada
+  (encode/decode, hash/HMAC, AES-CBC/CTR, XOR, JSON/JWT, analysis, utility,
+  random) adalah P0 final. Pasca-MVP: XML prettify, AES-GCM/CFB/OFB, KDF,
+  dan operasi CyberChef lain (backlog F16/F17).
 - [x] **D02** Lua 5.4 (PUC-Rio, MIT) dikompilasi ke WASI (wasi-sdk) →
   `lua_runtime.wasm`, dijalankan via `wasm_run` + `wasm_run_flutter`, hash
   di-pin. Alternatif ditolak: wasmoon (glue JS), Fengari (VM JS), omnilua
   (tidak ada build WASI siap pakai).
-- [ ] **D03** Tentukan ukuran maksimum `core.berp` dan strategi lazy load.
-- [ ] **D04** Finalisasi font: Inter dibundel vs system font.
-- [ ] **D05** Konfirmasi lisensi MIT untuk inti dan `core.berp`.
-- [ ] **D06** Kebijakan error pipeline: berhenti di step error atau lanjut
-  dengan output terakhir + peringatan.
-- [ ] **D07** Target waktu rilis MVP.
+- [x] **D03** Batas `core.berp` bundel **2 MiB**; MVP memuat semua operasi
+  dalam satu paket (saat ini 4,2 KiB). Bila melewati batas, pecah per kategori
+  dan muat sesuai permintaan di Fase 2.
+- [x] **D04** Font sistem (fallback DESIGN.md) untuk MVP; Inter dibundel
+  ditunda sampai ada kebutuhan branding/ukuran APK.
+- [x] **D05** Lisensi MIT dikonfirmasi untuk aplikasi dan `core.berp`
+  (`LICENSE`, manifest paket).
+- [x] **D06** Default `stop`; `continueWithLastOutput` hanya opt-in eksplisit
+  per recipe. Error izin, pembatalan, dan runtime selalu berhenti (ditegakkan
+  di F05-T07).
+- [x] **D07** Target rilis MVP **2026-12-31**. Bila F05/F03 masih tertahan,
+  rilis 1.0 dengan tier DSL + operasi core dan pindahkan Lua/WASM ke 1.1.
 - [x] **D08** Skema DSL v1 (`DSL.md`): `map`, `regex_replace`,
   `convert_unit`, `rename`; batas 200 step, regex 512 karakter, input 1 MiB;
   hanya izin `cpu`; field tak dikenal ditolak.
-- [ ] **D09** Strategi cache runtime untuk banyak plugin.
-- [ ] **D10** Apakah plugin DSL dibungkus `.berp` (rekomendasi: ya).
+- [x] **D09** Cache runtime: satu instance per plugin, LRU maksimal 4,
+  disposal setelah 5 menit idle atau saat plugin dinonaktifkan/dihapus; batas
+  memori mengikuti `SandboxConfig`.
+- [x] **D10** Plugin DSL dibungkus `.berp` (manifest + `transform.json`),
+  sama seperti tier lain.

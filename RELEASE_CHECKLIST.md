@@ -1,15 +1,16 @@
 # Release Checklist MVP (F15-T06)
 
-Verifikasi `AGENT.md` �7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
+Verifikasi `AGENT.md` §7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
 
 | Item | Status | Bukti |
 |---|---|---|
+| Target rilis | 2026-12-31 | D07 (fallback 1.0 DSL-only bila runtime tertahan) |
 | Dokumen acuan diperbarui | OK | `operations.md`, `ARCHITECTURE.md`, `PLUGINS.md`, `THREAT_MODEL.md`, `PRIVACY.md`, `CHANGELOG.md` |
 | Struktur folder & penamaan | OK | feature-first `lib/core`, `lib/features`, `lib/core/operations` |
 | Tidak ada operasi di-hardcode di inti | OK | operasi = plugin (`lib/core/operations` = paket core) |
-| Unit test logika baru + lulus | OK | `flutter test` ? 334 lulus |
+| Unit test logika baru + lulus | OK | `flutter test` → 400 lulus |
 | Test kontrak terhadap core.berp | SEBAGIAN | `test/tool/*` build+decode; runner nyata menunggu F05-T04 |
-| Tanpa dependency baru tanpa alasan | OK | dicatat di `ARCHITECTURE.md` �12 |
+| Tanpa dependency baru tanpa alasan | OK | dicatat di `ARCHITECTURE.md` §12 |
 | Operasi berat di isolate | BELUM | F03-T04 ditunda |
 | Verifikasi SHA-256 runtime WASM & .berp | SEBAGIAN | `.berp` OK (`plugin_integrity_test`); aset WASM dipin (`lua_runtime_asset_test`); eksekusi menunggu F05-T04 |
 | UI layar kecil/besar + dark mode | SEBAGIAN | widget test + smoke emulator (dark); layar besar manual |
@@ -28,4 +29,4 @@ Tertunda (dicatat): instansiasi runtime Lua/WASM (F05-T04), host isolate
 device.
 
 Kesimpulan: MVP memenuhi Definisi Done untuk lingkup non-device; item tertunda
-dilacak di `progress.md` �8 Blocker.
+dilacak di `progress.md` §8 Blocker.

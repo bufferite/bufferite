@@ -32,9 +32,9 @@ Status yang dipakai:
 | Task MVP selesai | 123 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
-| Keputusan terbuka | 8 |
+| Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`) |
+| Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`); target rilis 2026-12-31 |
 | Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F03-T04 (host isolate), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (400 test, 2026-11-19) |
@@ -1187,6 +1187,21 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   atau reset data sampai ada strategi versi paket.
 - Commit: `4f5a3de`
 
+### CP-053 — 2026-11-19 — Keputusan tersisa D01/D03–D07/D09/D10
+
+- Status: Selesai
+- Perubahan: seluruh keputusan manusia ditutup. P0 = 38 operasi core; batas
+  `core.berp` 2 MiB (satu paket, lazy load ditunda); font sistem; MIT
+  dikonfirmasi; error default `stop` dengan mode lanjut opt-in; target rilis
+  2026-12-31 (fallback 1.0 DSL-only); cache runtime LRU 4/idle 5 menit; plugin
+  DSL dibungkus `.berp`.
+- File: `TODO.md`, `progress.md`, `operations.md`.
+- Verifikasi: review dokumen; `TODO.md` keputusan terbuka 0.
+- Catatan/risiko: D09 dan penegakan D06 baru berlaku saat F05-T07/T08
+  diimplementasikan. Bila runtime tetap tertahan, rilis 1.0 tanpa tier
+  Lua/WASM sesuai D07.
+- Commit: `<cp053>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1211,15 +1226,15 @@ bagian D.
 
 | Tanggal | Terkait | Blocker/Keputusan | Dampak | Status |
 |---|---|---|---|---|
-| 2026-11-11 | D01, F13 | Ruang lingkup operasi `core.berp` belum final | Menentukan jumlah operasi MVP | Terbuka |
+| 2026-11-11 | D01, F13 | Ruang lingkup operasi `core.berp` belum final | Menentukan jumlah operasi MVP | Selesai (D01: 38 operasi core) |
 | 2026-11-11 | D02, F05-T03 | Interpreter Lua via WASM belum dipilih | Menunda runtime Lua | Selesai (D02; aset Lua belum ada) |
 | 2026-11-11 | D08, F05-T02 | Skema DSL final belum ditetapkan | Menunda implementasi runtime DSL | Selesai (D08, CP-049) |
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
-| 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
+| 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Selesai (default stop; lanjut opt-in) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
-| 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
+| 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Aset Lua siap; `wasm_run` 0.2.0+2 gagal init (codegen FRB 2.12.0 vs runtime DLL 2.13.0, bug upstream) | Runtime Lua belum bisa dijalankan | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
@@ -1228,3 +1243,11 @@ bagian D.
 |---|---|---|---|---|
 | 2026-11-19 | D02 | Lua 5.4 (MIT) → WASI, dijalankan `wasm_run` + `wasm_run_flutter`, hash dipin | wasmoon/Fengari butuh glue JS; omnilua tanpa build WASI | F05-T03 memakai wasi-sdk |
 | 2026-11-19 | D08 | Skema DSL v1: map, regex_replace, convert_unit, rename; 200 step, regex 512 char, input 1 MiB, hanya cpu | Batas aman & minimal; tanpa eval/loop | F05-T02 selesai (`DSL.md`) |
+| 2026-11-19 | D01 | 38 operasi core saat ini = P0 final; XML prettify, GCM/CFB/OFB, KDF, operasi lain masuk pasca-MVP | Menjaga MVP fokus & menghindari scope creep | F16/F17 menampung sisanya |
+| 2026-11-19 | D03 | Batas `core.berp` 2 MiB, satu paket untuk MVP; pecah per kategori bila melewati | Paket saat ini 4,2 KiB; lazy load belum perlu | F13-T11 gate tetap |
+| 2026-11-19 | D04 | Font sistem untuk MVP; Inter ditunda | Sesuai fallback DESIGN.md, APK lebih kecil | Tidak ada aset font |
+| 2026-11-19 | D05 | MIT untuk aplikasi dan `core.berp` | Konsisten dengan LICENSE & manifest | Tidak ada perubahan |
+| 2026-11-19 | D06 | Default `stop`; lanjut dengan output terakhir hanya opt-in; izin/batal/runtime selalu stop | Menghindari output menyesatkan | F05-T07 menegakkan |
+| 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
+| 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 |
+| 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |
