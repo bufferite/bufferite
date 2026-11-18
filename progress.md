@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | `F05-T06` — runtime tier WASM (butuh engine WASI/EH baru); target rilis 2026-12-31 |
 | Blocker aktif | F05-T06..T09 (tier WASM/cache/kontrak lintas runtime), F14-T03 (runtime WASM belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (412 test, 2026-11-19) |
+| Test suite | Lulus (414 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -205,6 +205,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F05-T03 | Aset `lua_runtime.wasm` (WASI) — **digantikan** `lua_dart`; file & hash dihapus | — | — | `c44ae53` |
 | 2026-11-19 | F05-T04 | Runtime Lua `lua_dart` (Lua 5.5.1 FFI): sandbox, batas memori, 10 test | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 10 lulus; `type(io)`/`os.execute` nil | `aa6cc4a` |
 | 2026-11-19 | F05-T05 | Host API `transform(input, args)` + stdlib terbatas; akses terlarang → error terstruktur | `lib/core/runtime/lua_runtime.dart` | `flutter test` → `runtime.lua_error` untuk `io.open` | `aa6cc4a` |
+| 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `<hash>` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1263,6 +1264,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   (1.0.0 membutuhkan `meta` 1.19). Timeout Lua belum diintegrasikan ke
   sandbox; tier WASM tetap kosong sampai F05-T06.
 - Commit: `aa6cc4a`
+
+### CP-057 — 2026-11-19 — Lua di isolate + timeout/interrupt
+
+- Status: Selesai
+- Perubahan: `LuaRuntime` menjalankan Lua di isolate kerja; timeout dari
+  `SandboxConfig` dan pembatalan token memakai `LuaInterruptHandle` dengan
+  grace 300 ms sebelum isolate dimatikan; hasil/error diserialisasi lewat
+  port. Sandbox dan batas memori tetap aktif.
+- File: `lib/core/runtime/lua_runtime.dart`,
+  `test/core/runtime/lua_runtime_test.dart`,
+  `integration_test/lua_runtime_test.dart`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 414 lulus;
+  `while true do end` berhenti sebagai `runtime.timeout`, pembatalan →
+  `operation.cancelled`, ticker UI tetap berjalan; integration test emulator
+  lulus.
+- Catatan/risiko: kill isolate setelah grace dapat meninggalkan alokasi
+  native Lua sampai proses berakhir; normal path selalu `state.close()`.
+  Engine WASM nanti memakai protokol isolate yang sama.
+- Commit: `<hash>`
 
 ## 7. Template Checkpoint Baru
 

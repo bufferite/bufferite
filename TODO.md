@@ -248,9 +248,10 @@ Catatan progres: lihat [progress.md](progress.md).
   - Hash mismatch = tolak eksekusi dengan pesan jelas.
   - Acceptance: test hash mismatch dan runtime valid.
   - Verifikasi: runtime Lua `lua_dart` (Lua 5.5.1 FFI) dengan
-    `sandbox: true` + batas memori; `flutter test
-    test/core/runtime/lua_runtime_test.dart` (10 lulus); integration test di
-    emulator `127.0.0.1:7555` lulus; APK memuat `liblua_dart.so`.
+    `sandbox: true` + batas memori; eksekusi di isolate kerja dengan
+    timeout/interrupt; `flutter test test/core/runtime/lua_runtime_test.dart`
+    (12 lulus); integration test di emulator `127.0.0.1:7555` lulus; APK
+    memuat `liblua_dart.so`.
 - [x] **F05-T05 (P0)** Host API Lua yang terbatas.
   - Entrypoint `transform(input, args)`; stdlib tanpa `os`, `io`,
     `package`, `debug`; akses net/fs hanya lewat izin.

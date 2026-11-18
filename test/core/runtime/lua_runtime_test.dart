@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bufferite/core/engine/buffer.dart';
 import 'package:bufferite/core/engine/pipeline.dart';
 import 'package:bufferite/core/error/app_error.dart';
@@ -125,6 +127,62 @@ void main() {
         'x',
         context: _context(cancellation: token),
       ),
+      throwsA(
+        isA<AppError>().having(
+          (error) => error.code,
+          'code',
+          'operation.cancelled',
+        ),
+      ),
+    );
+  });
+
+  test('timeout menghentikan loop tak berujung', () async {
+    final runtime = LuaRuntime('function transform() while true do end end');
+    var ticks = 0;
+    final ticker = Timer.periodic(
+      const Duration(milliseconds: 10),
+      (_) => ticks++,
+    );
+    try {
+      await expectLater(
+        runtime.execute(
+          const TextBuffer('x'),
+          const <String, Object?>{},
+          SandboxContext(
+            pluginId: 'com.example.lua',
+            operationId: 'lua.transform',
+            config: SandboxConfig(
+              stepTimeout: const Duration(milliseconds: 200),
+            ),
+          ),
+        ),
+        throwsA(
+          isA<AppError>().having(
+            (error) => error.code,
+            'code',
+            'runtime.timeout',
+          ),
+        ),
+      );
+    } finally {
+      ticker.cancel();
+    }
+    expect(ticks, greaterThan(0));
+  });
+
+  test('pembatalan saat Lua berjalan menghentikan isolate', () async {
+    final token = CancellationToken();
+    final runtime = LuaRuntime('function transform() while true do end end');
+    final future = runtime.execute(
+      const TextBuffer('x'),
+      const <String, Object?>{},
+      _context(cancellation: token),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    token.cancel();
+    await expectLater(
+      future,
       throwsA(
         isA<AppError>().having(
           (error) => error.code,
