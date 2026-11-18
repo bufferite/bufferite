@@ -32,15 +32,16 @@ Rilis MVP Bufferite.
   (anti-ReDoS), CSPRNG, audit offline-default, integration test end-to-end,
   review kripto lanjutan (`SECURITY_REVIEW_CRYPTO.md`).
 - Pipeline operasi core berjalan di isolate kerja (UI tetap responsif).
+- Runtime Lua (Lua 5.5.1) via `lua_dart`: sandbox tanpa `io`/`os.execute`,
+  batas memori, entrypoint `transform(input, args)`, prebuilt per ABI.
 
 ### Keamanan
 - Tanpa izin INTERNET di manifest utama; offline-by-default.
 - Batas sandbox default: timeout 2 dtk, memori 64 MiB, izin `cpu`.
 
 ### Diketahui belum ada
-- Aset `lua_runtime.wasm` (Lua 5.4.6 WASI) sudah dibundel & dipin;
-  instansiasi runtime menunggu runtime WASM yang mendukung `wasi_unstable`
-  dan wasm-EH (wasmtime 14 belum).
+- Runtime Lua memakai `lua_dart` (Lua 5.5.1 via FFI, prebuilt + hash paket);
+  tier WASM belum punya engine.
 - Runtime DSL sudah ada (`DSL.md`); integrasi ke loader plugin menunggu
   F05-T07.
 - Host isolate pekerja (F03-T04) dan enforcement memori belum aktif.

@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 124 / 131 |
+| Task MVP selesai | 126 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`); target rilis 2026-12-31 |
-| Blocker aktif | F05-T04..T09 (wasmtime 14 di `wasm_run` tidak mendukung wasm-EH/WASI preview0), F14-T03 (runtime belum ada) |
+| Blocker aktif | F05-T06..T09 (tier WASM/cache/kontrak lintas runtime), F14-T03 (runtime WASM belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (405 test, 2026-11-19) |
+| Test suite | Lulus (412 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -50,7 +50,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 8 | Selesai |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
-| F05 — Runtime & Sandbox | 9 | 3 | Sebagian (T04 butuh wasm_run native) |
+| F05 — Runtime & Sandbox | 9 | 5 | Sebagian (tier WASM belum ada) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 11 | Selesai |
 | F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **124** | **Berjalan** |
+| **Total MVP** | **131** | **126** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -202,7 +202,9 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-15 | F14-T08 | Uji performa/memori: benchmark 10k step + input 5 MiB | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 285.714 step/s; 5 MiB base64 48 ms, RSS +22,5 MiB | — |
 | 2026-11-15 | F14-T09 | QA desain DESIGN §15: kontras, touch target, dark mode, text scale 2x, layar 320x568 & 820x1180 | `test/core/ui/accessibility_test.dart` | `flutter test` → 359 lulus | — |
 | 2026-11-19 | F05-T02 | Runtime DSL: map, regex replace, konversi unit, rename JSON + batas keamanan | `lib/core/runtime/dsl_runtime.dart`, `DSL.md` | `flutter test` → 20 lulus; `flutter analyze` 0 issue | `20a7b52` |
-| 2026-11-19 | F05-T03 | Bundel `lua_runtime.wasm` (Lua 5.4.6 WASI) + pin SHA-256 | `assets/lua_runtime.wasm`, `lib/core/runtime/lua_runtime_asset.dart`, `test/core/runtime/lua_runtime_asset_test.dart` | `flutter test` → 3 lulus; hash `02754c98…0c84` | `c44ae53` |
+| 2026-11-19 | F05-T03 | Aset `lua_runtime.wasm` (WASI) — **digantikan** `lua_dart`; file & hash dihapus | — | — | `c44ae53` |
+| 2026-11-19 | F05-T04 | Runtime Lua `lua_dart` (Lua 5.5.1 FFI): sandbox, batas memori, 10 test | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 10 lulus; `type(io)`/`os.execute` nil | `<hash>` |
+| 2026-11-19 | F05-T05 | Host API `transform(input, args)` + stdlib terbatas; akses terlarang → error terstruktur | `lib/core/runtime/lua_runtime.dart` | `flutter test` → `runtime.lua_error` untuk `io.open` | `<hash>` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1242,6 +1244,26 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   DSL-only) tetap berlaku.
 - Commit: `ec18813`
 
+### CP-056 — 2026-11-19 — Ganti engine Lua ke `lua_dart` (F05-T04/T05)
+
+- Status: Selesai
+- Perubahan: D02 direvisi — Lua 5.5.1 via `lua_dart` (FFI, prebuilt per ABI,
+  hash diperiksa paket) menggantikan jalur WASM; aset `lua_runtime.wasm` dan
+  pin-nya dihapus. `LuaRuntime` menjalankan `transform(input, args)` dengan
+  `sandbox: true`, batas memori dari `SandboxConfig`, capture `print`, dan
+  error terstruktur.
+- File: `lib/core/runtime/lua_runtime.dart`,
+  `test/core/runtime/lua_runtime_test.dart`,
+  `integration_test/lua_runtime_test.dart`, `pubspec.yaml`,
+  `THIRD_PARTY_LICENSES.md`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 412 lulus;
+  integration test di emulator `127.0.0.1:7555` lulus; APK debug memuat
+  `liblua_dart.so` (arm64-v8a, armeabi-v7a, x86_64).
+- Catatan/risiko: `lua_dart` 0.2.1 adalah versi maksimum untuk Flutter 3.44
+  (1.0.0 membutuhkan `meta` 1.19). Timeout Lua belum diintegrasikan ke
+  sandbox; tier WASM tetap kosong sampai F05-T06.
+- Commit: `<hash>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1275,13 +1297,14 @@ bagian D.
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
-| 2026-11-19 | F05-T04 | FRB mismatch diperbaiki (pin `flutter_rust_bridge` 2.12.0; runtime init OK). Blocker baru: aset Lua memakai `wasi_unstable`, dan Lua butuh wasm-EH (setjmp/longjmp) yang tidak didukung wasmtime 14 di `wasm_run` | Runtime Lua belum bisa dijalankan | Terbuka (butuh runtime baru) |
+| 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
+| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime (butuh engine dengan dukungan WASI/EH) | Operasi tier `wasm` belum bisa dieksekusi | Terbuka |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
 | Tanggal | ID | Keputusan | Alasan | Dampak |
 |---|---|---|---|---|
-| 2026-11-19 | D02 | Lua 5.4 (MIT) → WASI, dijalankan `wasm_run` + `wasm_run_flutter`, hash dipin | wasmoon/Fengari butuh glue JS; omnilua tanpa build WASI | F05-T03 memakai wasi-sdk |
+| 2026-11-19 | D02 | Lua 5.5.1 via `lua_dart` (FFI, prebuilt + hash paket, sandbox + batas memori); WASM dihapus | wasmtime 14 tidak mendukung wasm-EH; FFI lebih ringkas di mobile | F05-T04/T05 selesai |
 | 2026-11-19 | D08 | Skema DSL v1: map, regex_replace, convert_unit, rename; 200 step, regex 512 char, input 1 MiB, hanya cpu | Batas aman & minimal; tanpa eval/loop | F05-T02 selesai (`DSL.md`) |
 | 2026-11-19 | D01 | 38 operasi core saat ini = P0 final; XML prettify, GCM/CFB/OFB, KDF, operasi lain masuk pasca-MVP | Menjaga MVP fokus & menghindari scope creep | F16/F17 menampung sisanya |
 | 2026-11-19 | D03 | Batas `core.berp` 2 MiB, satu paket untuk MVP; pecah per kategori bila melewati | Paket saat ini 4,2 KiB; lazy load belum perlu | F13-T11 gate tetap |

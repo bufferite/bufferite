@@ -24,7 +24,7 @@ Tercapai: engine + recipe + pipeline, sistem plugin (manifest/paket/izin),
 storage, UI foundation, Home, Recipe Editor, Library, Plugin Manager, Settings,
 core.berp tooling + operasi inti, keamanan dasar.
 
-Tertunda (dicatat): instansiasi runtime Lua/WASM (F05-T04), matriks izin runtime
+Tertunda (dicatat): tier WASM (F05-T06), matriks izin runtime (F14-T03)
 (F03-T04), enforcement izin runtime, katalog daring Fase 2, sebagian verifikasi
 device.
 

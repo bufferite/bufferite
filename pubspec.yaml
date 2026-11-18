@@ -37,11 +37,13 @@ dependencies:
   flutter_riverpod: ^3.5.0
   path_provider: ^2.1.6
   sqflite: ^2.4.6
-  wasm_run: ^0.2.0+2
   pointycastle: ^4.0.0
+  lua_dart: ^0.2.1
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -65,7 +67,6 @@ flutter:
 
   assets:
     - assets/core.berp
-    - assets/lua_runtime.wasm
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -97,7 +98,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-dependency_overrides:
-  # wasm_run 0.2.0+2 digenerate dengan FRB 2.12.0; pub resolve 2.13 -> mismatch.
-  flutter_rust_bridge: 2.12.0

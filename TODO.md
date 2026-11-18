@@ -239,26 +239,25 @@ Catatan progres: lihat [progress.md](progress.md).
   - Acceptance: test tiap transformasi + input invalid.
   - Verifikasi: `DSL.md`; `flutter test test/core/runtime/dsl_runtime_test.dart`
     (20 lulus); `flutter analyze` 0 issue.
-- [x] **F05-T03 (P0)** Siapkan `lua_runtime.wasm`.
-  - Finalisasi interpreter (lihat keputusan D02), catat lisensi, simpan
-    aset, dan pin SHA-256.
-  - Acceptance: hash terdokumentasi dan cocok dengan file aset.
-  - Verifikasi: `assets/lua_runtime.wasm` (329.167 byte, SHA-256
-    `02754c98…0c84`) dari `@antonz/lua-wasi@5.4.6` (Lua 5.4.6, MIT);
-    `flutter test test/core/runtime/lua_runtime_asset_test.dart` (3 lulus).
-- [ ] **F05-T04 (P0)** Verifikasi + instantiasi runtime Lua via
+- [x] **F05-T03 (P0)** Siapkan `lua_runtime.wasm`. — **DIGANTIKAN**:
+  aset WASI dihapus; runtime Lua memakai `lua_dart` (prebuilt + hash dari
+  paket, lihat D02 revisi).
+  - Acceptance lama: hash terdokumentasi dan cocok dengan file aset.
+- [x] **F05-T04 (P0)** Verifikasi + instantiasi runtime Lua via
     `wasm_run` di isolate.
   - Hash mismatch = tolak eksekusi dengan pesan jelas.
   - Acceptance: test hash mismatch dan runtime valid.
-  - Catatan 2026-11-19: `wasm_run` gagal init karena pub me-resolve
-    `flutter_rust_bridge` 2.13.0 vs codegen 2.12.0; sudah dipin 2.12.0 dan
-    runtime init berhasil. Aset Lua memakai `wasi_unstable`; build WASI
-    preview1 membutuhkan wasm-EH untuk setjmp/longjmp Lua, yang tidak
-    didukung wasmtime 14 di `wasm_run`.
-- [ ] **F05-T05 (P0)** Host API Lua yang terbatas.
+  - Verifikasi: runtime Lua `lua_dart` (Lua 5.5.1 FFI) dengan
+    `sandbox: true` + batas memori; `flutter test
+    test/core/runtime/lua_runtime_test.dart` (10 lulus); integration test di
+    emulator `127.0.0.1:7555` lulus; APK memuat `liblua_dart.so`.
+- [x] **F05-T05 (P0)** Host API Lua yang terbatas.
   - Entrypoint `transform(input, args)`; stdlib tanpa `os`, `io`,
     `package`, `debug`; akses net/fs hanya lewat izin.
   - Acceptance: test script mencoba akses terlarang → error terstruktur.
+  - Verifikasi: `LuaRuntime` menjalankan `transform(input, args)`; `io` dan
+    `os.execute` nil; akses `io.open` → `runtime.lua_error`; integration test
+    emulator lulus.
 - [ ] **F05-T06 (P0)** Runtime WASM untuk plugin tier `wasm`.
   - ABI input/output, tanpa host function net/fs kecuali izin.
   - Acceptance: test modul WASM contoh berjalan dan akses terlarang
@@ -502,10 +501,10 @@ Catatan progres: lihat [progress.md](progress.md).
   (encode/decode, hash/HMAC, AES-CBC/CTR, XOR, JSON/JWT, analysis, utility,
   random) adalah P0 final. Pasca-MVP: XML prettify, AES-GCM/CFB/OFB, KDF,
   dan operasi CyberChef lain (backlog F16/F17).
-- [x] **D02** Lua 5.4 (PUC-Rio, MIT) dikompilasi ke WASI (wasi-sdk) →
-  `lua_runtime.wasm`, dijalankan via `wasm_run` + `wasm_run_flutter`, hash
-  di-pin. Alternatif ditolak: wasmoon (glue JS), Fengari (VM JS), omnilua
-  (tidak ada build WASI siap pakai).
+- [x] **D02** Lua 5.5.1 via `lua_dart` (FFI; native prebuilt + hash dari
+  paket, `sandbox: true`, batas memori, interrupt). Revisi 2026-11-19:
+  jalur WASM (`wasm_run`/wasmtime 14) tidak mendukung wasm-EH yang dibutuhkan
+  Lua; aset `lua_runtime.wasm` dihapus.
 - [x] **D03** Batas `core.berp` bundel **2 MiB**; MVP memuat semua operasi
   dalam satu paket (saat ini 4,2 KiB). Bila melewati batas, pecah per kategori
   dan muat sesuai permintaan di Fase 2.
