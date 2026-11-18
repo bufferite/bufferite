@@ -1309,6 +1309,22 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Verifikasi: review dokumen; konsisten dengan CP-057.
 - Catatan/risiko: plugin Lua sideload harus dianggap tidak tepercaya sampai
   isolasi WASM/proses tersedia.
+- Commit: `1760e75`
+
+### CP-060 — 2026-11-19 — Spike Lua→WASM (EH) + evaluasi engine
+
+- Status: Selesai
+- Perubahan: Lua 5.4.8 berhasil dibangun ke `wasm32-wasip1` dengan wasm-EH
+  memakai wasi-sdk 34 (712.907 byte) dan divalidasi di Node 24 (`print`,
+  `pcall/error`). WAMR 2.4.3 ditolak: EH legacy crash bahkan untuk
+  `setjmp/longjmp` minimal, dan aset new-EH gagal (`unsupported opcode 0x1f`).
+  Engine host dipilih **wasmtime C API**; rencana diperbarui.
+- File: `WASM_ENGINE_PLAN.md`.
+- Verifikasi: Node → `4` dan `false boom` (exit 0); `iwasm` crash/opcode
+  tidak didukung; hash aset
+  `f7ad57f97fd93b79d3c6a0076bd03023dc7fc13546f2ca3525537c3beb3e5dea`.
+- Catatan/risiko: aset + wasi-sdk hanya ada di `build/` (belum dibundel).
+  Langkah berikutnya membangun wasmtime C API (Windows lalu Android).
 - Commit: `<hash>`
 
 ## 7. Template Checkpoint Baru
@@ -1345,7 +1361,7 @@ bagian D.
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
-| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime (butuh engine dengan dukungan WASI/EH) | Operasi tier `wasm` belum bisa dieksekusi | Terbuka |
+| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Terbuka (engine wasmtime) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
