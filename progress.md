@@ -1337,7 +1337,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Verifikasi: `wt_test.exe` exit 0 untuk kedua kasus; DLL 14,9 MB.
 - Catatan/risiko: `wasm_exceptions` digerbangi fitur `gc` dan engine menuntut
   kolektor (`gc-drc`). Android cross-compile (NDK + Rust targets) berikutnya.
-- Commit: `<hash>`
+- Commit: `6f0e6a0`
 
 ## 7. Template Checkpoint Baru
 
