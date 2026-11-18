@@ -187,7 +187,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` → 306 pass | `c80edae` |
 | 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` → 311 pass | `9b7dc7d` |
 | 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` → 317 pass | `4067c56` |
-| 2026-11-19 | F13-T09 | Kripto lanjutan: AES-CBC/CTR, XOR, HMAC-SHA1/512 + review keamanan | `lib/core/operations/crypto.dart`, `SECURITY_REVIEW_CRYPTO.md` | `flutter test` → 400 lulus; vektor NIST CTR & HMAC | `<hash>` |
+| 2026-11-19 | F13-T09 | Kripto lanjutan: AES-CBC/CTR, XOR, HMAC-SHA1/512 + review keamanan | `lib/core/operations/crypto.dart`, `SECURITY_REVIEW_CRYPTO.md` | `flutter test` → 400 lulus; vektor NIST CTR & HMAC | `4032b9e` |
 | 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
 | 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` → 334 pass | `ac30e3e` |
 | 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
@@ -1169,7 +1169,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   referensi; `core.berp` dibangun ulang (SHA-256 `7237a996…1bba`).
 - Catatan/risiko: CBC/CTR tanpa autentikasi; zeroization Dart tidak
   dijamin; GCM, KDF, dan kripto asimetris di luar cakupan.
-- Commit: `<cp051>`
+- Commit: `4032b9e`
 
 ## 7. Template Checkpoint Baru
 
