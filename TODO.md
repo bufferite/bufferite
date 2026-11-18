@@ -159,10 +159,13 @@ Catatan progres: lihat [progress.md](progress.md).
   - Bungkus error dengan `pluginId` + `stepId`; tentukan dan dokumentasikan
     kebijakan stop vs lanjut.
   - Acceptance: test error di tengah pipeline; UI tetap stabil.
-- [ ] **F03-T04 (P0)** Eksekusi di isolate.
+- [x] **F03-T04 (P0)** Eksekusi di isolate.
   - Protokol pesan request/response/progress; tidak memblokir UI.
   - Acceptance: test pipeline berat tetap responsif (fake UI ticker) dan
     data kompleks terkirim dengan benar.
+  - Verifikasi: `IsolatePipelineExecutor` (ready/run/event/done + cancel);
+    `flutter test test/core/engine/pipeline_isolate_test.dart` (5 lulus,
+    termasuk ticker saat base64 8 MiB).
 - [x] **F03-T05 (P0)** Stream progres dan hasil live.
   - Kirim output antar-step; dukung pembatalan eksekusi.
   - Acceptance: test urutan event dan cancellation.

@@ -100,6 +100,43 @@ final class PipelineEvent {
   final AppError? error;
   final String? message;
 
+  /// Serialisasi untuk protokol isolate (F03-T04).
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'type': type.name,
+      'stepIndex': stepIndex,
+      'stepId': ?stepId,
+      'operationId': ?operationId,
+      'output': ?output?.toJson(),
+      'error': ?error?.toJson(),
+      'message': ?message,
+    };
+  }
+
+  factory PipelineEvent.fromJson(Map<String, Object?> json) {
+    final rawType = json['type'];
+    final type = PipelineEventType.values.firstWhere(
+      (value) => value.name == rawType,
+      orElse: () =>
+          throw FormatException('Tipe event pipeline tidak dikenal: $rawType'),
+    );
+    final stepIndex = json['stepIndex'];
+    if (stepIndex is! int) {
+      throw const FormatException('stepIndex event harus integer.');
+    }
+    final output = json['output'];
+    final error = json['error'];
+    return PipelineEvent(
+      type: type,
+      stepIndex: stepIndex,
+      stepId: json['stepId'] as String?,
+      operationId: json['operationId'] as String?,
+      output: output is Map<String, Object?> ? Buffer.fromJson(output) : null,
+      error: error is Map<String, Object?> ? AppError.fromJson(error) : null,
+      message: json['message'] as String?,
+    );
+  }
+
   @override
   String toString() {
     return 'PipelineEvent(${type.name}, stepIndex: $stepIndex, '

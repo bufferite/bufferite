@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/engine/buffer.dart';
 import '../../core/engine/pipeline.dart';
-import '../../core/engine/pipeline_executor.dart';
+import '../../core/engine/pipeline_isolate.dart';
 import '../../core/error/app_error.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_button.dart';
@@ -371,7 +371,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       input: _inputBuffer(),
     );
 
-    final executor = PipelineExecutor(
+    final executor = IsolatePipelineExecutor(
       registry: ref.read(operationRegistryProvider),
     );
     final result = await executor.execute(

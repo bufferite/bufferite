@@ -31,6 +31,7 @@ Rilis MVP Bufferite.
 - Keamanan: threat model, test adversarial paket, bypass izin, safe regex
   (anti-ReDoS), CSPRNG, audit offline-default, integration test end-to-end,
   review kripto lanjutan (`SECURITY_REVIEW_CRYPTO.md`).
+- Pipeline operasi core berjalan di isolate kerja (UI tetap responsif).
 
 ### Keamanan
 - Tanpa izin INTERNET di manifest utama; offline-by-default.

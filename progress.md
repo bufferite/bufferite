@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 123 / 131 |
+| Task MVP selesai | 124 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T04` — instantiasi `lua_runtime.wasm` via `wasm_run` (butuh `wasm_run_flutter`); target rilis 2026-12-31 |
-| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F03-T04 (host isolate), F14-T03 (runtime belum ada) |
+| Blocker aktif | F05-T04 (bug upstream `wasm_run` FRB + ABI input), F14-T03 (runtime belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (400 test, 2026-11-19) |
+| Test suite | Lulus (405 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -48,7 +48,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F00 — Fondasi Proyek & Dokumentasi | 7 | 7 | Selesai |
 | F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
-| F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
+| F03 — Recipe Engine & Pipeline Executor | 8 | 8 | Selesai |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
 | F05 — Runtime & Sandbox | 9 | 3 | Sebagian (T04 butuh wasm_run native) |
 | F06 — Storage | 7 | 7 | Selesai |
@@ -61,7 +61,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 11 | Selesai |
 | F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **123** | **Berjalan** |
+| **Total MVP** | **131** | **124** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -189,6 +189,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` → 317 pass | `4067c56` |
 | 2026-11-19 | F13-T09 | Kripto lanjutan: AES-CBC/CTR, XOR, HMAC-SHA1/512 + review keamanan | `lib/core/operations/crypto.dart`, `SECURITY_REVIEW_CRYPTO.md` | `flutter test` → 400 lulus; vektor NIST CTR & HMAC | `4032b9e` |
 | 2026-11-19 | UX | Reinstal core.berp memaksa pasang ulang aset + refresh katalog | `lib/features/settings/settings_page.dart` | emulator: AES Encrypt/Decrypt & XOR muncul setelah reinstal | `4f5a3de` |
+| 2026-11-19 | F03-T04 | Pipeline core di isolate: protokol ready/run/event/done + cancel, fallback in-process | `lib/core/engine/pipeline_isolate.dart`, `pipeline.dart`, `recipe_editor_page.dart` | `flutter test` → 405 lulus; ticker tetap jalan saat base64 8 MiB | `<hash>` |
 | 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
 | 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` → 334 pass | `ac30e3e` |
 | 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
@@ -1202,6 +1203,25 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   Lua/WASM sesuai D07.
 - Commit: `c19fed9`
 
+### CP-054 — 2026-11-19 — F03-T04 pipeline core di isolate
+
+- Status: Selesai
+- Perubahan: `IsolatePipelineExecutor` menjalankan pipeline operasi core di
+  isolate kerja dengan protokol ready/run/event/done dan pembatalan; fallback
+  otomatis ke eksekusi in-process bila ada operasi non-core, input file, atau
+  isolate gagal sebelum event pertama. Recipe Editor memakai executor baru.
+- File: `lib/core/engine/pipeline_isolate.dart`,
+  `lib/core/engine/pipeline.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `test/core/engine/pipeline_isolate_test.dart`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 405 lulus;
+  ticker UI tetap berjalan saat base64 8 MiB di isolate; pembatalan dan data
+  unicode terkirim utuh.
+- Catatan/risiko: pembatalan saat operasi sinkron berat bersifat best-effort
+  (isolate dibunuh setelah 250 ms); timeout per step tetap ditegakkan di dalam
+  isolate. Enforcement memori belum ada (Dart tidak menyediakan batas heap).
+- Commit: `<cp054>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1231,7 +1251,7 @@ bagian D.
 | 2026-11-11 | D08, F05-T02 | Skema DSL final belum ditetapkan | Menunda implementasi runtime DSL | Selesai (D08, CP-049) |
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Selesai (default stop; lanjut opt-in) |
-| 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
+| 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Selesai (CP-054; runtime plugin tetap F05) |
 | 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |

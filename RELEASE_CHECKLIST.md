@@ -8,7 +8,7 @@ Verifikasi `AGENT.md` §7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
 | Dokumen acuan diperbarui | OK | `operations.md`, `ARCHITECTURE.md`, `PLUGINS.md`, `THREAT_MODEL.md`, `PRIVACY.md`, `CHANGELOG.md` |
 | Struktur folder & penamaan | OK | feature-first `lib/core`, `lib/features`, `lib/core/operations` |
 | Tidak ada operasi di-hardcode di inti | OK | operasi = plugin (`lib/core/operations` = paket core) |
-| Unit test logika baru + lulus | OK | `flutter test` → 400 lulus |
+| Unit test logika baru + lulus | OK | `flutter test` → 405 lulus |
 | Test kontrak terhadap core.berp | SEBAGIAN | `test/tool/*` build+decode; runner nyata menunggu F05-T04 |
 | Tanpa dependency baru tanpa alasan | OK | dicatat di `ARCHITECTURE.md` §12 |
 | Operasi berat di isolate | BELUM | F03-T04 ditunda |
@@ -24,7 +24,7 @@ Tercapai: engine + recipe + pipeline, sistem plugin (manifest/paket/izin),
 storage, UI foundation, Home, Recipe Editor, Library, Plugin Manager, Settings,
 core.berp tooling + operasi inti, keamanan dasar.
 
-Tertunda (dicatat): instansiasi runtime Lua/WASM (F05-T04), host isolate
+Tertunda (dicatat): instansiasi runtime Lua/WASM (F05-T04), matriks izin runtime
 (F03-T04), enforcement izin runtime, katalog daring Fase 2, sebagian verifikasi
 device.
 
