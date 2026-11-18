@@ -35,7 +35,7 @@ Status yang dipakai:
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
 | Task berikutnya | `F05-T06` — runtime tier WASM (butuh engine WASI/EH baru); target rilis 2026-12-31 |
-| Blocker aktif | F05-T06..T09 (tier WASM/cache/kontrak lintas runtime), F14-T03 (runtime WASM belum ada) |
+| Blocker aktif | F05-T06..T09 (engine WASM: rencana di WASM_ENGINE_PLAN.md), F14-T03 (runtime WASM belum ada) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (414 test, 2026-11-19) |
 
