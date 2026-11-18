@@ -1298,6 +1298,19 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   deviasi engine dari WASM tercatat di D02.
 - Commit: `1c952d6`
 
+### CP-059 — 2026-11-19 — Dokumentasi batas isolasi Lua 1.0
+
+- Status: Selesai
+- Perubahan: `THREAT_MODEL.md` §4.1 mencatat bahwa Lua 1.0 berjalan native
+  (FFI) di proses aplikasi: capability sandbox + batas memori + timeout,
+  tetapi **bukan** isolasi memori; `PLUGINS.md`/`ARCHITECTURE.md` menyelaraskan
+  catatan engine dan rencana WASM 1.1.
+- File: `THREAT_MODEL.md`, `PLUGINS.md`, `ARCHITECTURE.md`.
+- Verifikasi: review dokumen; konsisten dengan CP-057.
+- Catatan/risiko: plugin Lua sideload harus dianggap tidak tepercaya sampai
+  isolasi WASM/proses tersedia.
+- Commit: `<hash>`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:

@@ -78,11 +78,12 @@ Tier 1 — DSL deklaratif
 - Dieksekusi oleh engine bawaan aplikasi.
 - Aman, cepat, mudah direview. Cocok untuk kontribusi pemula.
 
-Tier 2 — Lua (source murni, dieksekusi via runtime WASM)
+Tier 2 — Lua (source murni, dieksekusi via runtime Lua)
 - Plugin berupa source Lua murni (.lua) yang dapat dibaca dan direview.
 - Jalur utama plugin komunitas karena transparan dan mudah di-diff.
-- Eksekusi dilakukan oleh interpreter Lua yang telah dikompilasi ke
-  WebAssembly (lihat bagian 10: Integritas Runtime WASM).
+- 1.0 memakai `lua_dart` (Lua 5.5.1 via FFI native) dengan capability
+  sandbox + batas memori + timeout; isolasi WASM ditunda ke 1.1
+  (`WASM_ENGINE_PLAN.md`).
 - Source Lua TIDAK dikompilasi menjadi WASM; source tetap murni.
 - Sandbox: stdlib terbatas (tanpa os, io, package, debug), batas waktu dan
   memori, tanpa akses jaringan kecuali izin "net".

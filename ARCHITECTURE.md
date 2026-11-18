@@ -166,7 +166,9 @@ Implementasi storage MVP:
 ## 10. Keputusan Terkunci
 - Inti minimal; semua operasi plugin.
 - core.berp dibundel, diinstal otomatis, di-hash.
-- Runtime: DSL + Lua via WASM + WASM (satu kesatuan MVP).
+- Runtime: DSL + Lua + WASM (satu kesatuan MVP).
+  Catatan 1.0: Lua memakai `lua_dart` (FFI native) dengan capability sandbox;
+  engine WASM ditunda ke 1.1 (`WASM_ENGINE_PLAN.md`).
 - Format paket: .berp.
 - Sideload didukung di MVP.
 - Signature opsional di MVP, wajib untuk registry resmi di Fase 2.

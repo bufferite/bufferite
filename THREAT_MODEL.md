@@ -7,7 +7,7 @@ Versi: 1.0 · Fase: MVP
 1. Data pengguna (buffer, file yang dipilih, hasil operasi).
 2. Recipe tersimpan (`.brecipe`, SQLite).
 3. Plugin terpasang + izin yang diberikan.
-4. Integritas runtime (`core.berp`, `lua_runtime.wasm`).
+4. Integritas runtime (`core.berp`, native `lua_dart` dengan hash dari paket).
 5. Privasi: tidak ada eksfiltrasi data tanpa aksi pengguna.
 
 ## 2. Aktor
@@ -36,14 +36,40 @@ Versi: 1.0 · Fase: MVP
 
 ## 4. Asumsi & batasan MVP
 
-- Eksekusi masih di isolate pemanggil; host isolate + kill paksa (F03-T04)
-  belum ada, sehingga timeout hanya best-effort.
-- Enforcement izin runtime Lua/WASM menunggu F05-T03/T04.
-- Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop).
+- Pipeline operasi core berjalan di isolate kerja; Lua juga di isolate kerja
+  dengan timeout + interrupt (F03-T04, CP-054/CP-057).
+- **Isolate Dart bukan batas keamanan.** Lua 1.0 memakai `lua_dart` (native
+  FFI, Lua 5.5.1) di proses aplikasi: tidak ada isolasi memori seperti WASM.
+- Sandbox Lua bersifat *capability*: `io`, `dofile`, `loadfile`, `package`,
+  `require`, `debug`, serta `os.execute/getenv/exit/remove/tmpname` tidak
+  tersedia; tidak ada host function net/fs; memori dibatasi 64 MiB.
+- Tier WASM + matriks izin lintas runtime (F05-T06..T09, F14-T03) ditunda ke
+  1.1; rencana engine ada di `WASM_ENGINE_PLAN.md`.
+- Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop), izin
+  INTERNET tidak diminta, dan storage scoped.
+
+### 4.1 Batas isolasi Lua 1.0
+
+| Aspek | Status |
+|---|---|
+| Capability (file/net/proses) | Diblokir di level Lua (library dihapus) |
+| Batas memori | 64 MiB via allocator Lua (`memoryLimit`) |
+| Waktu / DoS | Timeout + interrupt + kill isolate |
+| UI responsif | Ya (isolate kerja) |
+| Isolasi memori / kontainmen bug native | **Tidak** (native in-process) |
+| Plugin tepercaya | Hanya hash paket; sideload `unverified` = tidak tepercaya |
+| Sandbox OS | Android/iOS/desktop (UID, scoped storage, tanpa INTERNET) |
+
+Konsekuensi: plugin Lua yang jahat tidak bisa memanggil file/net lewat API
+Lua, tetapi **bug native** (Lua/binding/libc) berpotensi keluar dari sandbox
+Lua dan menyentuh proses aplikasi. Untuk plugin tak tepercaya, isolasi WASM
+atau proses terpisah diperlukan (1.1).
 
 ## 5. Status verifikasi
 
 - Suspected: `test/core/plugin_package_test.dart`,
   `test/core/plugin_integrity_test.dart`, `test/core/plugin_permission_test.dart`.
-- Terbuka: test bypass izin runtime (F14-T03), keamanan regex terukur
+- Terbuka: test bypass izin runtime WASM (F14-T03), keamanan regex terukur
   (F14-T04), CSPRNG operasi acak (F14-T05), audit offline (F14-T06).
+- Lua 1.0: 12 test sandbox/timeout + integration emulator (CP-057); batas
+  isolasi didokumentasikan di §4.1.
