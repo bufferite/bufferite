@@ -28,16 +28,16 @@ Status yang dipakai:
 | Item | Nilai |
 |---|---|
 | Fase aktif | Fase 1 — MVP |
-| Milestone aktif | M1 — Domain & Engine |
-| Task MVP selesai | 115 / 131 |
+| Milestone aktif | M5 — Rilis MVP |
+| Task MVP selesai | 120 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 10 |
 | Task sedang berjalan | — |
-| Task berikutnya | `F13-T02` — build script `.berp` (device-gated: F09-T09/T10, F11 sideload, F15 ditunda) |
-| Blocker aktif | Device-gated: F03-T04, F04-T05/T08/T10, F09-T09/T10, F14-T08/T09, F15; keputusan D02/D08/D06/D07 |
-| Analyze | Lulus (0 issue, 2026-11-13) |
-| Test suite | Lulus (335 test, 2026-11-14) |
+| Task berikutnya | `F13-T09` — review keamanan kripto lanjutan; lalu `F05` (butuh D02/D08) |
+| Blocker aktif | D02/D08 (runtime DSL/Lua), F03-T04 (host isolate), F13-T09 (review keamanan), F14-T03 (runtime belum ada) |
+| Analyze | Lulus (0 issue, 2026-11-15) |
+| Test suite | Lulus (359 test, 2026-11-15) |
 
 ## 3. Progres per Feature
 
@@ -49,7 +49,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F01 — Domain: Buffer, Error, Kontrak Operation | 7 | 7 | Selesai |
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 7 | Sebagian (T04 blocked) |
-| F04 — Sistem Plugin | 11 | 8 | Sebagian (T05/T08/T10 ditunda) |
+| F04 — Sistem Plugin | 11 | 11 | Selesai |
 | F05 — Runtime & Sandbox | 9 | 1 | Sebagian (T02/T03 blocked) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
@@ -58,10 +58,10 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F10 — Fitur Library & Operation Picker | 7 | 7 | Selesai |
 | F11 — Fitur Plugin Manager | 9 | 9 | Selesai |
 | F12 — Fitur Settings | 6 | 6 | Selesai |
-| F13 — core.berp: Tooling & Operasi | 11 | 1 | Berjalan |
-| F14 — Keamanan & Kualitas | 9 | 0 | Belum |
-| F15 — Rilis MVP | 7 | 0 | Belum |
-| **Total MVP** | **131** | **115** | **Berjalan** |
+| F13 — core.berp: Tooling & Operasi | 11 | 10 | Sebagian (T09 review keamanan) |
+| F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
+| F15 — Rilis MVP | 7 | 7 | Selesai |
+| **Total MVP** | **131** | **120** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | D — Keputusan Manusia | 10 | 0 | Terbuka |
@@ -182,23 +182,23 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-13 | F11-T08 | Empty state Plugin Manager | `lib/features/plugins/plugin_manager_page.dart` | `flutter test` → 274 pass | `54cab59` |
 | 2026-11-13 | F11-T09 | Widget test detail/enable/disable/hapus/sideload | `test/features/plugins/plugin_manager_page_test.dart` | `flutter test` → 277 pass | `4896fce` |
 
-| 2026-11-14 | F13-T04 | Operasi Encode/Decode core (Base64/Hex/URL/HTML/Base32) | `lib/core/operations/encode_decode.dart` | `flutter test` ? 306 pass | `60f45b7` |
-| 2026-11-14 | F13-T05 | Operasi hash/kripto dasar (MD5/SHA-1/256/512, HMAC) | `lib/core/operations/hash.dart` | `flutter test` ? 306 pass | `bf70e86` |
-| 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` ? 306 pass | `c80edae` |
-| 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` ? 311 pass | `9b7dc7d` |
-| 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` ? 317 pass | `4067c56` |
-| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) � DITUNDA (review keamanan) | � | Belum | � |
+| 2026-11-14 | F13-T04 | Operasi Encode/Decode core (Base64/Hex/URL/HTML/Base32) | `lib/core/operations/encode_decode.dart` | `flutter test` → 306 pass | `60f45b7` |
+| 2026-11-14 | F13-T05 | Operasi hash/kripto dasar (MD5/SHA-1/256/512, HMAC) | `lib/core/operations/hash.dart` | `flutter test` → 306 pass | `bf70e86` |
+| 2026-11-14 | F13-T06 | Operasi Format (JSON prettify/minify, JWT decode) | `lib/core/operations/format.dart` | `flutter test` → 306 pass | `c80edae` |
+| 2026-11-14 | F13-T07 | Operasi Analysis (entropy, frequency, file type, strings) | `lib/core/operations/analysis.dart` | `flutter test` → 311 pass | `9b7dc7d` |
+| 2026-11-14 | F13-T08 | Operasi Utility (case, reverse, replace, regex, slice, lines) | `lib/core/operations/utility.dart` | `flutter test` → 317 pass | `4067c56` |
+| 2026-11-14 | F13-T09 | Kripto lanjutan (AES/XOR) — DITUNDA (review keamanan) | — | Belum | — |
 | 2026-11-14 | F13-T10 | Audit lisensi operasi core | `plugins/core/LICENSES.md` | Review dokumen | `69d8a7d` |
-| 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` ? 334 pass | `ac30e3e` |
+| 2026-11-14 | F13-T11 | Gate ukuran core.berp < 2 MiB + catatan lazy load | `test/tool/core_package_size_test.dart`, `plugins/core/README.md` | `flutter test` → 334 pass | `ac30e3e` |
 | 2026-11-14 | F14-T01 | Threat model | `THREAT_MODEL.md` | Review dokumen | `b64f7e3` |
-| 2026-11-14 | F14-T02 | Test adversarial paket (tercakup `plugin_package_test.dart`) | `test/core/plugin_package_test.dart` | `flutter test` ? 325 pass | `fbbc0fe` |
-| 2026-11-14 | F14-T03 | Test bypass izin (guard + SandboxContext) | `test/core/permission_bypass_test.dart` | `flutter test` ? 325 pass | `89c1466` |
-| 2026-11-14 | F14-T04 | Safe regex anti-ReDoS + integrasi RegexReplace | `lib/core/operations/safe_regex.dart` | `flutter test` ? 325 pass | `60aec35` |
-| 2026-11-14 | F14-T05 | CSPRNG random ops (Random.secure) | `lib/core/operations/random_ops.dart` | `flutter test` ? 329 pass | `ed5c3a6` |
-| 2026-11-14 | F14-T06 | Audit offline-by-default (scan lib/ + pubspec) | `test/core/offline_audit_test.dart` | `flutter test` ? 331 pass | `cb6d364` |
-| 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` ? 332 pass | `3cfd542` |
-| 2026-11-14 | F14-T08 | Uji performa/memori � DITUNDA (sebagian device) | � | Belum | � |
-| 2026-11-14 | F14-T09 | QA desain DESIGN �15 � DITUNDA (manual/device) | � | Belum | � |
+| 2026-11-14 | F14-T02 | Test adversarial paket (tercakup `plugin_package_test.dart`) | `test/core/plugin_package_test.dart` | `flutter test` → 325 pass | `fbbc0fe` |
+| 2026-11-14 | F14-T03 | Test bypass izin (guard + SandboxContext) | `test/core/permission_bypass_test.dart` | `flutter test` → 325 pass | `89c1466` |
+| 2026-11-14 | F14-T04 | Safe regex anti-ReDoS + integrasi RegexReplace | `lib/core/operations/safe_regex.dart` | `flutter test` → 325 pass | `60aec35` |
+| 2026-11-14 | F14-T05 | CSPRNG random ops (Random.secure) | `lib/core/operations/random_ops.dart` | `flutter test` → 329 pass | `ed5c3a6` |
+| 2026-11-14 | F14-T06 | Audit offline-by-default (scan lib/ + pubspec) | `test/core/offline_audit_test.dart` | `flutter test` → 331 pass | `cb6d364` |
+| 2026-11-14 | F14-T07 | Integration test end-to-end (non-device) | `test/core/e2e_integration_test.dart` | `flutter test` → 332 pass | `3cfd542` |
+| 2026-11-15 | F14-T08 | Uji performa/memori: benchmark 10k step + input 5 MiB | `tool/benchmark_pipeline.dart` | `dart run tool/benchmark_pipeline.dart` → 285.714 step/s; 5 MiB base64 48 ms, RSS +22,5 MiB | — |
+| 2026-11-15 | F14-T09 | QA desain DESIGN §15: kontras, touch target, dark mode, text scale 2x, layar 320x568 & 820x1180 | `test/core/ui/accessibility_test.dart` | `flutter test` → 359 lulus | — |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -207,7 +207,10 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-14 | F04-T08 | Manifest core digenerate dari operasi inti + executor didaftarkan saat bootstrap | `core_operations.dart`, `tool/build_core_berp.dart`, `plugins/core/operations.json` | `flutter test` (335 lulus); emulator: Library menampilkan 33 operasi, preview base64 `1` -> `MQ==` | `90dafd7` |
 | 2026-11-15 | UX | Toast tidak menumpuk/menggantung, tombol Plugin Manager di Library, chevron step jadi tombol Atur step | `app_toast.dart` (`persist: false`), `library_page.dart`, `step_card.dart`, `step_config_sheet.dart` | `flutter test` (338 lulus); emulator: toast hilang ~3 dtk, Plugin Manager terbuka dari Library, sheet parameter tampil | `9f417ba`, `5ef3b0d` |
 | 2026-11-15 | UX | Chevron disembunyikan untuk operasi tanpa parameter; kategori step memakai kategori operasi; sheet semua operasi berparameter diuji | `step_card.dart`, `recipe_editor_page.dart`, `test/features/operations/core_params_sheet_test.dart` | `flutter test` (349 lulus); emulator: Slice/Extract Strings/Regex Replace membuka sheet, Base64 Encode tanpa chevron | `1abb4d3`, `df40c33` |
-| 2026-11-14 | F04-T08 | core.berp dibundel di `assets/` + auto-install saat bootstrap | `assets/core.berp`, `lib/core/bootstrap/core_bootstrap_service.dart`, `bootstrap_provider.dart` | `flutter test` ? 333 lulus | `bb450fc` |
+| 2026-11-15 | F04-T10 | `PluginManagerService` + provider Riverpod: instal, enable/disable, hapus, bootstrap | `lib/features/plugins/plugin_manager_service.dart`, `plugin_actions.dart`, `plugin_sideload.dart`, `core_bootstrap_service.dart` | `flutter test` (359 lulus); emulator: daftar plugin segar setelah instal | `b5a1eaa` |
+| 2026-11-15 | F10-T03 | Library: filter chip Semua/Favorit/kategori + nama plugin di kartu | `lib/features/library/library_page.dart`, `operation_catalog.dart` | `flutter test` (359 lulus); emulator: chip + "Bufferite Core" tampil | `b5a1eaa` |
+| 2026-11-15 | F04-T05 | Sideload end-to-end di emulator | `lib/features/plugins/plugin_sideload.dart` | emulator: `sample.berp` → preview `Sample Pack` → Instal → muncul di Library (`unverified`) | `b5a1eaa` |
+| 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `b5a1eaa` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1024,20 +1027,20 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `core.berp` menunggu F13.
 - Commit: `54cab59` … `4896fce` + commit checkpoint ini.
 
-### CP-043 � 2026-11-14 � F13 core.berp (10/11)
+### CP-043 — 2026-11-14 — F13 core.berp (10/11)
 
 - Status: Sebagian (10/11). T09 kripto lanjutan ditunda menunggu review keamanan.
 - Perubahan: tooling authoring + build `.berp` deterministik, gate integritas &
   ukuran, operasi encode/decode, hash, format, analysis, utility, audit lisensi.
-- Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` → 334 lulus.
 - Catatan: XML prettify dilewati (opsional); operasi core di Dart (`lib/core/operations`).
 
-### CP-044 � 2026-11-14 � F14 Keamanan & Kualitas (6/9)
+### CP-044 — 2026-11-14 — F14 Keamanan & Kualitas (6/9)
 
 - Status: Sebagian (6/9). T08 perf dan T09 QA desain ditunda (device/manual).
 - Perubahan: threat model, test adversarial paket, bypass izin, safe regex,
   CSPRNG, audit offline, integration test end-to-end non-device.
-- Verifikasi: `flutter analyze` 0 issue; `flutter test` ? 334 lulus.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` → 334 lulus.
 - Catatan: non-device praktis selesai; sisa wajib device (F15, F03-T04,
   F04-T05/T08/T10) dan keputusan D02/D08.
 
@@ -1084,6 +1087,34 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: operasi tanpa parameter tetap bisa dihapus/diaktifkan, hanya
   tidak punya sheet konfigurasi.
 
+### CP-048 — 2026-11-15 — F04-T05/T10, F10-T03, F14-T08/T09, F15-T01
+
+- Status: Selesai
+- Perubahan: `PluginManagerService` menjadi satu pintu instal/hapus/enable/
+  disable (dipakai sideloader, PluginActions, dan bootstrap); registry operasi
+  mutable mendapat `operationsRevisionProvider` sehingga katalog Library ikut
+  segar tanpa restart; `pluginMetadataProvider` diturunkan dari daftar plugin
+  terpasang; Library mendapat chip Semua/Favorit/kategori dan nama plugin;
+  benchmark pipeline 10k step + input 5 MiB; tes aksesibilitas layar 320x568,
+  820x1180, dark mode, dan text scale 2x; ikon launcher + splash logo.
+- File: `lib/features/plugins/plugin_manager_service.dart`,
+  `plugin_sideload.dart`, `plugin_actions.dart`,
+  `lib/features/operations/operation_providers.dart`,
+  `lib/features/library/operation_catalog.dart`,
+  `lib/features/library/library_page.dart`,
+  `tool/benchmark_pipeline.dart`,
+  `test/core/ui/accessibility_test.dart`,
+  `android/app/src/main/res/**`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 359 lulus;
+  `dart run tool/benchmark_pipeline.dart` → 285.714 step/s, input 5 MiB 48 ms
+  (RSS +22,5 MiB); emulator `127.0.0.1:7555` → sideload `sample.berp`,
+  preview `Sample Pack`, instal sukses, `Sample Upper` tampil di Library
+  (`unverified`), ikon launcher biru "B" di app drawer.
+- Catatan/risiko: MuMu (Android 12) tidak merender ikon splash sistem —
+  hanya warna latar tema yang tampil. Pra-Android 12 memakai
+  `launch_background.xml` (logo + warna tema) dan belum diuji di API < 31.
+- Commit: `b5a1eaa`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1096,7 +1127,7 @@ Salin format berikut saat menyelesaikan task:
 - File: <path utama>
 - Verifikasi: `<perintah>` → <hasil>
 - Catatan/risiko: <jika ada>
-- Commit: `<hash>`
+- Commit: `b5a1eaa`
 ```
 
 Dan tambahkan baris di §5 serta perbarui angka di §2 dan §3.
@@ -1114,7 +1145,7 @@ bagian D.
 | 2026-11-11 | F00-T06 | `operations.md` belum ada | Kontrak Operation belum tertulis | Selesai (F00-T06) |
 | 2026-11-11 | D06, F03-T03 | Kebijakan stop vs lanjut saat error step | Memengaruhi UI dan test engine | Terbuka (default stop; mode lanjut tersedia) |
 | 2026-11-11 | F03-T04, F03-T06 | Host isolate membutuhkan registry/runtime plugin dari F05 | Isolate offload, kill saat timeout, dan enforcement memori belum aktif | Terbuka |
-| 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Terbuka |
+| 2026-11-11 | F04-T05, F04-T10 | Sideload dan service manager membutuhkan UI F07/F11 | Storage/filesystem siap; alur instalasi end-to-end belum tersedia | Selesai (CP-048) |
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Terbuka |
 

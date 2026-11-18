@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/plugins/plugin_manager_service.dart';
 import '../../features/plugins/plugin_repository.dart';
 import '../storage/storage_providers.dart';
 import 'core_bootstrap_service.dart';
@@ -32,7 +33,7 @@ final coreBootstrapProvider = FutureProvider<CoreBootstrapResult>((ref) async {
       await service.installBundledCore();
     }
 
-    service.registerOperations(await repository.list());
+    await ref.read(pluginManagerServiceProvider).restore();
     return const CoreBootstrapResult.ready();
   } on Object catch (error) {
     return CoreBootstrapResult.failed('Bootstrap gagal: $error');

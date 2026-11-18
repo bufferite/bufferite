@@ -2,15 +2,12 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../core/error/app_error.dart';
 import '../../core/plugin/installed_plugin.dart';
-import '../../core/plugin/manifest_registrar.dart';
 import '../../core/plugin/plugin_package.dart';
-import '../../core/plugin/plugin_package_store.dart';
-import '../../core/storage/storage_providers.dart';
 import '../operations/operation_providers.dart';
+import 'plugin_manager_service.dart';
 import 'plugin_providers.dart';
 
 /// Alur sideload plugin dari file `.berp`.
@@ -41,24 +38,13 @@ class PluginSideloadService {
     return PluginPackage.decode(handle.readAsBytesSync());
   }
 
-  /// Menyimpan paket ke filesystem, metadata ke SQLite, dan operasi ke registry.
+  /// Menyimpan paket, metadata, dan mendaftarkan operasinya.
   Future<InstalledPlugin> install(PluginPackage package) async {
-    final support = await getApplicationSupportDirectory();
-    final store = PluginPackageStore(Directory('${support.path}/plugins'));
-    final installPath = await store.install(package);
-
-    final plugin = InstalledPlugin(
-      manifest: package.manifest,
-      source: PluginSource.sideload,
-      installedAt: DateTime.now().toUtc(),
-      verified: false,
-      installPath: installPath,
-    );
-    await _ref.read(pluginRepositoryProvider).save(plugin);
-    ManifestRegistrar(
-      _ref.read(operationRegistryProvider),
-    ).register(package.manifest);
+    final plugin = await _ref
+        .read(pluginManagerServiceProvider)
+        .install(package, source: PluginSource.sideload);
     _ref.invalidate(installedPluginsProvider);
+    _ref.read(operationsRevisionProvider.notifier).bump();
     return plugin;
   }
 }

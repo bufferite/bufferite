@@ -3,13 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/operation_registry.dart';
 import '../operations/operation_providers.dart';
+import '../plugins/plugin_providers.dart';
 
-/// Metadata plugin terpasang, diisi F11 saat Plugin Manager tersedia.
+/// Metadata plugin terpasang untuk menandai operasi aktif/nonaktif.
 ///
-/// Test atau bootstrap dapat meng-override nilai ini.
-final pluginMetadataProvider = Provider<Map<String, InstalledPlugin>>(
-  (ref) => const <String, InstalledPlugin>{},
-);
+/// Diturunkan dari SQLite; test atau bootstrap dapat meng-override nilai ini.
+final pluginMetadataProvider = Provider<Map<String, InstalledPlugin>>((ref) {
+  final plugins =
+      ref.watch(installedPluginsProvider).asData?.value ??
+      const <InstalledPlugin>[];
+  return <String, InstalledPlugin>{
+    for (final plugin in plugins) plugin.pluginId: plugin,
+  };
+});
 
 /// Satu baris katalog operasi: descriptor + metadata plugin pengasuhnya.
 final class OperationCatalogEntry {
@@ -36,6 +42,7 @@ final class OperationCatalogEntry {
 /// Plugin tanpa metadata (mis. core saat bootstrap) dianggap aktif.
 final operationCatalogProvider = Provider<List<OperationCatalogEntry>>((ref) {
   final registry = ref.watch(operationRegistryProvider);
+  ref.watch(operationsRevisionProvider);
   final metadata = ref.watch(pluginMetadataProvider);
 
   final entries = <OperationCatalogEntry>[];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/plugin/operation.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/empty_state.dart';
 import '../../core/ui/design_tokens.dart';
@@ -18,21 +19,17 @@ class LibraryPage extends ConsumerStatefulWidget {
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
   String _query = '';
+  OperationCategory? _category;
+  bool _favoritesOnly = false;
 
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(operationCatalogProvider);
     final favorites = ref.watch(favoritesProvider).value ?? const <String>{};
-    final query = _query.trim().toLowerCase();
-    final items = query.isEmpty
-        ? catalog
-        : catalog
-              .where(
-                (entry) =>
-                    entry.name.toLowerCase().contains(query) ||
-                    entry.operationId.toLowerCase().contains(query),
-              )
-              .toList();
+    final items = _filtered(catalog, favorites);
+    final categories = <OperationCategory>{
+      for (final entry in catalog) entry.entry.descriptor.category,
+    }.toList()..sort((a, b) => a.label.compareTo(b.label));
 
     return Scaffold(
       appBar: AppBar(
@@ -62,6 +59,48 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           ),
+          if (catalog.isNotEmpty)
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                children: <Widget>[
+                  FilterChip(
+                    label: const Text('Semua'),
+                    selected: _category == null && !_favoritesOnly,
+                    onSelected: (_) => setState(() {
+                      _category = null;
+                      _favoritesOnly = false;
+                    }),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  FilterChip(
+                    label: const Text('Favorit'),
+                    selected: _favoritesOnly,
+                    onSelected: (_) => setState(() {
+                      _favoritesOnly = !_favoritesOnly;
+                      if (_favoritesOnly) {
+                        _category = null;
+                      }
+                    }),
+                  ),
+                  for (final category in categories) ...<Widget>[
+                    const SizedBox(width: AppSpacing.sm),
+                    FilterChip(
+                      label: Text(category.label),
+                      selected: _category == category,
+                      onSelected: (_) => setState(() {
+                        _category = _category == category ? null : category;
+                        if (_category != null) {
+                          _favoritesOnly = false;
+                        }
+                      }),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           Expanded(
             child: catalog.isEmpty
                 ? EmptyState(
@@ -80,7 +119,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 : items.isEmpty
                 ? Center(
                     child: Text(
-                      'Tidak ada operasi cocok',
+                      _emptyFilterMessage(),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   )
@@ -100,6 +139,41 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         ],
       ),
     );
+  }
+
+  List<OperationCatalogEntry> _filtered(
+    List<OperationCatalogEntry> catalog,
+    Set<String> favorites,
+  ) {
+    final query = _query.trim().toLowerCase();
+    Iterable<OperationCatalogEntry> items = catalog;
+    if (query.isNotEmpty) {
+      items = items.where(
+        (entry) =>
+            entry.name.toLowerCase().contains(query) ||
+            entry.operationId.toLowerCase().contains(query),
+      );
+    }
+    final category = _category;
+    if (category != null) {
+      items = items.where(
+        (entry) => entry.entry.descriptor.category == category,
+      );
+    }
+    if (_favoritesOnly) {
+      items = items.where((entry) => favorites.contains(entry.operationId));
+    }
+    return items.toList();
+  }
+
+  String _emptyFilterMessage() {
+    if (_favoritesOnly) {
+      return 'Belum ada operasi favorit';
+    }
+    if (_category != null) {
+      return 'Tidak ada operasi di kategori ini';
+    }
+    return 'Tidak ada operasi cocok';
   }
 
   Widget _tile(OperationCatalogEntry entry, bool isFavorite) {

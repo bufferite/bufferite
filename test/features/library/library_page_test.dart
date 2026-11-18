@@ -11,8 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../core/support/fake_operations.dart';
 
 class _FakeFavorites extends FavoritesController {
+  _FakeFavorites(this._values);
+
+  final Set<String> _values;
+
   @override
-  Future<Set<String>> build() async => const <String>{};
+  Future<Set<String>> build() async => _values;
 }
 
 OperationRegistry _registry() {
@@ -32,11 +36,14 @@ OperationRegistry _registry() {
   return registry;
 }
 
-Widget _host({required OperationRegistry registry}) {
+Widget _host({
+  required OperationRegistry registry,
+  Set<String> favorites = const <String>{},
+}) {
   return ProviderScope(
     overrides: [
       operationRegistryProvider.overrideWithValue(registry),
-      favoritesProvider.overrideWith(_FakeFavorites.new),
+      favoritesProvider.overrideWith(() => _FakeFavorites(favorites)),
     ],
     child: MaterialApp(theme: AppTheme.light(), home: const LibraryPage()),
   );
@@ -90,5 +97,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Plugin Manager'), findsOneWidget);
+  });
+
+  testWidgets('chip kategori memfilter operasi', (tester) async {
+    await tester.pumpWidget(_host(registry: _registry()));
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Encode/Decode'));
+    await tester.pump();
+
+    expect(find.text('Base64 Decode'), findsOneWidget);
+    expect(find.text('Reverse Text'), findsNothing);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Semua'));
+    await tester.pump();
+
+    expect(find.text('Reverse Text'), findsOneWidget);
+    expect(find.text('Base64 Decode'), findsOneWidget);
+  });
+
+  testWidgets('chip favorit hanya menampilkan operasi favorit', (tester) async {
+    await tester.pumpWidget(
+      _host(registry: _registry(), favorites: <String>{'test.reverse'}),
+    );
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Favorit'));
+    await tester.pump();
+
+    expect(find.text('Reverse Text'), findsOneWidget);
+    expect(find.text('Base64 Decode'), findsNothing);
+  });
+
+  testWidgets('favorit kosong menampilkan pesan khusus', (tester) async {
+    await tester.pumpWidget(_host(registry: _registry()));
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(FilterChip, 'Favorit'));
+    await tester.pump();
+
+    expect(find.text('Belum ada operasi favorit'), findsOneWidget);
   });
 }

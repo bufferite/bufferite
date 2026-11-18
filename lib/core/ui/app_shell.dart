@@ -72,7 +72,7 @@ class HomePlaceholder extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Bufferite')),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,

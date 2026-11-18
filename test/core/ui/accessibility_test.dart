@@ -118,6 +118,34 @@ void main() {
 
     expect(find.bySemanticsLabel(RegExp('Base64 Decode')), findsOneWidget);
   });
+
+  testWidgets('layout aman di layar kecil/besar dengan teks 2x dan dark mode', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final size in <Size>[const Size(320, 568), const Size(820, 1180)]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark(),
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: size,
+              textScaler: const TextScaler.linear(2),
+            ),
+            child: const AppShell(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull, reason: 'ukuran $size');
+    }
+  });
 }
 
 void _noop() {}

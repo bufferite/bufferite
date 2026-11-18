@@ -195,10 +195,14 @@ Catatan progres: lihat [progress.md](progress.md).
   - Metadata: id, versi, tier, permissions, source
     (core/registry/sideload), verified/unverified, enabled.
   - Acceptance: test serialisasi dan aturan kompatibilitas versi app.
-- [ ] **F04-T05 (P0)** Alur sideload.
+- [x] **F04-T05 (P0)** Alur sideload.
   - Pilih file → preview manifest → consent izin → verifikasi hash →
     ekstrak atomik → daftarkan operasi; bersihkan sisa saat gagal.
   - Acceptance: test instal sukses, hash mismatch, dan izin ditolak.
+  - Verifikasi: emulator `127.0.0.1:7555` — pilih `sample.berp` →
+    preview `Sample Pack` → Instal → plugin tampil di Library sebagai
+    `Sample Pack` (`unverified`); daftar operasi langsung segar tanpa
+    restart.
 - [x] **F04-T06 (P0)** Siklus hidup plugin.
   - Enable/disable/hapus; operasi ikut keluar/masuk registry; peringatan
     saat menghapus/menonaktifkan `core.berp`.
@@ -215,7 +219,7 @@ Catatan progres: lihat [progress.md](progress.md).
   - Petakan metadata manifest ke `OperationDescriptor`; tangani tier tak
     didukung dan ID duplikat dengan peringatan.
   - Acceptance: test deskripsi operasi muncul di registry.
-- [ ] **F04-T10 (P0)** `PluginManagerService` + provider Riverpod.
+- [x] **F04-T10 (P0)** `PluginManagerService` + provider Riverpod.
   - Orkestrasi instal, verifikasi, enable/disable, hapus, dan bootstrap.
   - Acceptance: test service dengan storage in-memory.
 - [x] **F04-T11 (P0)** Test adversarial paket plugin.
@@ -335,7 +339,7 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F10-T02 (P0)** Operation Picker bottom sheet 85% layar.
   - Search sticky, chip kategori, daftar operasi + badge tier, tap untuk
     menambah.
-- [ ] **F10-T03 (P0)** Pencarian dan filter kategori/favorit.
+- [x] **F10-T03 (P0)** Pencarian dan filter kategori/favorit.
 - [x] **F10-T04 (P0)** Favorit operasi (persist).
 - [x] **F10-T05 (P0)** Tab Library: daftar operasi + pencarian + detail
   singkat.
@@ -382,29 +386,29 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F13-T01 (P0)** Spesifikasi authoring operasi core.
   - Struktur source `plugins/core/`, manifest per operasi/paket, format
     DSL/Lua/WASM, dan aturan ID stabil.
-- [ ] **F13-T02 (P0)** Build script `.berp`.
+- [x] **F13-T02 (P0)** Build script `.berp`.
   - Bungkus zip deterministik, hitung SHA-256, hasilkan hash untuk di-pin
     ke aplikasi.
-- [ ] **F13-T03 (P0)** Test integritas build.
+- [x] **F13-T03 (P0)** Test integritas build.
   - Hash aset `core.berp` harus cocok dengan pin; build ulang harus
     deterministik.
 
 ### Paket operasi
 
-- [ ] **F13-T04 (P0)** Operasi Encode/Decode dasar.
+- [x] **F13-T04 (P0)** Operasi Encode/Decode dasar.
   - Base64 encode/decode, Base32 decode/encode, Hex encode/decode, URL
     encode/decode, HTML entity encode/decode.
   - Setiap operasi: manifest, contoh I/O, contract test, entri
     `operations.md`, lisensi.
-- [ ] **F13-T05 (P0)** Operasi hash/kripto dasar.
+- [x] **F13-T05 (P0)** Operasi hash/kripto dasar.
   - MD5, SHA-1, SHA-256, SHA-512 (hash); util HMAC-SHA256.
   - Catat bahwa MD5/SHA-1 untuk kompatibilitas, bukan keamanan.
-- [ ] **F13-T06 (P0)** Operasi Format.
+- [x] **F13-T06 (P0)** Operasi Format.
   - JSON prettify/minify, JWT decode (tanpa verifikasi klaim), XML
     prettify bila memungkinkan.
-- [ ] **F13-T07 (P1)** Operasi Analysis.
+- [x] **F13-T07 (P1)** Operasi Analysis.
   - Entropy, frequency, magic bytes/file type, ekstraksi string.
-- [ ] **F13-T08 (P0)** Operasi Utility.
+- [x] **F13-T08 (P0)** Operasi Utility.
   - Upper/lower/title case, reverse, find & replace, regex replace,
     slice, sort lines, unique lines.
 - [ ] **F13-T09 (P1)** Operasi kripto lanjutan.
@@ -433,21 +437,21 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **F14-T07 (P0)** Integration test end-to-end.
   - Bootstrap → sideload plugin → buat recipe multi-step → simpan →
     ekspor → impor → jalankan.
-- [ ] **F14-T08 (P1)** Uji performa dan memori.
+- [x] **F14-T08 (P1)** Uji performa dan memori.
   - Input besar (sesuai batas MVP), tidak OOM, UI tetap responsif.
-- [ ] **F14-T09 (P0)** QA desain.
+- [x] **F14-T09 (P0)** QA desain.
   - Checklist `DESIGN.md` §15: dark mode, layar kecil/besar, text scale,
     empty state, aksesibilitas.
 
 ## F15 — Rilis MVP
 
-- [ ] **F15-T01 (P0)** Metadata aplikasi: nama, deskripsi, ikon, splash,
+- [x] **F15-T01 (P0)** Metadata aplikasi: nama, deskripsi, ikon, splash,
   application ID.
-- [ ] **F15-T02 (P0)** Konfigurasi Android/iOS.
+- [x] **F15-T02 (P0)** Konfigurasi Android/iOS.
   - Min SDK, izin platform minimal (tanpa INTERNET default), signing
     build lokal (tidak di-commit).
-- [ ] **F15-T03 (P0)** Teks privasi offline + lisensi pihak ketiga.
-- [ ] **F15-T04 (P0)** Versi rilis `1.0.0+1` dan changelog rilis.
+- [x] **F15-T03 (P0)** Teks privasi offline + lisensi pihak ketiga.
+- [x] **F15-T04 (P0)** Versi rilis `1.0.0+1` dan changelog rilis.
 - [x] **F15-T05 (P0)** Smoke test build Android di device/emulator.
 - [x] **F15-T06 (P0)** Jalankan seluruh checklist `AGENT.md` §7 dan
   `ROADMAP.md` Fase 1.
