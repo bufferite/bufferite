@@ -334,6 +334,17 @@ final class RegistryIndex {
           <String, Object?>{'pluginId': entry.pluginId},
         );
       }
+      final signatureHost = _resolveUrl(
+        entry.effectiveSignatureUrl,
+        registryBase,
+      ).host;
+      if (!allowedHosts.contains(signatureHost.toLowerCase())) {
+        throw RegistryFormatException(
+          'registry.schema',
+          'Host signature $signatureHost tidak ada di allowedHosts.',
+          <String, Object?>{'pluginId': entry.pluginId},
+        );
+      }
     }
   }
 

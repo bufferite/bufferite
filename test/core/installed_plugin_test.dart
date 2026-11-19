@@ -46,6 +46,67 @@ void main() {
       expect(parsed.installPath, '/plugins/com.test.pack/1.0.0');
     });
 
+    test('provenance registry ikut tersimpan dan dibaca ulang', () {
+      final plugin = InstalledPlugin(
+        manifest: _manifest(),
+        source: PluginSource.registry,
+        installedAt: DateTime.utc(2026, 11, 20, 12),
+        verified: true,
+        provenance: PluginProvenance(
+          registryUrl: 'https://registry.test/registry.json',
+          keyId: 'package-test',
+          sha256: 'a' * 64,
+          previousVersion: '0.9.0',
+        ),
+      );
+
+      final parsed = InstalledPlugin.fromJson(
+        jsonDecode(jsonEncode(plugin.toJson())) as Map<String, Object?>,
+      );
+
+      expect(parsed.source, PluginSource.registry);
+      expect(parsed.provenance, isNotNull);
+      expect(
+        parsed.provenance!.registryUrl,
+        'https://registry.test/registry.json',
+      );
+      expect(parsed.provenance!.keyId, 'package-test');
+      expect(parsed.provenance!.sha256, 'a' * 64);
+      expect(parsed.provenance!.previousVersion, '0.9.0');
+      expect(parsed.copyWith(enabled: false).provenance, isNotNull);
+      expect(parsed.toJson()['provenance'], isA<Map<String, Object?>>());
+    });
+
+    test('provenance invalid ditolak', () {
+      expect(
+        () => InstalledPlugin.fromJson(
+          _installed().toJson()..['provenance'] = <String, Object?>{
+            'registryUrl': 'https://registry.test/registry.json',
+            'keyId': 'package-test',
+          },
+        ),
+        throwsA(
+          isA<AppError>().having(
+            (error) => error.code,
+            'code',
+            'plugin.installed_invalid',
+          ),
+        ),
+      );
+      expect(
+        () => InstalledPlugin.fromJson(
+          _installed().toJson()..['provenance'] = 'legacy',
+        ),
+        throwsA(
+          isA<AppError>().having(
+            (error) => error.code,
+            'code',
+            'plugin.installed_invalid',
+          ),
+        ),
+      );
+    });
+
     test('default enabled/verified saat impor metadata lama', () {
       final json = _installed().toJson()
         ..remove('enabled')

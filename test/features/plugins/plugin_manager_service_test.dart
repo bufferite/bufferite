@@ -99,6 +99,27 @@ void main() {
     );
   });
 
+  test('instal registry menyimpan provenance terverifikasi', () async {
+    final plugin = await service.install(
+      package(),
+      source: PluginSource.registry,
+      verified: true,
+      provenance: PluginProvenance(
+        registryUrl: 'https://registry.test/registry.json',
+        keyId: 'package-test',
+        sha256: 'a' * 64,
+        previousVersion: '0.9.0',
+      ),
+    );
+
+    expect(plugin.source, PluginSource.registry);
+    expect(plugin.verified, isTrue);
+    final stored = await repository.byId('com.test.pack');
+    expect(stored!.provenance, isNotNull);
+    expect(stored.provenance!.keyId, 'package-test');
+    expect(stored.provenance!.previousVersion, '0.9.0');
+  });
+
   test('setEnabled menonaktifkan dan mengaktifkan operasi', () async {
     await service.install(package(), source: PluginSource.sideload);
 

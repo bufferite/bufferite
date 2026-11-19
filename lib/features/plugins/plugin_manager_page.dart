@@ -16,6 +16,7 @@ import 'plugin_actions.dart';
 import 'plugin_detail_page.dart';
 import 'plugin_providers.dart';
 import 'plugin_sideload.dart';
+import 'registry/registry_catalog_screen.dart';
 
 /// Daftar plugin terpasang sesuai `DESIGN.md` §6.5.
 class PluginManagerPage extends ConsumerWidget {
@@ -45,7 +46,11 @@ class PluginManagerPage extends ConsumerWidget {
               AppSpacing.sm,
             ),
             child: OutlinedButton(
-              onPressed: () => _showCatalogInfo(context),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const RegistryCatalogScreen(),
+                ),
+              ),
               child: Text(context.tr('plugins.openCatalog')),
             ),
           ),
@@ -241,22 +246,6 @@ class PluginManagerPage extends ConsumerWidget {
           ? context.tr('plugins.removed')
           : context.tr('plugins.notFound'),
       tone: ok ? AppToastTone.success : AppToastTone.error,
-    );
-  }
-
-  Future<void> _showCatalogInfo(BuildContext context) {
-    return showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.tr('plugins.catalogTitle')),
-        content: Text(context.tr('plugins.catalogBody')),
-        actions: <Widget>[
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.tr('common.understood')),
-          ),
-        ],
-      ),
     );
   }
 

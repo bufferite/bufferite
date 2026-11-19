@@ -48,6 +48,7 @@ class FakeSettingsController extends SettingsController {
   Duration? stepTimeout;
   int? memoryBytes;
   bool? optInLogging;
+  bool? registryConsent;
 
   @override
   Future<void> setStepTimeout(Duration timeout) async {
@@ -63,6 +64,12 @@ class FakeSettingsController extends SettingsController {
   Future<void> setOptInLogging(bool enabled) async {
     optInLogging = enabled;
     state = AsyncData(AppSettings.defaults.copyWith(optInLogging: enabled));
+  }
+
+  @override
+  Future<void> setRegistryConsent(bool enabled) async {
+    registryConsent = enabled;
+    state = AsyncData(AppSettings.defaults.copyWith(registryConsent: enabled));
   }
 }
 
@@ -185,6 +192,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(settingsController.optInLogging, isTrue);
+  });
+
+  testWidgets('toggle konsen registry memanggil setter', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('Izinkan akses jaringan katalog'));
+    await tester.pumpAndSettle();
+
+    expect(settingsController.registryConsent, isTrue);
   });
 
   testWidgets('membuka layar diagnostik', (tester) async {

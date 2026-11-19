@@ -19,6 +19,7 @@ import '../../core/ui/theme_provider.dart';
 import '../operations/operation_providers.dart';
 import '../plugins/plugin_manager_service.dart';
 import '../plugins/plugin_providers.dart';
+import '../plugins/registry/registry_providers.dart';
 import 'diagnostics_page.dart';
 import 'settings_provider.dart';
 import 'settings_repository.dart';
@@ -65,7 +66,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: <Widget>[
-          Text(context.tr('settings.appearance'), style: theme.textTheme.titleLarge),
+          Text(
+            context.tr('settings.appearance'),
+            style: theme.textTheme.titleLarge,
+          ),
           const SizedBox(height: AppSpacing.sm),
           SegmentedButton<AppThemeMode>(
             segments: <ButtonSegment<AppThemeMode>>[
@@ -109,13 +113,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ],
             selected: <AppLanguage>{language},
             onSelectionChanged: (selection) {
-              ref
-                  .read(languageProvider.notifier)
-                  .setLanguage(selection.first);
+              ref.read(languageProvider.notifier).setLanguage(selection.first);
             },
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text(context.tr('settings.sandbox'), style: theme.textTheme.titleLarge),
+          Text(
+            context.tr('settings.sandbox'),
+            style: theme.textTheme.titleLarge,
+          ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _timeoutController,
@@ -169,15 +174,46 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             label: Text(context.tr('settings.clearLogs')),
           ),
           const SizedBox(height: AppSpacing.xl),
+          Text(
+            context.tr('settings.registry'),
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.tr('settings.registryConsent')),
+            subtitle: Text(context.tr('settings.registryConsentSubtitle')),
+            value: settings.registryConsent,
+            onChanged: (value) async {
+              await ref
+                  .read(settingsProvider.notifier)
+                  .setRegistryConsent(value);
+              ref.invalidate(registryCatalogProvider);
+            },
+          ),
+          OutlinedButton.icon(
+            onPressed: _clearRegistryCache,
+            icon: const Icon(Icons.cached),
+            label: Text(context.tr('settings.registryCache')),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              context.tr('settings.registryCacheSubtitle'),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Text(context.tr('settings.about'), style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Bufferite'),
             subtitle: Text(
-              context.tr('settings.version', args: <String, Object?>{
-                'version': '1.0.0',
-              }),
+              context.tr(
+                'settings.version',
+                args: <String, Object?>{'version': '1.0.0'},
+              ),
             ),
           ),
           ListTile(
@@ -263,6 +299,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
+  Future<void> _clearRegistryCache() async {
+    try {
+      await ref.read(registryCacheStoreProvider).clear();
+      ref.invalidate(registryCatalogProvider);
+      if (mounted) {
+        showAppToast(
+          context,
+          message: context.tr('settings.registryCacheCleared'),
+          tone: AppToastTone.success,
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        showAppToast(
+          context,
+          message: context.tr(
+            'settings.registryCacheClearFailed',
+            args: <String, Object?>{'error': context.trErrorObject(error)},
+          ),
+          tone: AppToastTone.error,
+        );
+      }
+    }
+  }
+
   Future<void> _reinstallCore() async {
     final confirmed = await _confirm(
       context.tr('settings.reinstallTitle'),
@@ -309,7 +370,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
     try {
       final support = await getApplicationSupportDirectory();
-      for (final name in <String>['plugins', 'logs']) {
+      for (final name in <String>['plugins', 'logs', 'registry']) {
         final directory = Directory('${support.path}/$name');
         if (directory.existsSync()) {
           directory.deleteSync(recursive: true);

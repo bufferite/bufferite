@@ -70,11 +70,13 @@ final class PluginManagerService {
     Uint8List bytes, {
     PluginSource source = PluginSource.sideload,
     bool verified = false,
+    PluginProvenance? provenance,
   }) {
     return install(
       PluginPackage.decode(bytes),
       source: source,
       verified: verified,
+      provenance: provenance,
     );
   }
 
@@ -86,6 +88,7 @@ final class PluginManagerService {
     PluginPackage package, {
     required PluginSource source,
     bool verified = false,
+    PluginProvenance? provenance,
   }) async {
     final installPath = await _writePackage(package);
     final plugin = InstalledPlugin(
@@ -94,6 +97,7 @@ final class PluginManagerService {
       installedAt: DateTime.now().toUtc(),
       verified: verified,
       installPath: installPath,
+      provenance: provenance,
     );
     await _repository.save(plugin);
     await _runtimeLoader?.evictPlugin(plugin.pluginId);

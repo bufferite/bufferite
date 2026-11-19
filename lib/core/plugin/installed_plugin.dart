@@ -25,6 +25,60 @@ enum PluginSource {
 
 enum PluginStatus { active, disabled, unverified, incompatible }
 
+/// Asal-usul paket registry untuk audit dan rollback (F16-T02/T04).
+final class PluginProvenance {
+  const PluginProvenance({
+    required this.registryUrl,
+    required this.keyId,
+    required this.sha256,
+    this.previousVersion,
+  });
+
+  final String registryUrl;
+  final String keyId;
+  final String sha256;
+  final String? previousVersion;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'registryUrl': registryUrl,
+      'keyId': keyId,
+      'sha256': sha256,
+      if (previousVersion != null) 'previousVersion': previousVersion,
+    };
+  }
+
+  factory PluginProvenance.fromJson(Object? raw) {
+    if (raw is! Map<String, Object?>) {
+      throw const AppError(
+        category: ErrorCategory.validation,
+        code: 'plugin.installed_invalid',
+        message: 'Provenance plugin harus berupa objek.',
+      );
+    }
+    final registryUrl = raw['registryUrl'];
+    final keyId = raw['keyId'];
+    final sha256 = raw['sha256'];
+    final previousVersion = raw['previousVersion'];
+    if (registryUrl is! String ||
+        keyId is! String ||
+        sha256 is! String ||
+        (previousVersion != null && previousVersion is! String)) {
+      throw const AppError(
+        category: ErrorCategory.validation,
+        code: 'plugin.installed_invalid',
+        message: 'Field provenance plugin tidak valid.',
+      );
+    }
+    return PluginProvenance(
+      registryUrl: registryUrl,
+      keyId: keyId,
+      sha256: sha256,
+      previousVersion: previousVersion as String?,
+    );
+  }
+}
+
 /// Metadata plugin yang sudah terpasang.
 final class InstalledPlugin {
   InstalledPlugin({
@@ -34,6 +88,7 @@ final class InstalledPlugin {
     this.enabled = true,
     this.verified = false,
     this.installPath,
+    this.provenance,
   }) : installedAt = installedAt.toUtc();
 
   final PluginManifest manifest;
@@ -42,6 +97,7 @@ final class InstalledPlugin {
   final bool enabled;
   final bool verified;
   final String? installPath;
+  final PluginProvenance? provenance;
 
   String get pluginId => manifest.pluginId;
 
@@ -68,6 +124,7 @@ final class InstalledPlugin {
     bool? enabled,
     bool? verified,
     String? installPath,
+    PluginProvenance? provenance,
   }) {
     return InstalledPlugin(
       manifest: manifest,
@@ -76,6 +133,7 @@ final class InstalledPlugin {
       enabled: enabled ?? this.enabled,
       verified: verified ?? this.verified,
       installPath: installPath ?? this.installPath,
+      provenance: provenance ?? this.provenance,
     );
   }
 
@@ -87,6 +145,7 @@ final class InstalledPlugin {
       'enabled': enabled,
       'verified': verified,
       if (installPath != null) 'installPath': installPath,
+      if (provenance != null) 'provenance': provenance!.toJson(),
     };
   }
 
@@ -141,6 +200,9 @@ final class InstalledPlugin {
       enabled: enabled,
       verified: verified,
       installPath: installPath as String?,
+      provenance: json['provenance'] == null
+          ? null
+          : PluginProvenance.fromJson(json['provenance']),
     );
   }
 }

@@ -22,6 +22,10 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     await _update((current) => current.copyWith(optInLogging: enabled));
   }
 
+  Future<void> setRegistryConsent(bool enabled) async {
+    await _update((current) => current.copyWith(registryConsent: enabled));
+  }
+
   /// Memuat ulang dari repository sebelum menyimpan agar perubahan dari
   /// controller lain (tema/bahasa) tidak tertimpa nilai lama.
   Future<void> _update(AppSettings Function(AppSettings) transform) async {

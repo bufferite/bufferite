@@ -36,6 +36,15 @@ void main() {
     expect(settings.stepTimeout, const Duration(seconds: 2));
     expect(settings.memoryLimitBytes, 64 * 1024 * 1024);
     expect(settings.optInLogging, isFalse);
+    expect(settings.registryConsent, isFalse);
+  });
+
+  test('konsen registry tersimpan dan dapat dicabut', () async {
+    await repository.save(AppSettings(registryConsent: true));
+    expect((await repository.load()).registryConsent, isTrue);
+
+    await repository.save(AppSettings(registryConsent: false));
+    expect((await repository.load()).registryConsent, isFalse);
   });
 
   test('save lalu load mengembalikan nilai yang sama', () async {
@@ -45,6 +54,7 @@ void main() {
       stepTimeout: const Duration(milliseconds: 750),
       memoryLimitBytes: 8 * 1024 * 1024,
       optInLogging: true,
+      registryConsent: true,
     );
 
     await repository.save(settings);
@@ -100,6 +110,10 @@ void main() {
       'key': SettingsRepository.languageKey,
       'value': 'klingon',
     });
+    await db.insert('setting', <String, Object?>{
+      'key': SettingsRepository.registryConsentKey,
+      'value': 'yes',
+    });
 
     final settings = await repository.load();
     expect(settings, AppSettings.defaults);
@@ -110,7 +124,7 @@ void main() {
     await repository.save(AppSettings(themeMode: AppThemeMode.dark));
 
     final db = await appDatabase.open();
-    expect(await db.query('setting'), hasLength(5));
+    expect(await db.query('setting'), hasLength(6));
   });
 
   test('AppSettings menolak batas resource tidak valid', () {

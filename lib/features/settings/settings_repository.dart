@@ -46,6 +46,7 @@ final class AppSettings {
     this.stepTimeout = const Duration(seconds: 2),
     this.memoryLimitBytes = 64 * 1024 * 1024,
     this.optInLogging = false,
+    this.registryConsent = false,
   }) {
     if (stepTimeout <= Duration.zero) {
       throw ArgumentError.value(
@@ -73,6 +74,9 @@ final class AppSettings {
   /// Log diagnostic hanya dikirim bila pengguna memilih ikut serta.
   final bool optInLogging;
 
+  /// Izin mengakses katalog registry resmi lewat jaringan.
+  final bool registryConsent;
+
   SandboxConfig get sandboxConfig => SandboxConfig(
     stepTimeout: stepTimeout,
     memoryLimitBytes: memoryLimitBytes,
@@ -84,6 +88,7 @@ final class AppSettings {
     Duration? stepTimeout,
     int? memoryLimitBytes,
     bool? optInLogging,
+    bool? registryConsent,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
@@ -91,6 +96,7 @@ final class AppSettings {
       stepTimeout: stepTimeout ?? this.stepTimeout,
       memoryLimitBytes: memoryLimitBytes ?? this.memoryLimitBytes,
       optInLogging: optInLogging ?? this.optInLogging,
+      registryConsent: registryConsent ?? this.registryConsent,
     );
   }
 
@@ -101,7 +107,8 @@ final class AppSettings {
         other.language == language &&
         other.stepTimeout == stepTimeout &&
         other.memoryLimitBytes == memoryLimitBytes &&
-        other.optInLogging == optInLogging;
+        other.optInLogging == optInLogging &&
+        other.registryConsent == registryConsent;
   }
 
   @override
@@ -112,6 +119,7 @@ final class AppSettings {
       stepTimeout,
       memoryLimitBytes,
       optInLogging,
+      registryConsent,
     );
   }
 }
@@ -128,6 +136,7 @@ final class SettingsRepository {
   static const String stepTimeoutKey = 'sandbox.step_timeout_ms';
   static const String memoryLimitKey = 'sandbox.memory_limit_bytes';
   static const String optInLoggingKey = 'logging.opt_in';
+  static const String registryConsentKey = 'registry.consent';
 
   static const List<String> _keys = <String>[
     themeKey,
@@ -135,6 +144,7 @@ final class SettingsRepository {
     stepTimeoutKey,
     memoryLimitKey,
     optInLoggingKey,
+    registryConsentKey,
   ];
 
   final AppDatabase _database;
@@ -167,6 +177,7 @@ final class SettingsRepository {
         AppSettings.defaults.memoryLimitBytes,
       ),
       optInLogging: _bool(values[optInLoggingKey]),
+      registryConsent: _bool(values[registryConsentKey]),
     );
   }
 
@@ -178,6 +189,7 @@ final class SettingsRepository {
       stepTimeoutKey: settings.stepTimeout.inMilliseconds.toString(),
       memoryLimitKey: settings.memoryLimitBytes.toString(),
       optInLoggingKey: settings.optInLogging ? 'true' : 'false',
+      registryConsentKey: settings.registryConsent ? 'true' : 'false',
     };
 
     await db.transaction((transaction) async {
