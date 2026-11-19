@@ -28,13 +28,13 @@ Status yang dipakai:
 | Item | Nilai |
 |---|---|
 | Fase aktif | Fase 1 — MVP |
-| Milestone aktif | M5 — Rilis MVP |
+| Milestone aktif | M5 — Rilis MVP (selesai, tag `v1.0.0`) |
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
-| Task berikutnya | Rilis 1.0: jalankan `RELEASE_CHECKLIST.md`, tag lokal `v1.0.0` |
+| Task berikutnya | — (MVP 1.0 selesai; lanjut Fase 2/F16 bila diminta) |
 | Blocker aktif | — (libwasmtime Android release masih di luar 1.0; tier `wasm` butuh build yang menyertakan engine) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (512 test, 2026-11-19) |
@@ -208,6 +208,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `ef086f6` |
 | 2026-11-19 | F05-T08 | Cache runtime per plugin (LRU 4, idle 5 mnt) + worker WASM persisten | `lib/core/runtime/runtime_cache.dart`, `wasm_lua_runtime.dart`, `plugin_runtime.dart` | `flutter test` → 465 lulus; integration emulator 2 lulus | `1ebcac2` |
 | 2026-11-19 | F05-T06/T07/T09 + F14-T03 | ABI plugin WASM (stdin/argv/stdout), penegakan izin semua runtime, matriks bypass + kontrak DSL/Lua/WASM | `wasm_plugin_runtime.dart`, `wasm_worker.dart`, `permission_matrix_test.dart`, `test/fixtures/wasm/` | `flutter test` → 512 lulus; integration emulator 3 lulus | `cdc2cde` |
+| 2026-11-19 | Rilis 1.0.0 | Changelog final, checklist rilis, build universal + split per ABI, tag lokal | `CHANGELOG.md`, `RELEASE_CHECKLIST.md` | 512 test; release install+launch x86_64 OK | `v1.0.0` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1440,6 +1441,20 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   release 1.0 akan gagal dengan `runtime.wasm_error` sampai library dirilis.
   ABI v1 tidak menyediakan host function net/fs.
 - Commit: `cdc2cde`
+
+### CP-066 — 2026-11-19 — Rilis 1.0.0 (lokal, tanpa push)
+
+- Status: Selesai
+- Perubahan: `CHANGELOG.md` final 1.0.0 (engine WASM, tier `wasm`, cache,
+  penegakan izin); `RELEASE_CHECKLIST.md` diperbarui; tag `v1.0.0` dipindah ke
+  commit rilis final.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 512 lulus; integration
+  emulator Android 3 lulus; `flutter build apk --release` universal 53,1 MB +
+  split per ABI (16,0/18,5/19,9 MB); install + launch release x86_64 OK; APK
+  rilis tidak memuat `libwasmtime` (sesuai cakupan 1.0).
+- Catatan/risiko: tier `wasm`/`LuaEngine.wasm` di Android release menunggu
+  libwasmtime dikemas; verifikasi perangkat arm64 fisik belum dilakukan.
+- Tag: `v1.0.0`
 
 ## 7. Template Checkpoint Baru
 

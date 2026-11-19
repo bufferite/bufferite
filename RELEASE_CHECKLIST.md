@@ -14,6 +14,7 @@ Verifikasi `AGENT.md` §7 dan `ROADMAP.md` Fase 1 sebelum tag rilis.
 | Operasi berat di isolate | OK | pipeline + Lua/Lua WASM/plugin WASM di worker isolate (CP-054/CP-063/CP-065) |
 | Verifikasi SHA-256 runtime WASM & .berp | OK | `.berp` (`plugin_integrity_test`); aset WASM dipin (`lua_runtime_asset_test`); eksekusi device (CP-063/CP-065) |
 | Matriks izin & bypass lintas runtime | OK | `permission_matrix_test.dart` 32 test; tier `wasm` fs/import diblokir (CP-065) |
+| Build release + smoke install | OK | universal 53,1 MB; split `arm64-v8a` 18,5 MB / `armeabi-v7a` 16,0 MB / `x86_64` 19,9 MB; install + launch x86_64 OK; tanpa `libwasmtime` (sesuai 1.0) |
 | UI layar kecil/besar + dark mode | SEBAGIAN | widget test + smoke emulator (dark); layar besar manual |
 | Skema recipe versioned | OK | `schemaVersion` + migrasi berantai |
 | Conventional Commits | OK | riwayat commit `feat:`, `fix:`, `docs:`, `test:`, `chore:` |
@@ -29,6 +30,11 @@ Tertunda (dicatat): katalog daring Fase 2; pengemasan libwasmtime di build
 release Android (tier `wasm`/`LuaEngine.wasm` baru aktif di build yang memuat
 engine); verifikasi perangkat arm64 fisik. Semua task MVP (131/131) selesai
 per CP-065.
+
+Artefak rilis: `app-release.apk` (universal) atau
+`app-<abi>-release.apk` dari `flutter build apk --release --split-per-abi`.
+Keduanya tidak memuat `libwasmtime`; tier `wasm` memerlukan build khusus yang
+menyertakan library engine.
 
 Kesimpulan: MVP memenuhi Definisi Done untuk lingkup 1.0; item tertunda
 dilacak di `progress.md` §8 Blocker.

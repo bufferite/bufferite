@@ -3,7 +3,7 @@
 Semua perubahan penting didokumentasikan di sini.
 Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 
-## [1.0.0] - 2026-11-14
+## [1.0.0] - 2026-11-19
 
 Rilis MVP Bufferite.
 
@@ -34,15 +34,25 @@ Rilis MVP Bufferite.
 - Pipeline operasi core berjalan di isolate kerja (UI tetap responsif).
 - Runtime Lua (Lua 5.5.1) via `lua_dart`: sandbox tanpa `io`/`os.execute`,
   batas memori, entrypoint `transform(input, args)`, prebuilt per ABI.
+- Engine Lua WASI (`LuaEngine.wasm`) berbasis wasmtime C API + cache worker
+  persisten: engine/modul dikompilasi sekali per plugin, store baru per step,
+  timeout lewat epoch; aset `lua_runtime.wasm` dipin SHA-256.
+- Tier plugin `wasm` dengan ABI command WASI v1: input via stdin, args JSON di
+  argv, output stdout, tanpa host function net/fs.
+- Cache runtime per plugin (LRU 4, idle 5 menit) dan disposal saat plugin
+  dinonaktifkan/dihapus.
+- Penegakan izin di semua runtime (`requirePermission(cpu)`), sandbox Lua WASM
+  disamakan dengan `lua_dart` (`os.rename`/`setlocale` dihapus, `load` hanya
+  teks), matriks bypass izin 32 test, dan contract test DSL/Lua/WASM.
 
 ### Keamanan
 - Tanpa izin INTERNET di manifest utama; offline-by-default.
 - Batas sandbox default: timeout 2 dtk, memori 64 MiB, izin `cpu`.
 
 ### Diketahui belum ada
-- Runtime Lua memakai `lua_dart` (Lua 5.5.1 via FFI, prebuilt + hash paket),
-  di isolate dengan sandbox + timeout; tier WASM ditunda ke 1.1.
-- Runtime DSL sudah ada (`DSL.md`); integrasi ke loader plugin menunggu
-  F05-T07.
-- Host isolate pekerja (F03-T04) dan enforcement memori belum aktif.
-- Katalog plugin daring (Fase 2).
+- Libwasmtime hanya dikemas di varian debug Android; build release 1.0 belum
+  memuat engine sehingga tier `wasm`/`LuaEngine.wasm` memerlukan build yang
+  menyertakan library.
+- Verifikasi perangkat arm64 fisik (emulator x86_64 sudah lulus).
+- Katalog plugin daring dan signature registry (Fase 2).
+- Streaming file besar dan AI assistant (Fase 2/3).
