@@ -1,12 +1,19 @@
 import 'package:bufferite/core/bootstrap/bootstrap_provider.dart';
+import 'package:bufferite/core/i18n/language_provider.dart';
 import 'package:bufferite/core/storage/app_database.dart';
 import 'package:bufferite/core/storage/storage_providers.dart';
 import 'package:bufferite/features/recipe/recipe.dart';
 import 'package:bufferite/features/recipe/recipe_providers.dart';
+import 'package:bufferite/features/settings/settings_repository.dart';
 import 'package:bufferite/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class _EnglishLanguageController extends LanguageController {
+  @override
+  Future<AppLanguage> build() async => AppLanguage.english;
+}
 
 void main() {
   sqfliteFfiInit();
@@ -36,11 +43,38 @@ void main() {
     expect(find.text('Bufferite'), findsOneWidget);
     expect(find.text('Belum ada recipe'), findsOneWidget);
     expect(
-      find.text(
-        'Racik data dengan resep. Recipe builder akan tersedia '
-        'setelah fondasi selesai.',
-      ),
+      find.text('Buat recipe pertamamu untuk mulai meracik data.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('bahasa Inggris mengganti seluruh label utama', (tester) async {
+    final database = AppDatabase(
+      factory: databaseFactoryFfi,
+      path: inMemoryDatabasePath,
+    );
+    addTearDown(database.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(database),
+          languageProvider.overrideWith(_EnglishLanguageController.new),
+          recentRecipesProvider.overrideWith((ref) => const <Recipe>[]),
+          coreBootstrapProvider.overrideWith(
+            (ref) async => const CoreBootstrapResult.ready(),
+          ),
+        ],
+        child: const BufferiteApp(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('No recipes yet'), findsOneWidget);
+    expect(find.text('New Recipe'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 }

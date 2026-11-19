@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../i18n/app_localizations.dart';
 import '../design_tokens.dart';
 
 /// Panel buffer input/output sesuai `DESIGN.md` §6.3.
@@ -13,7 +14,7 @@ class BufferPanel extends StatelessWidget {
     this.live = false,
     this.expanded = false,
     this.errorMessage,
-    this.emptyHint = 'Belum ada data',
+    this.emptyHint,
     this.emptyActionLabel,
     this.onEmptyAction,
     this.onExpand,
@@ -25,7 +26,7 @@ class BufferPanel extends StatelessWidget {
   final bool live;
   final bool expanded;
   final String? errorMessage;
-  final String emptyHint;
+  final String? emptyHint;
   final String? emptyActionLabel;
   final VoidCallback? onEmptyAction;
   final VoidCallback? onExpand;
@@ -128,18 +129,20 @@ class BufferPanel extends StatelessWidget {
           const Spacer(),
           if (!isEmpty)
             IconButton(
-              tooltip: 'Copy',
+              tooltip: context.tr('common.copy'),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: content ?? ''));
-                ScaffoldMessenger.maybeOf(
-                  context,
-                )?.showSnackBar(const SnackBar(content: Text('Disalin')));
+                ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                  SnackBar(content: Text(context.tr('common.copied'))),
+                );
               },
               icon: const Icon(Icons.copy, size: 20),
             ),
           if (onExpand != null)
             IconButton(
-              tooltip: expanded ? 'Perkecil' : 'Perbesar',
+              tooltip: expanded
+                  ? context.tr('common.collapse')
+                  : context.tr('common.expand'),
               onPressed: onExpand,
               icon: Icon(
                 expanded ? Icons.close_fullscreen : Icons.open_in_full,
@@ -174,7 +177,7 @@ class BufferPanel extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Text(
-            emptyHint,
+            emptyHint ?? context.tr('common.noData'),
             style: theme.textTheme.bodySmall?.copyWith(
               color: palette.textMuted,
             ),

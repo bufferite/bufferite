@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n/app_localizations.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
@@ -49,9 +50,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: TextField(
               controller: _searchController,
               onChanged: (value) => setState(() => _query = value.trim()),
-              decoration: const InputDecoration(
-                hintText: 'Cari recipe',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: context.tr('home.searchHint'),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
@@ -60,14 +61,16 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: FilledButton.icon(
               onPressed: _startNewRecipe,
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('Recipe Baru'),
+              label: Text(context.tr('home.newRecipe')),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              _query.isEmpty ? 'Recipe Terbaru' : 'Hasil Pencarian',
+              _query.isEmpty
+                  ? context.tr('home.recent')
+                  : context.tr('home.searchResults'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
@@ -77,7 +80,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) => EmptyState(
                 icon: Icons.error_outline,
-                title: 'Gagal memuat recipe',
+                title: context.tr('home.loadFailed'),
                 description: error.toString(),
               ),
               data: (items) => _list(items),
@@ -92,12 +95,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (recipes.isEmpty) {
       return EmptyState(
         icon: Icons.science_outlined,
-        title: _query.isEmpty ? 'Belum ada recipe' : 'Tidak ada recipe cocok',
+        title: _query.isEmpty
+            ? context.tr('home.emptyTitle')
+            : context.tr('home.noMatchTitle'),
         description: _query.isEmpty
-            ? 'Racik data dengan resep. Recipe builder akan tersedia '
-                  'setelah fondasi selesai.'
-            : 'Coba kata kunci lain.',
-        actionLabel: _query.isEmpty ? 'Buat recipe baru' : null,
+            ? context.tr('home.emptyDescription')
+            : context.tr('home.noMatchDescription'),
+        actionLabel: _query.isEmpty ? context.tr('home.createFirst') : null,
         onAction: _query.isEmpty ? _startNewRecipe : null,
       );
     }
@@ -158,16 +162,20 @@ class _HomePageState extends ConsumerState<HomePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus recipe?'),
-        content: Text('"${recipe.name}" akan dihapus.'),
+        title: Text(context.tr('home.deleteTitle')),
+        content: Text(
+          context.tr('home.deleteBody', args: <String, Object?>{
+            'name': recipe.name,
+          }),
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
+            child: Text(context.tr('common.cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Hapus'),
+            child: Text(context.tr('common.delete')),
           ),
         ],
       ),
@@ -184,9 +192,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
     showAppToast(
       context,
-      message: 'Recipe dihapus',
+      message: context.tr('home.deleted'),
       tone: AppToastTone.warning,
-      undoLabel: 'Undo',
+      undoLabel: context.tr('common.undo'),
       onUndo: () {
         repository.save(recipe).then((_) => _invalidate());
       },
@@ -202,7 +210,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
     showAppToast(
       context,
-      message: 'Recipe diduplikasi',
+      message: context.tr('home.duplicated'),
       tone: AppToastTone.success,
     );
   }
@@ -233,7 +241,16 @@ class _RecipeTile extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(recipe.name),
-        subtitle: Text('$steps langkah · ${_relativeTime(recipe, now)}'),
+        subtitle: Text(
+          context.trPlural(
+            'home.recipeMeta',
+            steps,
+            args: <String, Object?>{
+              'steps': steps,
+              'time': _relativeTime(recipe, now, context),
+            },
+          ),
+        ),
         onTap: onTap,
         trailing: PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
@@ -242,8 +259,11 @@ class _RecipeTile extends StatelessWidget {
               onDuplicate();
             }
           },
-          itemBuilder: (context) => const <PopupMenuEntry<String>>[
-            PopupMenuItem<String>(value: 'duplicate', child: Text('Duplikat')),
+          itemBuilder: (context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'duplicate',
+              child: Text(context.tr('home.duplicate')),
+            ),
           ],
         ),
         shape: RoundedRectangleBorder(
@@ -257,26 +277,26 @@ class _RecipeTile extends StatelessWidget {
   }
 }
 
-String _relativeTime(Recipe recipe, DateTime now) {
+String _relativeTime(Recipe recipe, DateTime now, BuildContext context) {
   final updated = recipe.meta?.updatedAt;
   if (updated == null) {
-    return 'baru';
+    return context.tr('home.relative.new');
   }
   final diff = now.toUtc().difference(updated.toUtc());
   if (diff.inMinutes < 1) {
-    return 'baru saja';
+    return context.tr('home.relative.justNow');
   }
   if (diff.inHours < 1) {
-    return '${diff.inMinutes} menit lalu';
+    return context.trPlural('home.relative.minutes', diff.inMinutes);
   }
   if (diff.inDays < 1) {
-    return '${diff.inHours} jam lalu';
+    return context.trPlural('home.relative.hours', diff.inHours);
   }
   if (diff.inDays == 1) {
-    return 'kemarin';
+    return context.tr('home.relative.yesterday');
   }
   if (diff.inDays < 30) {
-    return '${diff.inDays} hari lalu';
+    return context.trPlural('home.relative.days', diff.inDays);
   }
   final local = updated.toLocal();
   return '${local.year}-'

@@ -17,13 +17,13 @@ final class RecipeIo {
   final RecipeCodec _codec;
 
   /// Menyimpan recipe ke file. Mengembalikan URI, atau `null` bila dibatalkan.
-  Future<String?> export(Recipe recipe) async {
+  Future<String?> export(Recipe recipe, {String? dialogTitle}) async {
     final encoded = _codec.encode(recipe);
     if (!encoded.isSuccess) {
       throw encoded.errorOrNull!;
     }
     final uri = await FilePicker.saveFile(
-      dialogTitle: 'Simpan recipe',
+      dialogTitle: dialogTitle ?? 'Simpan recipe',
       fileName: '${_safeName(recipe.name)}.$extension',
       mimeType: 'application/json',
       bytes: Uint8List.fromList(utf8.encode(encoded.valueOrNull!)),
@@ -34,9 +34,9 @@ final class RecipeIo {
   /// Membaca recipe dari file terpilih.
   ///
   /// Melempar `AppError` kategori `cancelled` bila pengguna membatalkan.
-  Future<Recipe> import() async {
+  Future<Recipe> import({String? dialogTitle}) async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Impor recipe',
+      dialogTitle: dialogTitle ?? 'Impor recipe',
       type: FileType.custom,
       allowedExtensions: <String>[extension],
     );

@@ -10,6 +10,7 @@ import '../../core/engine/buffer.dart';
 import '../../core/engine/pipeline.dart';
 import '../../core/engine/pipeline_isolate.dart';
 import '../../core/error/app_error.dart';
+import '../../core/i18n/app_localizations.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/components/app_toast.dart';
@@ -96,21 +97,25 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text(widget.recipe == null ? 'Recipe Baru' : 'Edit Recipe'),
+          title: Text(
+            widget.recipe == null
+                ? context.tr('recipe.newTitle')
+                : context.tr('recipe.editTitle'),
+          ),
           actions: <Widget>[
             IconButton(
-              tooltip: 'Ingredients',
+              tooltip: context.tr('recipe.ingredients'),
               onPressed: _openStepsDrawer,
               icon: Badge.count(
                 count: _steps.length,
                 isLabelVisible: _steps.isNotEmpty,
                 backgroundColor: theme.colorScheme.primary,
                 textColor: theme.colorScheme.onPrimary,
-                child: const Icon(Icons.shopping_basket),
+                child: const Icon(Icons.local_grocery_store),
               ),
             ),
             PopupMenuButton<String>(
-              tooltip: 'Lainnya',
+              tooltip: context.tr('recipe.more'),
               onSelected: (value) {
                 if (value == 'export') {
                   _exportRecipe();
@@ -118,14 +123,14 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                   _importRecipe();
                 }
               },
-              itemBuilder: (context) => const <PopupMenuEntry<String>>[
+              itemBuilder: (context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'import',
-                  child: Text('Impor .brecipe'),
+                  child: Text(context.tr('recipe.import')),
                 ),
                 PopupMenuItem<String>(
                   value: 'export',
-                  child: Text('Ekspor .brecipe'),
+                  child: Text(context.tr('recipe.export')),
                 ),
               ],
             ),
@@ -135,7 +140,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 vertical: AppSpacing.sm,
               ),
               child: AppButton(
-                label: 'Simpan',
+                label: context.tr('recipe.save'),
                 icon: Icons.save_outlined,
                 loading: _saving,
                 onPressed: _save,
@@ -149,11 +154,13 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           children: <Widget>[
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nama recipe'),
+              decoration: InputDecoration(
+                labelText: context.tr('recipe.nameLabel'),
+              ),
               maxLength: maxRecipeNameLength,
             ),
             const SizedBox(height: AppSpacing.lg),
-            _section(theme, 'Input'),
+            _section(theme, context.tr('recipe.input')),
             const SizedBox(height: AppSpacing.sm),
             if (_inputBytes != null)
               _fileInputCard(theme)
@@ -163,15 +170,15 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 minLines: 3,
                 maxLines: 8,
                 style: const TextStyle(fontFamily: 'Roboto Mono', fontSize: 14),
-                decoration: const InputDecoration(
-                  hintText: 'Tempel data input',
+                decoration: InputDecoration(
+                  hintText: context.tr('recipe.inputHint'),
                 ),
               ),
             const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: Alignment.centerLeft,
               child: AppButton(
-                label: 'Pilih file',
+                label: context.tr('recipe.chooseFile'),
                 variant: AppButtonVariant.ghost,
                 icon: Icons.attach_file,
                 onPressed: _pickInputFile,
@@ -179,7 +186,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             BufferPanel(
-              label: 'Output',
+              label: context.tr('recipe.output'),
               kind: widget.recipe?.output?.kind.name ?? 'text',
               content: _previewText,
               live: _previewing,
@@ -219,12 +226,12 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Ingredients (${_steps.length})',
+                      '${context.tr('recipe.ingredients')} (${_steps.length})',
                       style: theme.textTheme.titleLarge,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Tutup panel ingredients',
+                    tooltip: context.tr('recipe.closePanel'),
                     onPressed: () =>
                         _scaffoldKey.currentState?.closeEndDrawer(),
                     icon: const Icon(Icons.close),
@@ -240,7 +247,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 AppSpacing.md,
               ),
               child: AppButton(
-                label: 'Tambah ingredients',
+                label: context.tr('recipe.addIngredient'),
                 variant: AppButtonVariant.secondary,
                 icon: Icons.add,
                 expand: true,
@@ -260,7 +267,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            'Belum ada ingredients. Tambahkan operasi dari Library.',
+            context.tr('recipe.emptyIngredients'),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall,
           ),
@@ -290,7 +297,9 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             index: index,
             child: StepCard(
               name: descriptor?.name ?? step.operationId,
-              category: descriptor?.category.label ?? 'Operasi',
+              category:
+                  descriptor?.category.label ??
+                  context.tr('recipe.operationFallback'),
               enabled: step.enabled,
               state: _stateFor(step),
               errorMessage: _stepErrors[step.id]?.message,
@@ -329,9 +338,9 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     _scaffoldKey.currentState?.closeEndDrawer();
     showAppToast(
       context,
-      message: 'Ingredients dihapus',
+      message: context.tr('recipe.ingredientsDeleted'),
       tone: AppToastTone.warning,
-      undoLabel: 'Undo',
+      undoLabel: context.tr('common.undo'),
       onUndo: () {
         if (!mounted) {
           return;
@@ -376,7 +385,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     if (descriptor == null) {
       showAppToast(
         context,
-        message: 'Operasi ${step.operationId} tidak ditemukan.',
+        message: context.tr(
+          'recipe.operationNotFound',
+          args: <String, Object?>{'id': step.operationId},
+        ),
         tone: AppToastTone.warning,
       );
       return;
@@ -428,7 +440,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     final draft = Recipe(
       id: widget.recipe?.id ?? generateRecipeId(),
       name: _nameController.text.trim().isEmpty
-          ? 'Draft'
+          ? context.tr('recipe.draftName')
           : _nameController.text.trim(),
       steps: _steps,
       input: _inputBuffer(),
@@ -497,16 +509,16 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Buang perubahan?'),
-        content: const Text('Perubahan yang belum disimpan akan hilang.'),
+        title: Text(context.tr('recipe.discardTitle')),
+        content: Text(context.tr('recipe.discardBody')),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
+            child: Text(context.tr('common.cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Buang'),
+            child: Text(context.tr('common.discard')),
           ),
         ],
       ),
@@ -540,7 +552,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       });
       showAppToast(
         context,
-        message: 'Recipe disimpan',
+        message: context.tr('recipe.saved'),
         tone: AppToastTone.success,
       );
       Navigator.of(context).pop(saved);
@@ -576,13 +588,16 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       return;
     }
     try {
-      final path = await RecipeIo().export(draft);
+      final path = await RecipeIo().export(
+        draft,
+        dialogTitle: context.tr('recipe.exportDialogTitle'),
+      );
       if (!mounted || path == null) {
         return;
       }
       showAppToast(
         context,
-        message: 'Recipe diekspor',
+        message: context.tr('recipe.exported'),
         tone: AppToastTone.success,
       );
     } on AppError catch (error) {
@@ -593,7 +608,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal mengekspor recipe: $error',
+          message: context.tr(
+            'recipe.exportFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }
@@ -602,14 +620,16 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
 
   Future<void> _importRecipe() async {
     try {
-      final imported = await RecipeIo().import();
+      final imported = await RecipeIo().import(
+        dialogTitle: context.tr('recipe.importDialogTitle'),
+      );
       if (!mounted) {
         return;
       }
       _applyImported(imported);
       showAppToast(
         context,
-        message: 'Recipe diimpor',
+        message: context.tr('recipe.imported'),
         tone: AppToastTone.success,
       );
     } on AppError catch (error) {
@@ -620,7 +640,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal mengimpor recipe: $error',
+          message: context.tr(
+            'recipe.importFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }
@@ -646,10 +669,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.insert_drive_file_outlined),
-        title: Text(_inputFileName ?? 'file'),
-        subtitle: Text('${bytes.length} byte'),
+        title: Text(_inputFileName ?? context.tr('recipe.fileLabel')),
+        subtitle: Text(context.trPlural('common.bytes', bytes.length)),
         trailing: IconButton(
-          tooltip: 'Hapus file',
+          tooltip: context.tr('recipe.removeFile'),
           onPressed: () {
             setState(() {
               _inputBytes = null;
@@ -673,16 +696,18 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
 
   Future<void> _pickInputFile() async {
     try {
-      final file = await FilePicker.pickFile(dialogTitle: 'Pilih file input');
+      final file = await FilePicker.pickFile(
+        dialogTitle: context.tr('recipe.pickFileTitle'),
+      );
       if (file == null || !mounted) {
         return;
       }
       final path = file.path;
       if (path == null) {
-        throw const AppError(
+        throw AppError(
           category: ErrorCategory.storage,
           code: 'recipe.file_unreadable',
-          message: 'File tidak dapat dibaca.',
+          message: context.tr('recipe.fileUnreadable'),
         );
       }
       final handle = File(path);
@@ -691,7 +716,12 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         throw AppError(
           category: ErrorCategory.validation,
           code: 'recipe.file_too_large',
-          message: 'File melebihi batas ${maxInputBytes ~/ (1024 * 1024)} MiB.',
+          message: context.tr(
+            'recipe.fileTooLarge',
+            args: <String, Object?>{
+              'max': maxInputBytes ~/ (1024 * 1024),
+            },
+          ),
           details: <String, Object?>{'size': size},
         );
       }
@@ -711,7 +741,10 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal membaca file: $error',
+          message: context.tr(
+            'recipe.fileReadFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }

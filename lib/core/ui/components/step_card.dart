@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/app_localizations.dart';
 import '../design_tokens.dart';
 import 'app_badge.dart';
 
@@ -94,8 +95,8 @@ class StepCard extends StatelessWidget {
                           ),
                           if (tier != null) AppBadge(label: tier!),
                           if (_isUnsupported)
-                            const AppBadge(
-                              label: 'unsupported',
+                            AppBadge(
+                              label: context.tr('stepCard.unsupported'),
                               tone: AppBadgeTone.warning,
                             ),
                         ],
@@ -132,13 +133,13 @@ class StepCard extends StatelessWidget {
                   ),
                 if (onDelete != null)
                   IconButton(
-                    tooltip: 'Hapus ingredients',
+                    tooltip: context.tr('stepCard.delete'),
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete_outline, size: 20),
                   ),
                 if (onTap != null)
                   IconButton(
-                    tooltip: 'Atur ingredients',
+                    tooltip: context.tr('stepCard.configure'),
                     onPressed: _isUnsupported ? null : onTap,
                     icon: const Icon(Icons.chevron_right, size: 24),
                   ),

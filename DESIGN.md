@@ -167,11 +167,21 @@ Aturan:
 - Aksi: "Batal" (ghost) dan "Terapkan" (primary). Tap luar atau tombol
   tutup membatalkan tanpa mengubah args.
 
+### 6.10 Bahasa & Teks
+- Semua teks UI berasal dari katalog JSON `assets/i18n/id.json` dan
+  `assets/i18n/en.json`; tidak ada string UI yang di-hardcode di widget.
+- Bahasa aktif dipilih di Settings dan disimpan; default Indonesia.
+- Interpolasi memakai placeholder `{nama}` dan plural `_one`/`_other`
+  berdasarkan `count`.
+- Istilah "Ingredients" dipertahankan di kedua bahasa sebagai nama fitur.
+- Nama operasi, deskripsi plugin, dan pesan error domain belum diterjemahkan;
+  katalog hanya mencakup teks antarmuka.
+
 ## 7. Navigasi
 - Bottom navigation 3 tab: Home, Library, Settings.
 - Home: daftar recipe tersimpan + tombol "Recipe Baru".
 - Library: daftar operasi (dari plugin aktif) + pencarian.
-- Settings: tema, plugin manager, tentang, privasi.
+- Settings: tema, bahasa, plugin manager, tentang, privasi.
 - Recipe Editor dibuka sebagai layar penuh (bukan tab) dengan tombol back.
 - Panel ingredients di Recipe Editor dibuka dari ikon Ingredients (keranjang)
   di AppBar dan meluncur dari kanan (end drawer) berisi seluruh daftar
@@ -341,6 +351,8 @@ layar; daftar ingredients tetap terlihat di panel kanan.
 - [ ] Text scaling 1.3x tidak merusak layout.
 - [ ] Tidak ada gradient, shadow berlebih, atau aksen ganda.
 - [ ] Semua ikon aksi punya label semantik.
+- [ ] Semua teks UI ada di katalog Indonesia dan Inggris; tidak ada string
+      hardcoded di widget.
 
 ## 16. Pertanyaan Terbuka
 - Finalisasi font: Inter vs system font (perlu uji di Android/iOS).

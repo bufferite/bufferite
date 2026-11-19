@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../core/i18n/app_localizations.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/design_tokens.dart';
@@ -29,30 +30,48 @@ class PluginDetailPage extends StatelessWidget {
               AppBadge(label: manifest.tier.name),
               AppBadge(label: plugin.source.name),
               if (!plugin.verified)
-                const AppBadge(label: 'unverified', tone: AppBadgeTone.warning),
+                AppBadge(
+                  label: context.tr('common.unverified'),
+                  tone: AppBadgeTone.warning,
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          _section(theme, 'Manifest'),
-          _kv('ID', manifest.pluginId),
-          _kv('Versi', manifest.version.toString()),
-          _kv('Min. app', manifest.minAppVersion.toString()),
-          _kv('Entrypoint', manifest.entrypoint),
-          _kv('Ukuran', _sizeLabel()),
+          _section(theme, context.tr('plugins.detail.manifest')),
+          _kv(context.tr('plugins.detail.id'), manifest.pluginId),
+          _kv(
+            context.tr('plugins.detail.version'),
+            manifest.version.toString(),
+          ),
+          _kv(
+            context.tr('plugins.detail.minApp'),
+            manifest.minAppVersion.toString(),
+          ),
+          _kv(context.tr('plugins.detail.entrypoint'), manifest.entrypoint),
+          _kv(context.tr('plugins.detail.size'), _sizeLabel(context)),
           const SizedBox(height: AppSpacing.lg),
-          _section(theme, 'Izin'),
+          _section(theme, context.tr('plugins.detail.permissions')),
           if (manifest.permissions.isEmpty)
-            const Text('Tidak ada izin tambahan.')
+            Text(context.tr('plugins.detail.noExtraPermissions'))
           else
             for (final permission in manifest.permissions)
               _kv('•', permission.wireName),
           const SizedBox(height: AppSpacing.lg),
-          _section(theme, 'Operasi (${manifest.operations.length})'),
+          _section(
+            theme,
+            context.tr('plugins.detail.operations', args: <String, Object?>{
+              'count': manifest.operations.length,
+            }),
+          ),
           for (final operation in manifest.operations)
             _kv(operation.id, operation.category.label),
           const SizedBox(height: AppSpacing.lg),
-          _section(theme, 'Integritas'),
-          _kv('SHA-256', manifest.integritySha256 ?? 'tidak ditandatangani'),
+          _section(theme, context.tr('plugins.detail.integrity')),
+          _kv(
+            'SHA-256',
+            manifest.integritySha256 ??
+                context.tr('plugins.detail.unsigned'),
+          ),
         ],
       ),
     );
@@ -84,14 +103,14 @@ class PluginDetailPage extends StatelessWidget {
     );
   }
 
-  String _sizeLabel() {
+  String _sizeLabel(BuildContext context) {
     final path = plugin.installPath;
     if (path == null) {
-      return 'tidak diketahui';
+      return context.tr('plugins.detail.unknown');
     }
     final directory = Directory(path);
     if (!directory.existsSync()) {
-      return 'tidak ditemukan';
+      return context.tr('plugins.detail.notFound');
     }
     var total = 0;
     for (final entity in directory.listSync(recursive: true)) {
@@ -99,6 +118,6 @@ class PluginDetailPage extends StatelessWidget {
         total += entity.lengthSync();
       }
     }
-    return '$total byte';
+    return context.trPlural('common.bytes', total);
   }
 }

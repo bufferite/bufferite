@@ -11,25 +11,23 @@ class SettingsController extends AsyncNotifier<AppSettings> {
   }
 
   Future<void> setStepTimeout(Duration timeout) async {
-    final current = state.value ?? AppSettings.defaults;
-    await _save(current.copyWith(stepTimeout: timeout));
+    await _update((current) => current.copyWith(stepTimeout: timeout));
   }
 
   Future<void> setMemoryLimitBytes(int bytes) async {
-    final current = state.value ?? AppSettings.defaults;
-    await _save(current.copyWith(memoryLimitBytes: bytes));
+    await _update((current) => current.copyWith(memoryLimitBytes: bytes));
   }
 
   Future<void> setOptInLogging(bool enabled) async {
-    final current = state.value ?? AppSettings.defaults;
-    await _save(current.copyWith(optInLogging: enabled));
+    await _update((current) => current.copyWith(optInLogging: enabled));
   }
 
-  Future<void> _save(AppSettings settings) async {
-    final updated = await ref
-        .read(settingsRepositoryProvider)
-        .save(settings)
-        .then((_) => settings);
+  /// Memuat ulang dari repository sebelum menyimpan agar perubahan dari
+  /// controller lain (tema/bahasa) tidak tertimpa nilai lama.
+  Future<void> _update(AppSettings Function(AppSettings) transform) async {
+    final repository = ref.read(settingsRepositoryProvider);
+    final updated = transform(await repository.load());
+    await repository.save(updated);
     state = AsyncData(updated);
   }
 }

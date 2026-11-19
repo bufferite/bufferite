@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/i18n/app_localizations.dart';
 import '../../core/plugin/operation_param.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/design_tokens.dart';
@@ -108,7 +109,7 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Tutup',
+                    tooltip: context.tr('common.close'),
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close),
                   ),
@@ -130,7 +131,7 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
                       Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.sm),
                         child: Text(
-                          'Operasi ini tidak punya parameter.',
+                          context.tr('stepConfig.noParams'),
                           style: theme.textTheme.bodySmall,
                         ),
                       ),
@@ -159,12 +160,15 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   AppButton(
-                    label: 'Batal',
+                    label: context.tr('common.cancel'),
                     variant: AppButtonVariant.ghost,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  AppButton(label: 'Terapkan', onPressed: _apply),
+                  AppButton(
+                    label: context.tr('common.apply'),
+                    onPressed: _apply,
+                  ),
                 ],
               ),
             ),

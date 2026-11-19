@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/i18n/app_localizations.dart';
 import '../../core/plugin/operation.dart';
 import '../../core/plugin/operation_registry.dart';
 import '../../core/ui/components/app_badge.dart';
@@ -47,7 +48,7 @@ class _OperationPickerState extends State<OperationPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chips = _chips();
+    final chips = _chips(context);
     final results = _filtered();
 
     return Column(
@@ -69,9 +70,9 @@ class _OperationPickerState extends State<OperationPicker> {
           child: TextField(
             autofocus: true,
             onChanged: (value) => setState(() => _query = value),
-            decoration: const InputDecoration(
-              hintText: 'Cari operasi',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              hintText: context.tr('picker.searchHint'),
+              prefixIcon: const Icon(Icons.search),
             ),
           ),
         ),
@@ -99,7 +100,7 @@ class _OperationPickerState extends State<OperationPicker> {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xl),
                     child: Text(
-                      'Tidak ada operasi cocok',
+                      context.tr('picker.noMatch'),
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -121,10 +122,10 @@ class _OperationPickerState extends State<OperationPicker> {
     );
   }
 
-  List<_ChipData> _chips() {
+  List<_ChipData> _chips(BuildContext context) {
     return <_ChipData>[
       _ChipData(
-        label: 'Favorit',
+        label: context.tr('picker.favorites'),
         selected: _favoritesOnly,
         onSelected: () => _favoritesOnly = !_favoritesOnly,
       ),

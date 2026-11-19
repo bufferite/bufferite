@@ -527,6 +527,15 @@ sebelum registry dibuka publik.
 - [ ] **F17-T04** Dukungan desktop/web.
 - [ ] **F17-T05** Integrasi share sheet dan automation.
 
+## F18 — Lokalisasi Antarmuka (P2, pasca-MVP)
+
+- [x] **F18-T01** Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa
+  di Settings.
+  - `assets/i18n/{id,en}.json`, loader/delegate, persistensi locale di
+    `SettingsRepository`, dan migrasi string UI (Home, Library, Editor,
+    Plugin Manager, Settings, dialog, toast).
+  - Nama operasi/plugin dan pesan error domain belum diterjemahkan.
+
 ---
 
 ## D — Keputusan yang Harus Diambil Manusia

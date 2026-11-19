@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/app_localizations.dart';
 import '../../plugin/plugin_permission.dart';
 import '../design_tokens.dart';
 
@@ -41,13 +42,19 @@ class PermissionDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(
-        _hasNetwork ? 'Plugin meminta akses internet' : 'Plugin meminta izin',
+        context.tr(
+          _hasNetwork ? 'permissions.networkTitle' : 'permissions.title',
+        ),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('$pluginName meminta izin berikut:'),
+          Text(
+            context.tr('permissions.body', args: <String, Object?>{
+              'name': pluginName,
+            }),
+          ),
           const SizedBox(height: AppSpacing.md),
           for (final permission in permissions)
             Padding(
@@ -61,13 +68,13 @@ class PermissionDialog extends StatelessWidget {
                     color: palette.textSecondary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: Text(_description(permission))),
+                  Expanded(child: Text(_description(context, permission))),
                 ],
               ),
             ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Hanya setujui bila kamu memercayai plugin ini.',
+            context.tr('permissions.warning'),
             style: theme.textTheme.bodySmall?.copyWith(
               color: palette.textSecondary,
             ),
@@ -77,14 +84,14 @@ class PermissionDialog extends StatelessWidget {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Batal'),
+          child: Text(context.tr('common.cancel')),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
           style: _hasNetwork
               ? FilledButton.styleFrom(backgroundColor: palette.danger)
               : null,
-          child: const Text('Setujui'),
+          child: Text(context.tr('permissions.approve')),
         ),
       ],
     );
@@ -99,12 +106,12 @@ class PermissionDialog extends StatelessWidget {
     };
   }
 
-  String _description(PluginPermission permission) {
+  String _description(BuildContext context, PluginPermission permission) {
     return switch (permission) {
-      PluginPermission.cpu => 'cpu — memproses data di perangkat',
-      PluginPermission.net => 'net — mengakses internet',
-      PluginPermission.fileRead => 'file:read — membaca file',
-      PluginPermission.fileWrite => 'file:write — menulis file',
+      PluginPermission.cpu => context.tr('permissions.cpu'),
+      PluginPermission.net => context.tr('permissions.net'),
+      PluginPermission.fileRead => context.tr('permissions.fileRead'),
+      PluginPermission.fileWrite => context.tr('permissions.fileWrite'),
     };
   }
 }

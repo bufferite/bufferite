@@ -1,3 +1,4 @@
+import 'package:bufferite/core/i18n/language_provider.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
 import 'package:bufferite/core/ui/theme_provider.dart';
 import 'package:bufferite/features/settings/settings_page.dart';
@@ -17,6 +18,19 @@ class FakeThemeController extends ThemeModeController {
   Future<void> setMode(AppThemeMode mode) async {
     calls.add(mode);
     state = AsyncData(mode);
+  }
+}
+
+class FakeLanguageController extends LanguageController {
+  @override
+  Future<AppLanguage> build() async => AppLanguage.indonesian;
+
+  final List<AppLanguage> calls = <AppLanguage>[];
+
+  @override
+  Future<void> setLanguage(AppLanguage language) async {
+    calls.add(language);
+    state = AsyncData(language);
   }
 }
 
@@ -46,11 +60,16 @@ class FakeSettingsController extends SettingsController {
 }
 
 late FakeSettingsController settingsController;
+late FakeLanguageController languageController;
 
 Widget _host() {
   return ProviderScope(
     overrides: [
       themeModeProvider.overrideWith(FakeThemeController.new),
+      languageProvider.overrideWith(() {
+        languageController = FakeLanguageController();
+        return languageController;
+      }),
       settingsProvider.overrideWith(() {
         settingsController = FakeSettingsController();
         return settingsController;
@@ -70,14 +89,25 @@ Future<void> _pump(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('menampilkan pilihan tema dan sandbox', (tester) async {
+  testWidgets('menampilkan pilihan tema, bahasa, dan sandbox', (tester) async {
     await _pump(tester);
 
     expect(find.text('Sistem'), findsOneWidget);
     expect(find.text('Terang'), findsOneWidget);
     expect(find.text('Gelap'), findsOneWidget);
+    expect(find.text('Bahasa Indonesia'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
     expect(find.text('Batas waktu per operasi (ms)'), findsOneWidget);
     expect(find.text('Batas memori (MiB)'), findsOneWidget);
+  });
+
+  testWidgets('memilih bahasa memanggil setLanguage', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    expect(languageController.calls, <AppLanguage>[AppLanguage.english]);
   });
 
   testWidgets('memilih tema memanggil setMode', (tester) async {

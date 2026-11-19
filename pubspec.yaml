@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   archive: ^4.6.0
   crypto: ^3.0.8
@@ -69,6 +71,7 @@ flutter:
   assets:
     - assets/core.berp
     - assets/lua_runtime.wasm
+    - assets/i18n/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

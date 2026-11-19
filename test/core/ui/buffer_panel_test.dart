@@ -89,7 +89,7 @@ void main() {
       _host(const BufferPanel(label: 'Input', content: 'salin aku')),
     );
 
-    await tester.tap(find.byTooltip('Copy'));
+    await tester.tap(find.byIcon(Icons.copy));
     await tester.pumpAndSettle();
     expect(copied, 'salin aku');
   });

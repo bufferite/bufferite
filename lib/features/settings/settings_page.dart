@@ -7,6 +7,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../core/bootstrap/bootstrap_provider.dart';
 import '../../core/bootstrap/core_bootstrap_service.dart';
+import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/language_provider.dart';
 import '../../core/storage/app_database.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
@@ -45,6 +47,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ref.watch(themeModeProvider).asData?.value ?? AppThemeMode.system;
     final settings =
         ref.watch(settingsProvider).asData?.value ?? AppSettings.defaults;
+    final language =
+        ref.watch(languageProvider).asData?.value ?? AppLanguage.indonesian;
 
     if (!_initialized) {
       _timeoutController.text = settings.stepTimeout.inMilliseconds.toString();
@@ -54,28 +58,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.tr('settings.title'))),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: <Widget>[
-          Text('Tampilan', style: theme.textTheme.titleLarge),
+          Text(context.tr('settings.appearance'), style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           SegmentedButton<AppThemeMode>(
-            segments: const <ButtonSegment<AppThemeMode>>[
+            segments: <ButtonSegment<AppThemeMode>>[
               ButtonSegment<AppThemeMode>(
                 value: AppThemeMode.system,
-                label: Text('Sistem'),
-                icon: Icon(Icons.brightness_auto),
+                label: Text(context.tr('settings.themeSystem')),
+                icon: const Icon(Icons.brightness_auto),
               ),
               ButtonSegment<AppThemeMode>(
                 value: AppThemeMode.light,
-                label: Text('Terang'),
-                icon: Icon(Icons.light_mode),
+                label: Text(context.tr('settings.themeLight')),
+                icon: const Icon(Icons.light_mode),
               ),
               ButtonSegment<AppThemeMode>(
                 value: AppThemeMode.dark,
-                label: Text('Gelap'),
-                icon: Icon(Icons.dark_mode),
+                label: Text(context.tr('settings.themeDark')),
+                icon: const Icon(Icons.dark_mode),
               ),
             ],
             selected: <AppThemeMode>{mode},
@@ -83,36 +87,63 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ref.read(themeModeProvider.notifier).setMode(selection.first);
             },
           ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            context.tr('settings.languageLabel'),
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          SegmentedButton<AppLanguage>(
+            segments: <ButtonSegment<AppLanguage>>[
+              ButtonSegment<AppLanguage>(
+                value: AppLanguage.indonesian,
+                label: Text(context.tr('settings.languageIndonesian')),
+              ),
+              ButtonSegment<AppLanguage>(
+                value: AppLanguage.english,
+                label: Text(context.tr('settings.languageEnglish')),
+              ),
+            ],
+            selected: <AppLanguage>{language},
+            onSelectionChanged: (selection) {
+              ref
+                  .read(languageProvider.notifier)
+                  .setLanguage(selection.first);
+            },
+          ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Sandbox', style: theme.textTheme.titleLarge),
+          Text(context.tr('settings.sandbox'), style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _timeoutController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Batas waktu per operasi (ms)',
+            decoration: InputDecoration(
+              labelText: context.tr('settings.timeoutLabel'),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _memoryController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Batas memori (MiB)'),
+            decoration: InputDecoration(
+              labelText: context.tr('settings.memoryLabel'),
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           FilledButton(
             onPressed: _saveLimits,
-            child: const Text('Simpan batas sandbox'),
+            child: Text(context.tr('settings.saveLimits')),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Privasi & Log', style: theme.textTheme.titleLarge),
+          Text(
+            context.tr('settings.privacyLogs'),
+            style: theme.textTheme.titleLarge,
+          ),
           const SizedBox(height: AppSpacing.sm),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Ikut serta kirim log eksekusi'),
-            subtitle: const Text(
-              'Default mati. Log tidak pernah dikirim tanpa izin.',
-            ),
+            title: Text(context.tr('settings.optIn')),
+            subtitle: Text(context.tr('settings.optInSubtitle')),
             value: settings.optInLogging,
             onChanged: (value) =>
                 ref.read(settingsProvider.notifier).setOptInLogging(value),
@@ -120,36 +151,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           OutlinedButton.icon(
             onPressed: _clearLogs,
             icon: const Icon(Icons.delete_outline),
-            label: const Text('Hapus log'),
+            label: Text(context.tr('settings.clearLogs')),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Tentang', style: theme.textTheme.titleLarge),
+          Text(context.tr('settings.about'), style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
-          const ListTile(
+          ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Bufferite'),
-            subtitle: Text('Versi 1.0.0 · Lisensi MIT'),
-          ),
-          const ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text('Privasi'),
+            title: const Text('Bufferite'),
             subtitle: Text(
-              'Offline-first. Data dan resep tidak keluar dari perangkat; '
-              'hanya katalog plugin Fase 2 yang memakai jaringan.',
+              context.tr('settings.version', args: <String, Object?>{
+                'version': '1.0.0',
+              }),
             ),
           ),
-          const ListTile(
+          ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Kode sumber'),
-            subtitle: Text('github.com/bufferite/bufferite'),
+            title: Text(context.tr('settings.privacy')),
+            subtitle: Text(context.tr('settings.privacyBody')),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.tr('settings.sourceCode')),
+            subtitle: const Text('github.com/bufferite/bufferite'),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Data', style: theme.textTheme.titleLarge),
+          Text(context.tr('settings.data'), style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           OutlinedButton.icon(
             onPressed: _reinstallCore,
             icon: const Icon(Icons.refresh),
-            label: const Text('Instal ulang core.berp'),
+            label: Text(context.tr('settings.reinstallCore')),
           ),
           const SizedBox(height: AppSpacing.sm),
           OutlinedButton.icon(
@@ -158,7 +190,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               foregroundColor: theme.colorScheme.error,
             ),
             icon: const Icon(Icons.delete_forever),
-            label: const Text('Reset data'),
+            label: Text(context.tr('settings.resetData')),
           ),
         ],
       ),
@@ -174,7 +206,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         memoryMib <= 0) {
       showAppToast(
         context,
-        message: 'Nilai batas harus angka positif.',
+        message: context.tr('settings.invalidLimits'),
         tone: AppToastTone.error,
       );
       return;
@@ -186,7 +218,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (mounted) {
       showAppToast(
         context,
-        message: 'Batas sandbox disimpan',
+        message: context.tr('settings.limitsSaved'),
         tone: AppToastTone.success,
       );
     }
@@ -202,7 +234,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Log dihapus',
+          message: context.tr('settings.logsCleared'),
           tone: AppToastTone.success,
         );
       }
@@ -210,7 +242,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal menghapus log: $error',
+          message: context.tr(
+            'settings.logsClearFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }
@@ -219,9 +254,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _reinstallCore() async {
     final confirmed = await _confirm(
-      'Instal ulang core.berp?',
-      'Bootstrap dijalankan ulang dan operasi inti dipasang kembali bila aset '
-          'tersedia.',
+      context.tr('settings.reinstallTitle'),
+      context.tr('settings.reinstallBody'),
     );
     if (!confirmed || !mounted) {
       return;
@@ -235,7 +269,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Core.berp dipasang ulang',
+          message: context.tr('settings.reinstalled'),
           tone: AppToastTone.success,
         );
       }
@@ -243,7 +277,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal memasang ulang core: $error',
+          message: context.tr(
+            'settings.reinstallFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }
@@ -252,9 +289,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _resetData() async {
     final confirmed = await _confirm(
-      'Reset data?',
-      'Semua recipe, plugin, dan pengaturan akan dihapus. Tindakan ini tidak '
-          'dapat dibatalkan.',
+      context.tr('settings.resetTitle'),
+      context.tr('settings.resetBody'),
       destructive: true,
     );
     if (!confirmed || !mounted) {
@@ -274,7 +310,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Data direset',
+          message: context.tr('settings.resetDone'),
           tone: AppToastTone.success,
         );
       }
@@ -282,7 +318,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         showAppToast(
           context,
-          message: 'Gagal reset data: $error',
+          message: context.tr(
+            'settings.resetFailed',
+            args: <String, Object?>{'error': error},
+          ),
           tone: AppToastTone.error,
         );
       }
@@ -302,7 +341,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
+            child: Text(context.tr('common.cancel')),
           ),
           FilledButton(
             style: destructive
@@ -311,7 +350,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   )
                 : null,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Lanjut'),
+            child: Text(context.tr('common.continue')),
           ),
         ],
       ),

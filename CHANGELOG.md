@@ -9,8 +9,14 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Spesifikasi registry plugin v1 (`REGISTRY.md`): skema `registry.json`,
   signature Ed25519, konsen jaringan, cache, update/rollback, revocation,
   dan acceptance criteria F16.
+- Lokalisasi antarmuka EN/ID berbasis katalog JSON
+  (`assets/i18n/{id,en}.json`) dengan pemilih bahasa di Settings,
+  interpolasi/plural, dan persistensi bahasa lewat `SettingsRepository`.
 
 ### Diubah
+- Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,
+  dialog, dan toast dipindahkan ke katalog terjemahan; istilah
+  "Ingredients" dipertahankan di kedua bahasa.
 - Sinkronisasi dokumen dengan kondisi 1.0: `lua_dart` default, engine WASM
   opt-in, status implementasi sideload/bootstrap/isolate, dan penghapusan
   referensi `wasm_run`.

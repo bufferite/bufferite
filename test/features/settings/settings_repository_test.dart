@@ -32,6 +32,7 @@ void main() {
     final settings = await repository.load();
 
     expect(settings.themeMode, AppThemeMode.system);
+    expect(settings.language, AppLanguage.indonesian);
     expect(settings.stepTimeout, const Duration(seconds: 2));
     expect(settings.memoryLimitBytes, 64 * 1024 * 1024);
     expect(settings.optInLogging, isFalse);
@@ -40,6 +41,7 @@ void main() {
   test('save lalu load mengembalikan nilai yang sama', () async {
     final settings = AppSettings(
       themeMode: AppThemeMode.dark,
+      language: AppLanguage.english,
       stepTimeout: const Duration(milliseconds: 750),
       memoryLimitBytes: 8 * 1024 * 1024,
       optInLogging: true,
@@ -56,7 +58,11 @@ void main() {
 
   test('nilai persist setelah database dibuka ulang', () async {
     await repository.save(
-      AppSettings(themeMode: AppThemeMode.light, optInLogging: true),
+      AppSettings(
+        themeMode: AppThemeMode.light,
+        language: AppLanguage.english,
+        optInLogging: true,
+      ),
     );
     await appDatabase.close();
 
@@ -67,6 +73,7 @@ void main() {
     final reopened = SettingsRepository(reopenedDatabase);
     final settings = await reopened.load();
     expect(settings.themeMode, AppThemeMode.light);
+    expect(settings.language, AppLanguage.english);
     expect(settings.optInLogging, isTrue);
     await reopenedDatabase.close();
   });
@@ -89,6 +96,10 @@ void main() {
       'key': SettingsRepository.optInLoggingKey,
       'value': 'yes',
     });
+    await db.insert('setting', <String, Object?>{
+      'key': SettingsRepository.languageKey,
+      'value': 'klingon',
+    });
 
     final settings = await repository.load();
     expect(settings, AppSettings.defaults);
@@ -99,7 +110,7 @@ void main() {
     await repository.save(AppSettings(themeMode: AppThemeMode.dark));
 
     final db = await appDatabase.open();
-    expect(await db.query('setting'), hasLength(4));
+    expect(await db.query('setting'), hasLength(5));
   });
 
   test('AppSettings menolak batas resource tidak valid', () {

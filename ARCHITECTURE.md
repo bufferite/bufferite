@@ -142,8 +142,9 @@ Implementasi storage MVP:
   `FavoriteRepository` (`lib/features/library/favorite_repository.dart`).
   Data JSON menjadi sumber kebenaran; kolom terpisah dipakai untuk query dan
   status.
-- `SettingsRepository` memakai default aman: tema system, timeout 2 detik,
-  memori 64 MiB, log opt-in false; nilai rusak jatuh ke default per-key.
+- `SettingsRepository` memakai default aman: tema system, bahasa Indonesia,
+  timeout 2 detik, memori 64 MiB, log opt-in false; nilai rusak jatuh ke
+  default per-key.
 - `PluginPackageStore` (`lib/core/plugin/plugin_package_store.dart`) menulis
   paket ke `<root>/<pluginId>/<version>` lewat direktori staging + rename
   atomik; staging dibersihkan saat gagal dan uninstall.
@@ -169,6 +170,11 @@ Implementasi storage MVP:
 - Riverpod untuk state management.
 - Dependency injection via Provider/Riverpod; hindari singleton mutable.
 - Pipeline executor berjalan di isolate; komunikasi via port/stream.
+- Lokalisasi UI memakai katalog JSON `assets/i18n/{id,en}.json`.
+  `AppLocalizations.preload()` memuat katalog sekali sebelum `runApp`,
+  `AppLocalizationsScope` menyediakan `context.tr`/`context.trPlural`, dan
+  `LanguageController` menyimpan bahasa aktif lewat `SettingsRepository`
+  (key `language`).
 
 ## 10. Keputusan Terkunci
 - Inti minimal; semua operasi plugin.

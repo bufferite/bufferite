@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../i18n/app_localizations.dart';
 import '../ui/components/app_button.dart';
 import '../ui/components/empty_state.dart';
 import '../ui/design_tokens.dart';
@@ -27,12 +28,16 @@ class _BootstrapGateState extends ConsumerState<BootstrapGate> {
     return bootstrap.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, stackTrace) => _failure('Bootstrap gagal: $error'),
+      error: (error, stackTrace) => _failure(
+        context.tr('bootstrap.failed', args: <String, Object?>{'error': error}),
+      ),
       data: (result) {
         if (result.ready || _continueAnyway) {
           return widget.child;
         }
-        return _failure(result.message ?? 'Bootstrap gagal.');
+        return _failure(
+          result.message ?? context.tr('bootstrap.failedShort'),
+        );
       },
     );
   }
@@ -45,7 +50,7 @@ class _BootstrapGateState extends ConsumerState<BootstrapGate> {
           Expanded(
             child: EmptyState(
               icon: Icons.report_gmailerrorred_outlined,
-              title: 'Operasi inti tidak tersedia',
+              title: context.tr('bootstrap.unavailableTitle'),
               description: message,
             ),
           ),
@@ -55,7 +60,7 @@ class _BootstrapGateState extends ConsumerState<BootstrapGate> {
               children: <Widget>[
                 Expanded(
                   child: AppButton(
-                    label: 'Coba lagi',
+                    label: context.tr('bootstrap.retry'),
                     variant: AppButtonVariant.secondary,
                     onPressed: () => ref.invalidate(coreBootstrapProvider),
                   ),
@@ -63,7 +68,7 @@ class _BootstrapGateState extends ConsumerState<BootstrapGate> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: AppButton(
-                    label: 'Lanjutkan',
+                    label: context.tr('bootstrap.continue'),
                     onPressed: () => setState(() => _continueAnyway = true),
                   ),
                 ),

@@ -18,10 +18,31 @@ enum AppThemeMode {
   }
 }
 
+/// Bahasa antarmuka yang didukung.
+enum AppLanguage {
+  indonesian('id'),
+  english('en');
+
+  const AppLanguage(this.code);
+
+  /// Kode locale yang dipakai katalog `assets/i18n/<code>.json`.
+  final String code;
+
+  static AppLanguage parse(String? value) {
+    for (final language in values) {
+      if (language.name == value || language.code == value) {
+        return language;
+      }
+    }
+    return indonesian;
+  }
+}
+
 /// Preferensi aplikasi yang aman secara default.
 final class AppSettings {
   AppSettings({
     this.themeMode = AppThemeMode.system,
+    this.language = AppLanguage.indonesian,
     this.stepTimeout = const Duration(seconds: 2),
     this.memoryLimitBytes = 64 * 1024 * 1024,
     this.optInLogging = false,
@@ -45,6 +66,7 @@ final class AppSettings {
   static final AppSettings defaults = AppSettings();
 
   final AppThemeMode themeMode;
+  final AppLanguage language;
   final Duration stepTimeout;
   final int memoryLimitBytes;
 
@@ -58,12 +80,14 @@ final class AppSettings {
 
   AppSettings copyWith({
     AppThemeMode? themeMode,
+    AppLanguage? language,
     Duration? stepTimeout,
     int? memoryLimitBytes,
     bool? optInLogging,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
+      language: language ?? this.language,
       stepTimeout: stepTimeout ?? this.stepTimeout,
       memoryLimitBytes: memoryLimitBytes ?? this.memoryLimitBytes,
       optInLogging: optInLogging ?? this.optInLogging,
@@ -74,6 +98,7 @@ final class AppSettings {
   bool operator ==(Object other) {
     return other is AppSettings &&
         other.themeMode == themeMode &&
+        other.language == language &&
         other.stepTimeout == stepTimeout &&
         other.memoryLimitBytes == memoryLimitBytes &&
         other.optInLogging == optInLogging;
@@ -81,7 +106,13 @@ final class AppSettings {
 
   @override
   int get hashCode {
-    return Object.hash(themeMode, stepTimeout, memoryLimitBytes, optInLogging);
+    return Object.hash(
+      themeMode,
+      language,
+      stepTimeout,
+      memoryLimitBytes,
+      optInLogging,
+    );
   }
 }
 
@@ -93,12 +124,14 @@ final class SettingsRepository {
   SettingsRepository(this._database);
 
   static const String themeKey = 'theme';
+  static const String languageKey = 'language';
   static const String stepTimeoutKey = 'sandbox.step_timeout_ms';
   static const String memoryLimitKey = 'sandbox.memory_limit_bytes';
   static const String optInLoggingKey = 'logging.opt_in';
 
   static const List<String> _keys = <String>[
     themeKey,
+    languageKey,
     stepTimeoutKey,
     memoryLimitKey,
     optInLoggingKey,
@@ -108,9 +141,10 @@ final class SettingsRepository {
 
   Future<AppSettings> load() async {
     final db = await _database.open();
+    final placeholders = List<String>.filled(_keys.length, '?').join(', ');
     final rows = await db.query(
       'setting',
-      where: 'key IN (?, ?, ?, ?)',
+      where: 'key IN ($placeholders)',
       whereArgs: _keys,
     );
     final values = <String, String>{
@@ -121,6 +155,7 @@ final class SettingsRepository {
 
     return AppSettings(
       themeMode: AppThemeMode.parse(values[themeKey]),
+      language: AppLanguage.parse(values[languageKey]),
       stepTimeout: Duration(
         milliseconds: _positiveInt(
           values[stepTimeoutKey],
@@ -139,6 +174,7 @@ final class SettingsRepository {
     final db = await _database.open();
     final values = <String, String>{
       themeKey: settings.themeMode.name,
+      languageKey: settings.language.name,
       stepTimeoutKey: settings.stepTimeout.inMilliseconds.toString(),
       memoryLimitKey: settings.memoryLimitBytes.toString(),
       optInLoggingKey: settings.optInLogging ? 'true' : 'false',

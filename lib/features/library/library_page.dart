@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n/app_localizations.dart';
 import '../../core/plugin/operation.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/empty_state.dart';
@@ -33,10 +34,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Library'),
+        title: Text(context.tr('nav.library')),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Kelola plugin',
+            tooltip: context.tr('library.managePlugins'),
             icon: const Icon(Icons.extension_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -53,9 +54,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: TextField(
               onChanged: (value) => setState(() => _query = value),
-              decoration: const InputDecoration(
-                hintText: 'Cari operasi',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: context.tr('library.searchHint'),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
@@ -67,7 +68,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 children: <Widget>[
                   FilterChip(
-                    label: const Text('Semua'),
+                    label: Text(context.tr('library.all')),
                     selected: _category == null && !_favoritesOnly,
                     onSelected: (_) => setState(() {
                       _category = null;
@@ -76,7 +77,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   FilterChip(
-                    label: const Text('Favorit'),
+                    label: Text(context.tr('library.favorites')),
                     selected: _favoritesOnly,
                     onSelected: (_) => setState(() {
                       _favoritesOnly = !_favoritesOnly;
@@ -105,11 +106,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             child: catalog.isEmpty
                 ? EmptyState(
                     icon: Icons.extension_outlined,
-                    title: 'Belum ada operasi',
-                    description:
-                        'Pasang plugin dari file atau buka katalog untuk '
-                        'menambah operasi.',
-                    actionLabel: 'Buka Plugin Manager',
+                    title: context.tr('library.emptyTitle'),
+                    description: context.tr('library.emptyDescription'),
+                    actionLabel: context.tr('library.openPluginManager'),
                     onAction: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (context) => const PluginManagerPage(),
@@ -119,7 +118,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 : items.isEmpty
                 ? Center(
                     child: Text(
-                      _emptyFilterMessage(),
+                      _emptyFilterMessage(context),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   )
@@ -166,14 +165,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     return items.toList();
   }
 
-  String _emptyFilterMessage() {
+  String _emptyFilterMessage(BuildContext context) {
     if (_favoritesOnly) {
-      return 'Belum ada operasi favorit';
+      return context.tr('library.noFavorites');
     }
     if (_category != null) {
-      return 'Tidak ada operasi di kategori ini';
+      return context.tr('library.noCategory');
     }
-    return 'Tidak ada operasi cocok';
+    return context.tr('library.noMatch');
   }
 
   Widget _tile(OperationCatalogEntry entry, bool isFavorite) {
@@ -186,7 +185,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       ),
       leading: AppBadge(label: entry.entry.descriptor.tier.name),
       trailing: IconButton(
-        tooltip: isFavorite ? 'Hapus favorit' : 'Favorit',
+        tooltip: isFavorite
+            ? context.tr('library.favoriteRemove')
+            : context.tr('library.favoriteAdd'),
         icon: Icon(isFavorite ? Icons.star : Icons.star_border),
         onPressed: () =>
             ref.read(favoritesProvider.notifier).toggle(entry.operationId),
@@ -221,8 +222,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 if (entry.pluginName != null)
                   AppBadge(label: entry.pluginName!, tone: AppBadgeTone.accent),
                 if (!entry.verified)
-                  const AppBadge(
-                    label: 'unverified',
+                  AppBadge(
+                    label: context.tr('common.unverified'),
                     tone: AppBadgeTone.warning,
                   ),
               ],
@@ -230,8 +231,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             const SizedBox(height: AppSpacing.md),
             Text(
               descriptor.isSupported
-                  ? 'Parameter: ${descriptor.params.length}'
-                  : 'Operasi tidak didukung runtime ini.',
+                  ? context.tr('library.params', args: <String, Object?>{
+                      'count': descriptor.params.length,
+                    })
+                  : context.tr('library.unsupported'),
             ),
           ],
         ),

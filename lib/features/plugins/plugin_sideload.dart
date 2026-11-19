@@ -17,9 +17,9 @@ class PluginSideloadService {
   final Ref _ref;
 
   /// Memilih dan memvalidasi paket `.berp`. `null` bila dibatalkan.
-  Future<PluginPackage?> pick() async {
+  Future<PluginPackage?> pick({String? dialogTitle}) async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Pilih paket plugin',
+      dialogTitle: dialogTitle ?? 'Pilih paket plugin',
       type: FileType.custom,
       allowedExtensions: const <String>['berp'],
     );

@@ -53,7 +53,7 @@ class FakePluginSideload extends PluginSideloadService {
   late final PluginPackage package = PluginPackage.decode(buildPackageZip());
 
   @override
-  Future<PluginPackage?> pick() async => package;
+  Future<PluginPackage?> pick({String? dialogTitle}) async => package;
 
   @override
   Future<InstalledPlugin> install(PluginPackage package) async {

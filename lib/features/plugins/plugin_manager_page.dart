@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/app_error.dart';
+import '../../core/i18n/app_localizations.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/plugin_permission.dart';
 import '../../core/plugin/semantic_version.dart';
@@ -26,13 +27,13 @@ class PluginManagerPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plugin Manager'),
+        title: Text(context.tr('plugins.title')),
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: OutlinedButton(
               onPressed: () => _sideload(context, ref),
-              child: const Text('Instal dari file'),
+              child: Text(context.tr('plugins.installFromFile')),
             ),
           ),
           Padding(
@@ -44,7 +45,7 @@ class PluginManagerPage extends ConsumerWidget {
             ),
             child: OutlinedButton(
               onPressed: () => _showCatalogInfo(context),
-              child: const Text('Buka katalog'),
+              child: Text(context.tr('plugins.openCatalog')),
             ),
           ),
         ],
@@ -53,16 +54,14 @@ class PluginManagerPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => EmptyState(
           icon: Icons.error_outline,
-          title: 'Gagal memuat plugin',
+          title: context.tr('plugins.loadFailed'),
           description: error.toString(),
         ),
         data: (items) => items.isEmpty
-            ? const EmptyState(
+            ? EmptyState(
                 icon: Icons.extension_outlined,
-                title: 'Belum ada plugin terpasang',
-                description:
-                    'Instal plugin dari file .berp (sideload) atau buka '
-                    'katalog saat tersedia.',
+                title: context.tr('plugins.emptyTitle'),
+                description: context.tr('plugins.emptyDescription'),
               )
             : ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -93,7 +92,7 @@ class PluginManagerPage extends ConsumerWidget {
           ),
         ),
         trailing: PopupMenuButton<String>(
-          tooltip: 'Aksi plugin',
+          tooltip: context.tr('plugins.actions'),
           onSelected: (value) {
             if (value == 'toggle') {
               _toggleEnabled(context, ref, plugin);
@@ -104,9 +103,16 @@ class PluginManagerPage extends ConsumerWidget {
           itemBuilder: (context) => <PopupMenuEntry<String>>[
             PopupMenuItem<String>(
               value: 'toggle',
-              child: Text(plugin.enabled ? 'Nonaktifkan' : 'Aktifkan'),
+              child: Text(
+                plugin.enabled
+                    ? context.tr('plugins.disable')
+                    : context.tr('plugins.enable'),
+              ),
             ),
-            const PopupMenuItem<String>(value: 'remove', child: Text('Hapus')),
+            PopupMenuItem<String>(
+              value: 'remove',
+              child: Text(context.tr('common.delete')),
+            ),
           ],
         ),
         subtitle: Column(
@@ -115,8 +121,12 @@ class PluginManagerPage extends ConsumerWidget {
             Text('${manifest.pluginId} · v${manifest.version}'),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Sumber: ${plugin.source.name} · Izin: '
-              '${manifest.permissions.map((p) => p.wireName).join(', ')}',
+              context.tr('plugins.sourcePermissions', args: <String, Object?>{
+                'source': plugin.source.name,
+                'permissions': manifest.permissions
+                    .map((permission) => permission.wireName)
+                    .join(', '),
+              }),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -125,7 +135,7 @@ class PluginManagerPage extends ConsumerWidget {
               runSpacing: AppSpacing.xs,
               children: <Widget>[
                 AppBadge(label: manifest.tier.name),
-                _statusBadge(status),
+                _statusBadge(context, status),
               ],
             ),
           ],
@@ -134,19 +144,21 @@ class PluginManagerPage extends ConsumerWidget {
     );
   }
 
-  Widget _statusBadge(PluginStatus status) {
+  Widget _statusBadge(BuildContext context, PluginStatus status) {
     return switch (status) {
-      PluginStatus.active => const AppBadge(
-        label: 'aktif',
+      PluginStatus.active => AppBadge(
+        label: context.tr('plugins.status.active'),
         tone: AppBadgeTone.success,
       ),
-      PluginStatus.disabled => const AppBadge(label: 'nonaktif'),
-      PluginStatus.unverified => const AppBadge(
-        label: 'unverified',
+      PluginStatus.disabled => AppBadge(
+        label: context.tr('plugins.status.disabled'),
+      ),
+      PluginStatus.unverified => AppBadge(
+        label: context.tr('plugins.status.unverified'),
         tone: AppBadgeTone.warning,
       ),
-      PluginStatus.incompatible => const AppBadge(
-        label: 'inkompatibel',
+      PluginStatus.incompatible => AppBadge(
+        label: context.tr('plugins.status.incompatible'),
         tone: AppBadgeTone.danger,
       ),
     };
@@ -167,8 +179,10 @@ class PluginManagerPage extends ConsumerWidget {
     showAppToast(
       context,
       message: ok
-          ? (target ? 'Plugin diaktifkan' : 'Plugin dinonaktifkan')
-          : 'Plugin tidak ditemukan',
+          ? (target
+                ? context.tr('plugins.enabledToast')
+                : context.tr('plugins.disabledToast'))
+          : context.tr('plugins.notFound'),
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
@@ -182,24 +196,29 @@ class PluginManagerPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isCore ? 'Hapus plugin core?' : 'Hapus plugin?'),
+        title: Text(
+          context.tr(
+            isCore ? 'plugins.removeCoreTitle' : 'plugins.removeTitle',
+          ),
+        ),
         content: Text(
           isCore
-              ? 'Plugin core menyediakan operasi bawaan. Menghapusnya membuat '
-                    'operasi inti tidak tersedia sampai direinstalasi.'
-              : '"${plugin.manifest.name}" akan dihapus.',
+              ? context.tr('plugins.removeCoreBody')
+              : context.tr('plugins.removeBody', args: <String, Object?>{
+                  'name': plugin.manifest.name,
+                }),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
+            child: Text(context.tr('common.cancel')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Hapus'),
+            child: Text(context.tr('common.delete')),
           ),
         ],
       ),
@@ -213,7 +232,9 @@ class PluginManagerPage extends ConsumerWidget {
     }
     showAppToast(
       context,
-      message: ok ? 'Plugin dihapus' : 'Plugin tidak ditemukan',
+      message: ok
+          ? context.tr('plugins.removed')
+          : context.tr('plugins.notFound'),
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
@@ -222,16 +243,12 @@ class PluginManagerPage extends ConsumerWidget {
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Buka katalog plugin?'),
-        content: const Text(
-          'Katalog memerlukan akses internet. Bufferite tetap offline untuk '
-          'data dan resepmu; hanya katalog yang memakai jaringan.\n\n'
-          'Katalog belum tersedia sampai registry Fase 2 dirilis.',
-        ),
+        title: Text(context.tr('plugins.catalogTitle')),
+        content: Text(context.tr('plugins.catalogBody')),
         actions: <Widget>[
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Mengerti'),
+            child: Text(context.tr('common.understood')),
           ),
         ],
       ),
@@ -241,7 +258,9 @@ class PluginManagerPage extends ConsumerWidget {
   Future<void> _sideload(BuildContext context, WidgetRef ref) async {
     final service = ref.read(pluginSideloadProvider);
     try {
-      final package = await service.pick();
+      final package = await service.pick(
+        dialogTitle: context.tr('plugins.pickFileTitle'),
+      );
       if (package == null || !context.mounted) {
         return;
       }
@@ -249,20 +268,25 @@ class PluginManagerPage extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Instal plugin?'),
+          title: Text(context.tr('plugins.installTitle')),
           content: Text(
-            '${manifest.name} v${manifest.version}\n'
-            '${manifest.pluginId}\n'
-            'Izin: ${manifest.permissions.map((p) => p.wireName).join(', ')}',
+            context.tr('plugins.installBody', args: <String, Object?>{
+              'name': manifest.name,
+              'version': manifest.version,
+              'id': manifest.pluginId,
+              'permissions': manifest.permissions
+                  .map((permission) => permission.wireName)
+                  .join(', '),
+            }),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Batal'),
+              child: Text(context.tr('common.cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Instal'),
+              child: Text(context.tr('common.install')),
             ),
           ],
         ),
@@ -291,7 +315,9 @@ class PluginManagerPage extends ConsumerWidget {
       }
       showAppToast(
         context,
-        message: '${plugin.manifest.name} terpasang',
+        message: context.tr('plugins.installed', args: <String, Object?>{
+          'name': plugin.manifest.name,
+        }),
         tone: AppToastTone.success,
       );
     } on AppError catch (error) {
@@ -302,7 +328,9 @@ class PluginManagerPage extends ConsumerWidget {
       if (context.mounted) {
         showAppToast(
           context,
-          message: 'Gagal memasang plugin: $error',
+          message: context.tr('plugins.installFailed', args: <String, Object?>{
+            'error': error,
+          }),
           tone: AppToastTone.error,
         );
       }

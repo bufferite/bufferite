@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../i18n/app_localizations.dart';
 import 'design_tokens.dart';
 
 /// App shell dengan bottom navigation 3 tab.
@@ -40,21 +41,21 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (index) => setState(() => _index = index),
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: context.tr('nav.home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_outlined),
-            activeIcon: Icon(Icons.grid_view),
-            label: 'Library',
+            icon: const Icon(Icons.grid_view_outlined),
+            activeIcon: const Icon(Icons.grid_view),
+            label: context.tr('nav.library'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            activeIcon: const Icon(Icons.settings),
+            label: context.tr('nav.settings'),
           ),
         ],
       ),
@@ -84,14 +85,13 @@ class HomePlaceholder extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Belum ada recipe',
+                context.tr('shell.emptyTitle'),
                 style: theme.textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Racik data dengan resep. Recipe builder akan tersedia '
-                'setelah fondasi selesai.',
+                context.tr('shell.emptyDescription'),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -112,8 +112,8 @@ class LibraryPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Library')),
-      body: const Center(child: Text('Katalog operasi')),
+      appBar: AppBar(title: Text(context.tr('nav.library'))),
+      body: Center(child: Text(context.tr('shell.catalog'))),
     );
   }
 }
@@ -125,8 +125,8 @@ class SettingsPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('Pengaturan')),
+      appBar: AppBar(title: Text(context.tr('nav.settings'))),
+      body: Center(child: Text(context.tr('shell.settingsBody'))),
     );
   }
 }
