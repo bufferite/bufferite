@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (512 test, 2026-11-19) |
+| Test suite | Lulus (515 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -222,6 +222,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-15 | F04-T05 | Sideload end-to-end di emulator | `lib/features/plugins/plugin_sideload.dart` | emulator: `sample.berp` → preview `Sample Pack` → Instal → muncul di Library (`unverified`) | `be0e346` |
 | 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `be0e346` |
 | 2026-11-19 | Docs | Spesifikasi registry v1 + sinkronisasi dokumen basi (runtime, status implementasi, D12/D13) | `REGISTRY.md`, `PLUGINS.md`, `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`, `README.md`, `PRIVACY.md`, `ROADMAP.md`, `TODO.md` | Link Markdown lokal resolve; `git diff --check` bersih; 512 test tidak berubah | `583647a` |
+| 2026-11-19 | UX | Recipe Editor: output di bawah input, daftar step di panel kanan (end drawer), konfigurasi parameter jadi dialog tengah | `recipe_editor_page.dart`, `step_config_dialog.dart`, `step_card.dart`, `app_badge.dart` | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: drawer, picker, dialog, dan live output diverifikasi | `ad88b19` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1477,6 +1478,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   tidak ada perubahan kode (512 test tetap).
 - Catatan/risiko: registry belum diimplementasikan; D12/D13 masih terbuka.
 - Commit: `583647a`
+
+### CP-068 — 2026-11-19 — Revisi UI Recipe Editor (panel step + dialog parameter)
+
+- Status: Selesai
+- Perubahan:
+  - Badan editor kini Nama → Input → Output; output langsung di bawah input
+    dan tidak lagi berada setelah daftar step.
+  - Daftar step dipindah ke panel samping kanan (`endDrawer`) yang dibuka
+    dari aksi Step di AppBar dengan badge jumlah step; panel berisi tambah,
+    reorder, toggle, hapus, dan akses konfigurasi.
+  - Konfigurasi parameter memakai `showStepConfigDialog`/`StepConfigDialog`
+    (dialog tengah, maksimum 480) menggantikan bottom sheet; Operation
+    Picker tetap bottom sheet.
+  - `StepCard` menampilkan nama operasi dan badge kategori/tier di `Wrap`
+    agar tidak overflow di panel sempit; `AppBadge` memakai `letterSpacing: 0`.
+  - `DESIGN.md` §6.2, §6.9, §8.2, dan §10 diperbarui; CHANGELOG, TODO, dan
+    progress disinkronkan.
+- File: `lib/features/recipe/recipe_editor_page.dart`,
+  `lib/features/operations/step_config_dialog.dart`,
+  `lib/core/ui/components/step_card.dart`,
+  `lib/core/ui/components/app_badge.dart`, test terkait.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 515 lulus;
+  emulator Android 12: drawer step, picker, dialog konfigurasi, dan live
+  output diverifikasi lewat screenshot.
+- Catatan/risiko: Operation Picker tetap bottom sheet sesuai keputusan;
+  verifikasi visual hanya di emulator 720×1640, belum tablet/desktop.
+- Commit: `ad88b19`
 
 ## 7. Template Checkpoint Baru
 
