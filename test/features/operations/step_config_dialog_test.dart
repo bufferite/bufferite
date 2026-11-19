@@ -44,6 +44,7 @@ Future<Map<String, Object?>?> _show(
               onPressed: () async {
                 result = await showStepConfigDialog(
                   context,
+                  operationId: 'test.operation',
                   title: 'Konfigurasi',
                   params: _params,
                   initialArgs: initial,

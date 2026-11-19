@@ -58,9 +58,10 @@ class AppLocalizations {
 
   /// Instance untuk [locale], jatuh ke [defaultLocale] bila tidak didukung.
   static AppLocalizations forLocale(Locale locale) {
-    final code = supportedLocales.any(
-      (supported) => supported.languageCode == locale.languageCode,
-    )
+    final code =
+        supportedLocales.any(
+          (supported) => supported.languageCode == locale.languageCode,
+        )
         ? locale.languageCode
         : defaultLocale.languageCode;
     return AppLocalizations._(
@@ -73,9 +74,34 @@ class AppLocalizations {
   ///
   /// Bila key tidak ada di katalog aktif, katalog Indonesia dipakai; bila
   /// tetap tidak ada, key dikembalikan apa adanya.
-  String tr(String key, {Map<String, Object?> args = const <String, Object?>{}}) {
+  String tr(
+    String key, {
+    Map<String, Object?> args = const <String, Object?>{},
+  }) {
     final template =
         _strings[key] ?? _catalogs[defaultLocale.languageCode]?[key] ?? key;
+    return _interpolate(template, args);
+  }
+
+  /// Terjemahan mentah untuk [key], atau `null` bila tidak tersedia.
+  ///
+  /// Dipakai saat pemanggil punya fallback sendiri, mis. metadata operasi dari
+  /// manifest plugin yang tidak selalu ada di katalog.
+  String? trOrNull(String key) {
+    return _strings[key] ?? _catalogs[defaultLocale.languageCode]?[key];
+  }
+
+  /// Terjemahan untuk [key], atau [fallback] bila tidak tersedia.
+  String trOr(String key, String fallback) => trOrNull(key) ?? fallback;
+
+  /// Interpolasi placeholder `{nama}` pada [template].
+  ///
+  /// Diekspos agar helper lokalisasi lain (mis. pesan error terstruktur) bisa
+  /// memakai aturan interpolasi yang sama.
+  String format(
+    String template, {
+    Map<String, Object?> args = const <String, Object?>{},
+  }) {
     return _interpolate(template, args);
   }
 
@@ -92,10 +118,7 @@ class AppLocalizations {
         _strings[key] ??
         _catalogs[defaultLocale.languageCode]?[key] ??
         key;
-    return _interpolate(template, <String, Object?>{
-      ...args,
-      'count': count,
-    });
+    return _interpolate(template, <String, Object?>{...args, 'count': count});
   }
 
   static String _interpolate(String template, Map<String, Object?> args) {
@@ -148,8 +171,16 @@ class AppLocalizationsScope extends InheritedWidget {
 
 extension AppLocalizationsContextX on BuildContext {
   /// Terjemahan untuk [key] sesuai bahasa aktif.
-  String tr(String key, {Map<String, Object?> args = const <String, Object?>{}}) {
+  String tr(
+    String key, {
+    Map<String, Object?> args = const <String, Object?>{},
+  }) {
     return AppLocalizationsScope.of(this).tr(key, args: args);
+  }
+
+  /// Terjemahan untuk [key], atau [fallback] bila tidak tersedia.
+  String trOr(String key, String fallback) {
+    return AppLocalizationsScope.of(this).trOr(key, fallback);
   }
 
   /// Terjemahan plural untuk [key] sesuai bahasa aktif.

@@ -1,3 +1,5 @@
+import 'package:bufferite/core/i18n/app_localizations.dart';
+import 'package:bufferite/core/operations/core_operations.dart';
 import 'package:bufferite/core/plugin/operation.dart';
 import 'package:bufferite/core/plugin/operation_registry.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
@@ -39,14 +41,34 @@ OperationRegistry _registry() {
 Widget _host({
   required OperationRegistry registry,
   Set<String> favorites = const <String>{},
+  bool english = false,
 }) {
+  final app = MaterialApp(theme: AppTheme.light(), home: const LibraryPage());
   return ProviderScope(
     overrides: [
       operationRegistryProvider.overrideWithValue(registry),
       favoritesProvider.overrideWith(() => _FakeFavorites(favorites)),
     ],
-    child: MaterialApp(theme: AppTheme.light(), home: const LibraryPage()),
+    child: english
+        ? AppLocalizationsScope(
+            localizations: AppLocalizations.forLocale(const Locale('en')),
+            child: app,
+          )
+        : app,
   );
+}
+
+OperationRegistry _coreRegistry() {
+  final registry = OperationRegistry();
+  for (final operation in coreOperations) {
+    registry.registerOperation(
+      operation,
+      pluginId: 'dev.bufferite.core',
+      pluginVersion: '1.0.0',
+      tier: RuntimeTier.dsl,
+    );
+  }
+  return registry;
 }
 
 void main() {
@@ -137,5 +159,18 @@ void main() {
     await tester.pump();
 
     expect(find.text('Belum ada operasi favorit'), findsOneWidget);
+  });
+
+  testWidgets('metadata operasi inti mengikuti bahasa Inggris', (tester) async {
+    await tester.pumpWidget(_host(registry: _coreRegistry(), english: true));
+    await tester.pump();
+
+    expect(find.widgetWithText(FilterChip, 'Crypto'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'slice');
+    await tester.pump();
+
+    expect(find.text('Slice'), findsOneWidget);
+    expect(find.text('Potong'), findsNothing);
   });
 }

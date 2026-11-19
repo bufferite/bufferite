@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/operation_localization.dart';
 import '../../core/plugin/operation.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/empty_state.dart';
@@ -27,10 +28,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   Widget build(BuildContext context) {
     final catalog = ref.watch(operationCatalogProvider);
     final favorites = ref.watch(favoritesProvider).value ?? const <String>{};
-    final items = _filtered(catalog, favorites);
-    final categories = <OperationCategory>{
-      for (final entry in catalog) entry.entry.descriptor.category,
-    }.toList()..sort((a, b) => a.label.compareTo(b.label));
+    final items = _filtered(context, catalog, favorites);
+    final categories =
+        <OperationCategory>{
+          for (final entry in catalog) entry.entry.descriptor.category,
+        }.toList()..sort(
+          (a, b) => operationCategoryLabel(
+            context,
+            a,
+          ).compareTo(operationCategoryLabel(context, b)),
+        );
 
     return Scaffold(
       appBar: AppBar(
@@ -89,7 +96,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   for (final category in categories) ...<Widget>[
                     const SizedBox(width: AppSpacing.sm),
                     FilterChip(
-                      label: Text(category.label),
+                      label: Text(operationCategoryLabel(context, category)),
                       selected: _category == category,
                       onSelected: (_) => setState(() {
                         _category = _category == category ? null : category;
@@ -141,17 +148,22 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   List<OperationCatalogEntry> _filtered(
+    BuildContext context,
     List<OperationCatalogEntry> catalog,
     Set<String> favorites,
   ) {
     final query = _query.trim().toLowerCase();
     Iterable<OperationCatalogEntry> items = catalog;
     if (query.isNotEmpty) {
-      items = items.where(
-        (entry) =>
-            entry.name.toLowerCase().contains(query) ||
-            entry.operationId.toLowerCase().contains(query),
-      );
+      items = items.where((entry) {
+        final descriptor = entry.entry.descriptor;
+        return operationName(
+              context,
+              descriptor,
+            ).toLowerCase().contains(query) ||
+            descriptor.name.toLowerCase().contains(query) ||
+            entry.operationId.toLowerCase().contains(query);
+      });
     }
     final category = _category;
     if (category != null) {
@@ -162,7 +174,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     if (_favoritesOnly) {
       items = items.where((entry) => favorites.contains(entry.operationId));
     }
-    return items.toList();
+    final result = items.toList();
+    result.sort(
+      (a, b) => operationName(context, a.entry.descriptor)
+          .toLowerCase()
+          .compareTo(operationName(context, b.entry.descriptor).toLowerCase()),
+    );
+    return result;
   }
 
   String _emptyFilterMessage(BuildContext context) {
@@ -176,12 +194,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   Widget _tile(OperationCatalogEntry entry, bool isFavorite) {
+    final category = operationCategoryLabel(
+      context,
+      entry.entry.descriptor.category,
+    );
     return ListTile(
-      title: Text(entry.name),
+      title: Text(operationName(context, entry.entry.descriptor)),
       subtitle: Text(
-        entry.pluginName == null
-            ? entry.entry.descriptor.category.label
-            : '${entry.entry.descriptor.category.label} · ${entry.pluginName}',
+        entry.pluginName == null ? category : '$category · ${entry.pluginName}',
       ),
       leading: AppBadge(label: entry.entry.descriptor.tier.name),
       trailing: IconButton(
@@ -208,7 +228,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              descriptor.name,
+              operationName(context, descriptor),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -217,7 +237,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             Wrap(
               spacing: AppSpacing.sm,
               children: <Widget>[
-                AppBadge(label: descriptor.category.label),
+                AppBadge(
+                  label: operationCategoryLabel(context, descriptor.category),
+                ),
                 AppBadge(label: descriptor.tier.name),
                 if (entry.pluginName != null)
                   AppBadge(label: entry.pluginName!, tone: AppBadgeTone.accent),
@@ -231,9 +253,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             const SizedBox(height: AppSpacing.md),
             Text(
               descriptor.isSupported
-                  ? context.tr('library.params', args: <String, Object?>{
-                      'count': descriptor.params.length,
-                    })
+                  ? context.tr(
+                      'library.params',
+                      args: <String, Object?>{
+                        'count': descriptor.params.length,
+                      },
+                    )
                   : context.tr('library.unsupported'),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/operation_localization.dart';
 import '../../core/plugin/operation.dart';
 import '../../core/plugin/operation_registry.dart';
 import '../../core/ui/components/app_badge.dart';
@@ -49,7 +50,7 @@ class _OperationPickerState extends State<OperationPicker> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final chips = _chips(context);
-    final results = _filtered();
+    final results = _filtered(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,18 +132,32 @@ class _OperationPickerState extends State<OperationPicker> {
       ),
       for (final category in OperationCategory.values)
         _ChipData(
-          label: category.label,
+          label: operationCategoryLabel(context, category),
           selected: _category == category,
           onSelected: () => _category = _category == category ? null : category,
         ),
     ];
   }
 
-  List<RegisteredOperation> _filtered() {
-    Iterable<RegisteredOperation> items = widget.registry.search(
-      _query,
+  List<RegisteredOperation> _filtered(BuildContext context) {
+    final query = _query.trim().toLowerCase();
+    Iterable<RegisteredOperation> items = widget.registry.all(
       includeUnsupported: true,
     );
+    if (query.isNotEmpty) {
+      items = items.where((entry) {
+        final descriptor = entry.descriptor;
+        return descriptor.id.toLowerCase().contains(query) ||
+            operationName(context, descriptor).toLowerCase().contains(query) ||
+            descriptor.name.toLowerCase().contains(query) ||
+            operationCategoryLabel(
+              context,
+              descriptor.category,
+            ).toLowerCase().contains(query) ||
+            descriptor.category.label.toLowerCase().contains(query) ||
+            descriptor.pluginId.toLowerCase().contains(query);
+      });
+    }
     final category = _category;
     if (category != null) {
       items = items.where((entry) => entry.descriptor.category == category);
@@ -152,15 +167,21 @@ class _OperationPickerState extends State<OperationPicker> {
         (entry) => widget.favorites.contains(entry.descriptor.id),
       );
     }
-    return List<RegisteredOperation>.unmodifiable(items);
+    final result = items.toList();
+    result.sort(
+      (a, b) => operationName(context, a.descriptor).toLowerCase().compareTo(
+        operationName(context, b.descriptor).toLowerCase(),
+      ),
+    );
+    return List<RegisteredOperation>.unmodifiable(result);
   }
 
   Widget _tile(RegisteredOperation entry, ThemeData theme) {
     final descriptor = entry.descriptor;
     return ListTile(
       enabled: descriptor.isSupported,
-      title: Text(descriptor.name),
-      subtitle: Text(descriptor.category.label),
+      title: Text(operationName(context, descriptor)),
+      subtitle: Text(operationCategoryLabel(context, descriptor.category)),
       trailing: AppBadge(label: descriptor.tier.name),
       onTap: descriptor.isSupported
           ? () => Navigator.of(context).pop(descriptor)

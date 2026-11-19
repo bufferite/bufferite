@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../i18n/app_localizations.dart';
+import '../i18n/localized_error.dart';
 import '../ui/components/app_button.dart';
 import '../ui/components/empty_state.dart';
 import '../ui/design_tokens.dart';
@@ -28,17 +29,25 @@ class _BootstrapGateState extends ConsumerState<BootstrapGate> {
     return bootstrap.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, stackTrace) => _failure(
-        context.tr('bootstrap.failed', args: <String, Object?>{'error': error}),
-      ),
+      error: (error, stackTrace) => _failure(_errorMessage(context, error)),
       data: (result) {
         if (result.ready || _continueAnyway) {
           return widget.child;
         }
+        final error = result.error;
         return _failure(
-          result.message ?? context.tr('bootstrap.failedShort'),
+          error == null
+              ? context.tr('bootstrap.failedShort')
+              : _errorMessage(context, error),
         );
       },
+    );
+  }
+
+  String _errorMessage(BuildContext context, Object error) {
+    return context.tr(
+      'bootstrap.failed',
+      args: <String, Object?>{'error': context.trErrorObject(error)},
     );
   }
 

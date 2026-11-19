@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/app_error.dart';
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/localized_error.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/plugin_permission.dart';
 import '../../core/plugin/semantic_version.dart';
@@ -55,7 +56,7 @@ class PluginManagerPage extends ConsumerWidget {
         error: (error, stackTrace) => EmptyState(
           icon: Icons.error_outline,
           title: context.tr('plugins.loadFailed'),
-          description: error.toString(),
+          description: context.trErrorObject(error),
         ),
         data: (items) => items.isEmpty
             ? EmptyState(
@@ -121,12 +122,15 @@ class PluginManagerPage extends ConsumerWidget {
             Text('${manifest.pluginId} · v${manifest.version}'),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              context.tr('plugins.sourcePermissions', args: <String, Object?>{
-                'source': plugin.source.name,
-                'permissions': manifest.permissions
-                    .map((permission) => permission.wireName)
-                    .join(', '),
-              }),
+              context.tr(
+                'plugins.sourcePermissions',
+                args: <String, Object?>{
+                  'source': plugin.source.name,
+                  'permissions': manifest.permissions
+                      .map((permission) => permission.wireName)
+                      .join(', '),
+                },
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -204,9 +208,10 @@ class PluginManagerPage extends ConsumerWidget {
         content: Text(
           isCore
               ? context.tr('plugins.removeCoreBody')
-              : context.tr('plugins.removeBody', args: <String, Object?>{
-                  'name': plugin.manifest.name,
-                }),
+              : context.tr(
+                  'plugins.removeBody',
+                  args: <String, Object?>{'name': plugin.manifest.name},
+                ),
         ),
         actions: <Widget>[
           TextButton(
@@ -270,14 +275,17 @@ class PluginManagerPage extends ConsumerWidget {
         builder: (context) => AlertDialog(
           title: Text(context.tr('plugins.installTitle')),
           content: Text(
-            context.tr('plugins.installBody', args: <String, Object?>{
-              'name': manifest.name,
-              'version': manifest.version,
-              'id': manifest.pluginId,
-              'permissions': manifest.permissions
-                  .map((permission) => permission.wireName)
-                  .join(', '),
-            }),
+            context.tr(
+              'plugins.installBody',
+              args: <String, Object?>{
+                'name': manifest.name,
+                'version': manifest.version,
+                'id': manifest.pluginId,
+                'permissions': manifest.permissions
+                    .map((permission) => permission.wireName)
+                    .join(', '),
+              },
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -315,22 +323,28 @@ class PluginManagerPage extends ConsumerWidget {
       }
       showAppToast(
         context,
-        message: context.tr('plugins.installed', args: <String, Object?>{
-          'name': plugin.manifest.name,
-        }),
+        message: context.tr(
+          'plugins.installed',
+          args: <String, Object?>{'name': plugin.manifest.name},
+        ),
         tone: AppToastTone.success,
       );
     } on AppError catch (error) {
       if (context.mounted) {
-        showAppToast(context, message: error.message, tone: AppToastTone.error);
+        showAppToast(
+          context,
+          message: context.trError(error),
+          tone: AppToastTone.error,
+        );
       }
     } on Object catch (error) {
       if (context.mounted) {
         showAppToast(
           context,
-          message: context.tr('plugins.installFailed', args: <String, Object?>{
-            'error': error,
-          }),
+          message: context.tr(
+            'plugins.installFailed',
+            args: <String, Object?>{'error': context.trErrorObject(error)},
+          ),
           tone: AppToastTone.error,
         );
       }

@@ -230,5 +230,322 @@
     "resetBody": "Semua recipe, plugin, dan pengaturan akan dihapus. Tindakan ini tidak dapat dibatalkan.",
     "resetDone": "Data direset",
     "resetFailed": "Gagal reset data: {error}"
+  },
+  "operationCategory": {
+    "encodeDecode": "Encode/Decode",
+    "crypto": "Kripto",
+    "format": "Format",
+    "analysis": "Analisis",
+    "utility": "Utilitas"
+  },
+  "operations": {
+    "core.base64_encode": {
+      "name": "Encode Base64"
+    },
+    "core.base64_decode": {
+      "name": "Decode Base64"
+    },
+    "core.hex_encode": {
+      "name": "Encode Hex"
+    },
+    "core.hex_decode": {
+      "name": "Decode Hex"
+    },
+    "core.url_encode": {
+      "name": "Encode URL"
+    },
+    "core.url_decode": {
+      "name": "Decode URL"
+    },
+    "core.html_entity_encode": {
+      "name": "Encode Entitas HTML"
+    },
+    "core.html_entity_decode": {
+      "name": "Decode Entitas HTML"
+    },
+    "core.base32_encode": {
+      "name": "Encode Base32"
+    },
+    "core.base32_decode": {
+      "name": "Decode Base32"
+    },
+    "core.json_prettify": {
+      "name": "Rapikan JSON"
+    },
+    "core.json_minify": {
+      "name": "Kecilkan JSON"
+    },
+    "core.jwt_decode": {
+      "name": "Decode JWT"
+    },
+    "core.entropy": {
+      "name": "Entropi"
+    },
+    "core.frequency": {
+      "name": "Frekuensi Byte"
+    },
+    "core.file_type": {
+      "name": "Deteksi Tipe File"
+    },
+    "core.strings": {
+      "name": "Ekstrak String",
+      "params": {
+        "min_length": {
+          "label": "Panjang minimum"
+        }
+      }
+    },
+    "core.md5": {
+      "name": "MD5"
+    },
+    "core.sha1": {
+      "name": "SHA-1"
+    },
+    "core.sha256": {
+      "name": "SHA-256"
+    },
+    "core.sha512": {
+      "name": "SHA-512"
+    },
+    "core.hmac_sha1": {
+      "name": "HMAC-SHA1",
+      "params": {
+        "key": {
+          "label": "Kunci"
+        }
+      }
+    },
+    "core.hmac_sha256": {
+      "name": "HMAC-SHA256",
+      "params": {
+        "key": {
+          "label": "Kunci"
+        }
+      }
+    },
+    "core.hmac_sha512": {
+      "name": "HMAC-SHA512",
+      "params": {
+        "key": {
+          "label": "Kunci"
+        }
+      }
+    },
+    "core.aes_encrypt": {
+      "name": "Enkripsi AES",
+      "params": {
+        "mode": {
+          "label": "Mode",
+          "options": {
+            "cbc": "CBC (PKCS#7)",
+            "ctr": "CTR (tanpa padding)"
+          }
+        },
+        "key": {
+          "label": "Kunci (hex)",
+          "help": "Hex 32/48/64 karakter (AES-128/192/256)."
+        },
+        "iv": {
+          "label": "IV (hex)",
+          "help": "Hex 32 karakter (16 byte)."
+        },
+        "format": {
+          "label": "Format keluaran",
+          "options": {
+            "hex": "Hex",
+            "base64": "Base64"
+          }
+        }
+      }
+    },
+    "core.aes_decrypt": {
+      "name": "Dekripsi AES",
+      "params": {
+        "mode": {
+          "label": "Mode",
+          "options": {
+            "cbc": "CBC (PKCS#7)",
+            "ctr": "CTR (tanpa padding)"
+          }
+        },
+        "key": {
+          "label": "Kunci (hex)",
+          "help": "Hex 32/48/64 karakter (AES-128/192/256)."
+        },
+        "iv": {
+          "label": "IV (hex)",
+          "help": "Hex 32 karakter (16 byte)."
+        },
+        "format": {
+          "label": "Format masukan",
+          "options": {
+            "hex": "Hex",
+            "base64": "Base64"
+          }
+        },
+        "output": {
+          "label": "Keluaran",
+          "options": {
+            "text": "Teks UTF-8",
+            "hex": "Hex",
+            "base64": "Base64"
+          }
+        }
+      }
+    },
+    "core.xor": {
+      "name": "XOR",
+      "params": {
+        "key": {
+          "label": "Kunci"
+        },
+        "key_format": {
+          "label": "Format kunci",
+          "options": {
+            "text": "Teks UTF-8",
+            "hex": "Hex"
+          }
+        },
+        "output": {
+          "label": "Keluaran",
+          "options": {
+            "hex": "Hex",
+            "base64": "Base64"
+          }
+        }
+      }
+    },
+    "core.upper_case": {
+      "name": "Huruf Besar"
+    },
+    "core.lower_case": {
+      "name": "Huruf Kecil"
+    },
+    "core.title_case": {
+      "name": "Kapital Tiap Kata"
+    },
+    "core.reverse": {
+      "name": "Balik Teks"
+    },
+    "core.find_replace": {
+      "name": "Cari & Ganti",
+      "params": {
+        "find": {
+          "label": "Cari"
+        },
+        "replace": {
+          "label": "Ganti"
+        }
+      }
+    },
+    "core.regex_replace": {
+      "name": "Ganti Regex",
+      "params": {
+        "pattern": {
+          "label": "Pola"
+        },
+        "replacement": {
+          "label": "Ganti"
+        },
+        "ignore_case": {
+          "label": "Abaikan huruf besar/kecil"
+        }
+      }
+    },
+    "core.slice": {
+      "name": "Potong",
+      "params": {
+        "start": {
+          "label": "Mulai"
+        },
+        "end": {
+          "label": "Selesai (opsional)"
+        }
+      }
+    },
+    "core.sort_lines": {
+      "name": "Urutkan Baris"
+    },
+    "core.unique_lines": {
+      "name": "Baris Unik"
+    },
+    "core.random_hex": {
+      "name": "Hex Acak",
+      "params": {
+        "length": {
+          "label": "Panjang (byte)"
+        }
+      }
+    },
+    "core.random_bytes": {
+      "name": "Byte Acak",
+      "params": {
+        "length": {
+          "label": "Panjang (byte)"
+        }
+      }
+    }
+  },
+  "errors": {
+    "recipe": {
+      "schema_unsupported": "Versi schema recipe {schemaVersion} tidak didukung.",
+      "schema_missing": "Recipe wajib memiliki schemaVersion bertipe integer.",
+      "too_large": "Ukuran recipe melebihi batas {maxBytes} byte.",
+      "invalid_json": "Recipe bukan JSON yang valid.",
+      "invalid_json.not_object": "Recipe harus berupa objek JSON.",
+      "migration_missing": "Tidak ada migrasi dari schemaVersion {fromVersion}.",
+      "migration_invalid": "Migrasi schema {fromVersion} harus menaikkan versi ke {toVersion}.",
+      "migration_loop": "Migrasi recipe melebihi batas langkah.",
+      "encode_failed": "Recipe memuat nilai yang tidak dapat diserialisasi.",
+      "file_input_unsupported": "Input file tidak didukung di file .brecipe v1.",
+      "file_too_large": "File melebihi batas {max} MiB.",
+      "file_unreadable": "File tidak dapat dibaca.",
+      "import_cancelled": "Impor dibatalkan.",
+      "import_failed": "Gagal membaca file recipe.",
+      "invalid": {
+        "id": "ID recipe harus UUID v4.",
+        "name": "Nama recipe harus 1–{max} karakter.",
+        "steps": "Recipe harus memiliki 1–{max} step.",
+        "schemaVersion": "schemaVersion wajib berupa integer.",
+        "steps.args": "Args step harus berupa objek.",
+        "steps.enabled": "Field enabled harus berupa boolean.",
+        "steps.id": "ID step tidak boleh kosong.",
+        "steps.id.duplicate": "ID step duplikat: {stepId}",
+        "steps.operationId": "operationId step tidak boleh kosong.",
+        "input": "Field input wajib berupa objek Buffer.",
+        "output": "Field output harus berupa objek Buffer.",
+        "meta": "Field meta harus berupa objek.",
+        "meta.appVersion": "appVersion harus berupa string."
+      }
+    },
+    "operation": {
+      "param_required": "Parameter \"{label}\" wajib diisi.",
+      "param_out_of_range": {
+        "min": "Parameter \"{label}\" minimal {min}.",
+        "max": "Parameter \"{label}\" maksimal {max}.",
+        "select": "Nilai \"{value}\" bukan opsi valid untuk \"{label}\"."
+      },
+      "param_type_mismatch": "Parameter \"{label}\" harus bertipe {expected}.",
+      "param_unknown": "Argumen tidak dikenal: {param}",
+      "param_duplicate": "Definisi parameter duplikat: {param}",
+      "not_found": "Operasi {operationId} tidak ditemukan.",
+      "unsupported": "Operasi {operationId} tidak tersedia."
+    },
+    "core": {
+      "asset_missing": "Aset {assetPath} tidak ditemukan di aplikasi.",
+      "asset_missing.empty": "Aset {assetPath} kosong."
+    },
+    "storage": {
+      "corrupt_recipe": "Data recipe rusak dan tidak dapat dibaca.",
+      "corrupt_plugin": "Data plugin rusak dan tidak dapat dibaca."
+    },
+    "plugin": {
+      "file_unreadable": "File paket tidak dapat dibaca.",
+      "install_failed": "Gagal menyimpan paket plugin ke filesystem.",
+      "package_empty": "Paket .berp kosong.",
+      "package_invalid": "Paket .berp bukan zip yang valid.",
+      "manifest_missing": "Paket tidak memiliki plugin.manifest.json di root.",
+      "entrypoint_missing": "Entrypoint {entrypoint} tidak ada di dalam paket."
+    }
   }
 }

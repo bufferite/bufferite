@@ -29,7 +29,10 @@ final class CoreBootstrapService {
         category: ErrorCategory.plugin,
         code: 'core.asset_missing',
         message: 'Aset $assetPath tidak ditemukan di aplikasi.',
-        details: <String, Object?>{'error': error.toString()},
+        details: <String, Object?>{
+          'assetPath': assetPath,
+          'error': error.toString(),
+        },
       );
     }
     if (data.lengthInBytes == 0) {
@@ -37,6 +40,10 @@ final class CoreBootstrapService {
         category: ErrorCategory.plugin,
         code: 'core.asset_missing',
         message: 'Aset core.berp kosong.',
+        details: <String, Object?>{
+          'assetPath': assetPath,
+          'variant': 'empty',
+        },
       );
     }
 

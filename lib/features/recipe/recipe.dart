@@ -264,6 +264,7 @@ final class Recipe {
           category: ErrorCategory.validation,
           code: 'recipe.schema_unsupported',
           message: 'Versi schema recipe $schemaVersion tidak didukung.',
+          details: <String, Object?>{'schemaVersion': schemaVersion},
         ),
       );
     }
@@ -281,6 +282,7 @@ final class Recipe {
           'name',
           'Nama recipe harus 1–$maxRecipeNameLength karakter.',
           code: 'recipe.invalid',
+          details: <String, Object?>{'max': maxRecipeNameLength},
         ),
       );
     }
@@ -291,6 +293,7 @@ final class Recipe {
           'steps',
           'Recipe harus memiliki 1–$maxRecipeSteps step.',
           code: 'recipe.invalid',
+          details: <String, Object?>{'max': maxRecipeSteps},
         ),
       );
     }
@@ -313,6 +316,7 @@ final class Recipe {
             'ID step duplikat: ${step.id}',
             code: 'recipe.invalid',
             stepId: step.id,
+            details: <String, Object?>{'duplicate': true, 'stepId': step.id},
           ),
         );
       }
@@ -415,13 +419,14 @@ AppError _invalidField(
   String message, {
   String code = 'recipe.invalid',
   String? stepId,
+  Map<String, Object?> details = const <String, Object?>{},
 }) {
   return AppError(
     category: ErrorCategory.validation,
     code: code,
     message: message,
     stepId: stepId,
-    details: <String, Object?>{'field': field},
+    details: <String, Object?>{'field': field, ...details},
   );
 }
 

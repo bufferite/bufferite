@@ -35,6 +35,7 @@ final class RecipeCodec {
         _error(
           'recipe.too_large',
           'Ukuran recipe melebihi batas $maxBytes byte.',
+          <String, Object?>{'maxBytes': maxBytes},
         ),
       );
     }
@@ -54,7 +55,11 @@ final class RecipeCodec {
 
     if (decoded is! Map<String, Object?>) {
       return Err<Recipe>(
-        _error('recipe.invalid_json', 'Recipe harus berupa objek JSON.'),
+        _error(
+          'recipe.invalid_json',
+          'Recipe harus berupa objek JSON.',
+          <String, Object?>{'variant': 'not_object'},
+        ),
       );
     }
 
@@ -98,6 +103,10 @@ final class RecipeCodec {
           _error(
             'recipe.migration_invalid',
             'Migrasi schema $version harus menaikkan versi ke ${version + 1}.',
+            <String, Object?>{
+              'fromVersion': version,
+              'toVersion': version + 1,
+            },
           ),
         );
       }
@@ -154,6 +163,7 @@ final class RecipeCodec {
           _error(
             'recipe.too_large',
             'Ukuran recipe melebihi batas $maxBytes byte.',
+            <String, Object?>{'maxBytes': maxBytes},
           ),
         );
       }

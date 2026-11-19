@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/operation_localization.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/design_tokens.dart';
@@ -59,18 +60,21 @@ class PluginDetailPage extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           _section(
             theme,
-            context.tr('plugins.detail.operations', args: <String, Object?>{
-              'count': manifest.operations.length,
-            }),
+            context.tr(
+              'plugins.detail.operations',
+              args: <String, Object?>{'count': manifest.operations.length},
+            ),
           ),
           for (final operation in manifest.operations)
-            _kv(operation.id, operation.category.label),
+            _kv(
+              operation.id,
+              operationCategoryLabel(context, operation.category),
+            ),
           const SizedBox(height: AppSpacing.lg),
           _section(theme, context.tr('plugins.detail.integrity')),
           _kv(
             'SHA-256',
-            manifest.integritySha256 ??
-                context.tr('plugins.detail.unsigned'),
+            manifest.integritySha256 ?? context.tr('plugins.detail.unsigned'),
           ),
         ],
       ),

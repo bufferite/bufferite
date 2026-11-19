@@ -200,6 +200,7 @@ final class OperationParam {
           _paramError(
             'Parameter "$key" wajib diisi.',
             code: 'operation.param_required',
+            details: <String, Object?>{'param': key, 'label': label},
           ),
         );
       }
@@ -222,6 +223,11 @@ final class OperationParam {
             _paramError(
               'Parameter "$key" minimal $min.',
               code: 'operation.param_out_of_range',
+              details: <String, Object?>{
+                'param': key,
+                'label': label,
+                'min': min,
+              },
             ),
           );
         }
@@ -230,6 +236,11 @@ final class OperationParam {
             _paramError(
               'Parameter "$key" maksimal $max.',
               code: 'operation.param_out_of_range',
+              details: <String, Object?>{
+                'param': key,
+                'label': label,
+                'max': max,
+              },
             ),
           );
         }
@@ -250,6 +261,11 @@ final class OperationParam {
             _paramError(
               'Nilai "$value" bukan opsi valid untuk "$key".',
               code: 'operation.param_out_of_range',
+              details: <String, Object?>{
+                'param': key,
+                'label': label,
+                'value': value,
+              },
             ),
           );
         }
@@ -263,6 +279,7 @@ final class OperationParam {
       code: 'operation.param_type_mismatch',
       details: <String, Object?>{
         'param': key,
+        'label': label,
         'expected': expected,
         'actual': actual.runtimeType.toString(),
       },
@@ -283,6 +300,7 @@ Result<Map<String, Object?>> resolveOperationArgs(
         _paramError(
           'Definisi parameter duplikat: ${param.key}',
           code: 'operation.param_duplicate',
+          details: <String, Object?>{'param': param.key},
         ),
       );
     }

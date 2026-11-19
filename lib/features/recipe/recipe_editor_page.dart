@@ -11,6 +11,8 @@ import '../../core/engine/pipeline.dart';
 import '../../core/engine/pipeline_isolate.dart';
 import '../../core/error/app_error.dart';
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/localized_error.dart';
+import '../../core/i18n/operation_localization.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/components/app_toast.dart';
@@ -190,7 +192,9 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
               kind: widget.recipe?.output?.kind.name ?? 'text',
               content: _previewText,
               live: _previewing,
-              errorMessage: _previewError?.message,
+              errorMessage: _previewError == null
+                  ? null
+                  : context.trError(_previewError!),
             ),
           ],
         ),
@@ -296,13 +300,20 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           child: ReorderableDelayedDragStartListener(
             index: index,
             child: StepCard(
-              name: descriptor?.name ?? step.operationId,
-              category:
-                  descriptor?.category.label ??
-                  context.tr('recipe.operationFallback'),
+              name: descriptor == null
+                  ? step.operationId
+                  : operationName(context, descriptor),
+              category: descriptor == null
+                  ? context.tr('recipe.operationFallback')
+                  : operationCategoryLabel(context, descriptor.category),
               enabled: step.enabled,
               state: _stateFor(step),
-              errorMessage: _stepErrors[step.id]?.message,
+              errorMessage: _stepErrors[step.id] == null
+                  ? null
+                  : context.trError(
+                      _stepErrors[step.id]!,
+                      operationId: step.operationId,
+                    ),
               onEnabledChanged: (value) => setState(() {
                 _steps[index] = step.copyWith(enabled: value);
                 _dirty = true;
@@ -395,7 +406,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     }
     final args = await showStepConfigDialog(
       context,
-      title: descriptor.name,
+      operationId: descriptor.id,
+      title: operationName(context, descriptor),
       params: descriptor.params,
       initialArgs: step.args,
     );
@@ -534,7 +546,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     if (errors.isNotEmpty) {
       showAppToast(
         context,
-        message: errors.first.message,
+        message: context.trError(errors.first),
         tone: AppToastTone.error,
       );
       return;
@@ -561,7 +573,11 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         return;
       }
       setState(() => _saving = false);
-      showAppToast(context, message: error.message, tone: AppToastTone.error);
+      showAppToast(
+        context,
+        message: context.trError(error),
+        tone: AppToastTone.error,
+      );
     }
   }
 
@@ -582,7 +598,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     if (errors.isNotEmpty) {
       showAppToast(
         context,
-        message: errors.first.message,
+        message: context.trError(errors.first),
         tone: AppToastTone.error,
       );
       return;
@@ -602,7 +618,11 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       );
     } on AppError catch (error) {
       if (mounted) {
-        showAppToast(context, message: error.message, tone: AppToastTone.error);
+        showAppToast(
+          context,
+          message: context.trError(error),
+          tone: AppToastTone.error,
+        );
       }
     } on Object catch (error) {
       if (mounted) {
@@ -610,7 +630,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           context,
           message: context.tr(
             'recipe.exportFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );
@@ -634,7 +654,11 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       );
     } on AppError catch (error) {
       if (mounted && error.category != ErrorCategory.cancelled) {
-        showAppToast(context, message: error.message, tone: AppToastTone.error);
+        showAppToast(
+          context,
+          message: context.trError(error),
+          tone: AppToastTone.error,
+        );
       }
     } on Object catch (error) {
       if (mounted) {
@@ -642,7 +666,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           context,
           message: context.tr(
             'recipe.importFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );
@@ -718,11 +742,12 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           code: 'recipe.file_too_large',
           message: context.tr(
             'recipe.fileTooLarge',
-            args: <String, Object?>{
-              'max': maxInputBytes ~/ (1024 * 1024),
-            },
+            args: <String, Object?>{'max': maxInputBytes ~/ (1024 * 1024)},
           ),
-          details: <String, Object?>{'size': size},
+          details: <String, Object?>{
+            'size': size,
+            'max': maxInputBytes ~/ (1024 * 1024),
+          },
         );
       }
       final bytes = handle.readAsBytesSync();
@@ -735,7 +760,11 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       _schedulePreview();
     } on AppError catch (error) {
       if (mounted) {
-        showAppToast(context, message: error.message, tone: AppToastTone.error);
+        showAppToast(
+          context,
+          message: context.trError(error),
+          tone: AppToastTone.error,
+        );
       }
     } on Object catch (error) {
       if (mounted) {
@@ -743,7 +772,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           context,
           message: context.tr(
             'recipe.fileReadFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );

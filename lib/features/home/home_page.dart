@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/localized_error.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
@@ -81,7 +82,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               error: (error, stackTrace) => EmptyState(
                 icon: Icons.error_outline,
                 title: context.tr('home.loadFailed'),
-                description: error.toString(),
+                description: context.trErrorObject(error),
               ),
               data: (items) => _list(items),
             ),

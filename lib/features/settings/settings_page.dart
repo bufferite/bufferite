@@ -9,6 +9,7 @@ import '../../core/bootstrap/bootstrap_provider.dart';
 import '../../core/bootstrap/core_bootstrap_service.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/language_provider.dart';
+import '../../core/i18n/localized_error.dart';
 import '../../core/storage/app_database.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_toast.dart';
@@ -244,7 +245,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           context,
           message: context.tr(
             'settings.logsClearFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );
@@ -279,7 +280,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           context,
           message: context.tr(
             'settings.reinstallFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );
@@ -320,7 +321,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           context,
           message: context.tr(
             'settings.resetFailed',
-            args: <String, Object?>{'error': error},
+            args: <String, Object?>{'error': context.trErrorObject(error)},
           ),
           tone: AppToastTone.error,
         );

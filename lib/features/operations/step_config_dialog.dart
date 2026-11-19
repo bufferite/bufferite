@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/app_localizations.dart';
+import '../../core/i18n/localized_error.dart';
+import '../../core/i18n/operation_localization.dart';
 import '../../core/plugin/operation_param.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/design_tokens.dart';
@@ -10,6 +12,7 @@ import '../../core/ui/design_tokens.dart';
 /// Mengembalikan args yang sudah tervalidasi, atau `null` bila dibatalkan.
 Future<Map<String, Object?>?> showStepConfigDialog(
   BuildContext context, {
+  required String operationId,
   required String title,
   required List<OperationParam> params,
   required Map<String, Object?> initialArgs,
@@ -17,6 +20,7 @@ Future<Map<String, Object?>?> showStepConfigDialog(
   return showDialog<Map<String, Object?>>(
     context: context,
     builder: (context) => StepConfigDialog(
+      operationId: operationId,
       title: title,
       params: params,
       initialArgs: initialArgs,
@@ -31,11 +35,13 @@ Future<Map<String, Object?>?> showStepConfigDialog(
 class StepConfigDialog extends StatefulWidget {
   const StepConfigDialog({
     super.key,
+    required this.operationId,
     required this.title,
     required this.params,
     required this.initialArgs,
   });
 
+  final String operationId;
   final String title;
   final List<OperationParam> params;
   final Map<String, Object?> initialArgs;
@@ -179,12 +185,14 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
   }
 
   Widget _field(OperationParam param) {
+    final label = operationParamLabel(context, widget.operationId, param);
+    final help = operationParamHelp(context, widget.operationId, param);
     switch (param.type) {
       case OperationParamType.boolean:
         return SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(param.label),
-          subtitle: param.helpText != null ? Text(param.helpText!) : null,
+          title: Text(label),
+          subtitle: help != null ? Text(help) : null,
           value: _boolValues[param.key] ?? false,
           onChanged: (value) => setState(() => _boolValues[param.key] = value),
         );
@@ -193,15 +201,19 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: DropdownButtonFormField<String>(
             initialValue: _selectValues[param.key],
-            decoration: InputDecoration(
-              labelText: param.label,
-              helperText: param.helpText,
-            ),
+            decoration: InputDecoration(labelText: label, helperText: help),
             items: <DropdownMenuItem<String>>[
               for (final option in param.options)
                 DropdownMenuItem<String>(
                   value: option.value,
-                  child: Text(option.label),
+                  child: Text(
+                    operationParamOptionLabel(
+                      context,
+                      widget.operationId,
+                      param.key,
+                      option,
+                    ),
+                  ),
                 ),
             ],
             onChanged: (value) {
@@ -224,8 +236,8 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
             maxLines: param.multiline ? 5 : 1,
             obscureText: param.secret,
             decoration: InputDecoration(
-              labelText: param.label,
-              helperText: param.helpText,
+              labelText: label,
+              helperText: help,
               suffixText: param.isRequired ? '*' : null,
             ),
           ),
@@ -256,7 +268,12 @@ class _StepConfigDialogState extends State<StepConfigDialog> {
 
     final resolved = resolveOperationArgs(widget.params, raw);
     if (!resolved.isSuccess) {
-      setState(() => _error = resolved.errorOrNull!.message);
+      setState(
+        () => _error = context.trError(
+          resolved.errorOrNull!,
+          operationId: widget.operationId,
+        ),
+      );
       return;
     }
     Navigator.of(context).pop(resolved.valueOrNull);
