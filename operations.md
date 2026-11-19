@@ -408,7 +408,9 @@ Catatan keamanan:
 
 ## 13. Pertanyaan Terbuka
 
-- Streaming file besar dan batas input/output MVP (F16-T05).
+- Batas input/output MVP sudah diterapkan untuk input file dan output step
+  (F16-T05); streaming end-to-end per chunk belum diperlukan sampai ada
+  operasi yang chunk-aware.
 - Registry: hosting/kunci dan detail lain di `REGISTRY.md` §12.
 - Apakah operasi core perlu metadata contoh I/O di manifest, atau cukup di
   test vector repo.

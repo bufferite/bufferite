@@ -203,7 +203,8 @@ Implementasi storage MVP:
   untuk timeout. Engine + modul dikompilasi sekali per plugin.
 
 ## 11. Pertanyaan Terbuka
-- Streaming untuk file besar (F16-T05).
+- Streaming end-to-end berbasis chunk belum ada; input file dimaterialisasi
+  bertahap di worker isolate dengan batas memori (F16-T05 selesai).
 - Hosting/URL registry (D12) dan custody kunci Ed25519 (D13); detail di
   `REGISTRY.md` §12.
 - Ukuran `core.berp` sudah diputuskan (D03: 2 MiB, pecah per kategori bila

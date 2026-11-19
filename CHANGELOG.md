@@ -32,6 +32,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Recipe Editor: output langsung di bawah input; daftar ingredients dipindah
   ke panel samping (end drawer) dengan tombol Ingredients berikon keranjang
   di AppBar; konfigurasi parameter memakai dialog tengah, bukan bottom sheet.
+- Input file di Recipe Editor disimpan sebagai referensi `FileBuffer` dan
+  dibaca bertahap di isolate kerja. Ukuran mengikuti batas memori di Settings;
+  output step yang melebihi batas dilaporkan sebagai error terstruktur.
 - `StepCard`: nama operasi ditampilkan (bukan ID), badge tier/status
   memakai wrap agar aman di panel sempit.
 
@@ -39,6 +42,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Daftar recipe di Home tidak diperbarui setelah menyimpan dari Recipe
   Editor; provider daftar/pencarian kini di-invalidate saat editor
   mengembalikan recipe tersimpan.
+- File input besar tidak lagi dibaca utuh ke memori sebelum eksekusi,
+  sehingga preview tidak memicu OOM; file di atas batas memori ditolak
+  dengan pesan lokal sebelum alokasi.
 
 ## [1.0.0] - 2026-11-19
 

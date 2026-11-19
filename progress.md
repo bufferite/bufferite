@@ -30,14 +30,14 @@ Status yang dipakai:
 | Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
 | Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (spesifikasi siap) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 1 / 8 |
+| Task Fase 2 | 2 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 2 (D12, D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T05 (streaming file besar), lalu F16-T07 sebelum registry publik |
+| Task berikutnya | F16-T07 (audit/fuzzing sandbox), lalu registry publik setelah D12/D13 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (556 test, 2026-11-19) |
+| Test suite | Lulus (564 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 1 | Berjalan |
+| F16 — Backlog Fase 2 | 8 | 2 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
@@ -227,6 +227,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | UX | Istilah UI daftar step jadi "Ingredients" + ikon keranjang di AppBar | `recipe_editor_page.dart`, `step_card.dart`, test terkait | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: header "Ingredients (0)", tombol "Tambah ingredients", ikon keranjang tampil | `244cb2f` |
 | 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 536 lulus; paritas 331 key ID/EN | `899e2f8` |
 | 2026-11-19 | F16-T06 | Log eksekusi opt-in (JSONL lokal, rotasi) + layar Diagnostik di Settings | `lib/core/diagnostics/**`, `lib/features/settings/diagnostics_page.dart`, `recipe_editor_page.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 556 lulus | `2e2a97b` |
+| 2026-11-19 | F16-T05 | Input file dibaca bertahap di isolate kerja dengan batas memori; output step dibatasi | `lib/core/engine/file_buffer_reader.dart`, `pipeline_executor.dart`, `pipeline_isolate.dart`, `recipe_editor_page.dart` | `flutter analyze` 0 issue; `flutter test` 564 lulus | `cd07b03` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1657,6 +1658,35 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   pipeline; komponen registry/plugin dapat memakai `ExecutionLogService`
   yang sama saat F16-T01/T02 dikerjakan.
 - Commit: `2e2a97b`
+
+### CP-075 - 2026-11-19 - F16-T05 streaming file besar tanpa OOM
+
+- Status: Selesai
+- Perubahan:
+  - Input file Recipe Editor tidak lagi dibaca dengan `readAsBytesSync`;
+    editor menyimpan `FileBuffer` (path, nama, ukuran) dan preview berjalan
+    lewat isolator pipeline.
+  - `FileBufferReader` membaca file per chunk ke satu alokasi `Uint8List`
+    memakai `RandomAccessFile.readInto`, menolak file di atas batas memori
+    sebelum alokasi, dan melaporkan kegagalan baca sebagai
+    `runtime.file_read_failed`.
+  - `PipelineExecutor` menegakkan `memoryLimitBytes` pada output tiap step
+    (`runtime.memory_limit`); isolator meneruskan batas dari Settings ke
+    worker dan jalur fallback in-process.
+  - Pesan baru dilokalkan EN/ID: `runtime.memory_limit`,
+    `runtime.file_too_large`, dan `runtime.file_read_failed`.
+- File: `lib/core/engine/file_buffer_reader.dart`,
+  `lib/core/engine/{pipeline_executor,pipeline_isolate}.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `assets/i18n/{id,en}.json`, `test/core/engine/**`,
+  `test/features/recipe/recipe_editor_page_test.dart`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 564 lulus.
+- Catatan/risiko: input file disimpan sebagai referensi path. Bila file
+  dipindah/dihapus atau cache picker dibersihkan, preview gagal dengan
+  `runtime.file_read_failed` dan pengguna perlu memilih file lagi.
+  Serialisasi hasil worker masih menyalin buffer, sehingga batas memori
+  membatasi ukuran per buffer, bukan total memori proses.
+- Commit: `cd07b03`
 
 ## 7. Template Checkpoint Baru
 
