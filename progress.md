@@ -28,16 +28,16 @@ Status yang dipakai:
 | Item | Nilai |
 |---|---|
 | Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
-| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (spesifikasi siap) |
+| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (client selesai, UI menyusul) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 4 / 8 |
+| Task Fase 2 | 5 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 1 (D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T01 (client registry read-only) |
-| Blocker aktif | D13 (custody kunci) - tidak menghambat F16-T01 |
+| Task berikutnya | F16-T02 (UI katalog) |
+| Blocker aktif | D13 (custody kunci) - tidak menghambat UI; trust anchor final menunggu |
 | Analyze | Lulus (0 issue, 2026-11-20) |
-| Test suite | Lulus (600 test, 2026-11-20) |
+| Test suite | Lulus (613 test, 2026-11-20) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 4 | Berjalan |
+| F16 — Backlog Fase 2 | 8 | 5 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 12 | 1 terbuka (D13) |
@@ -231,6 +231,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T07 | Audit sandbox/runtime: pre-scan central directory `.berp`, batas stdout/stderr WASI, serialisasi worker, batas kedalaman JSON DSL, fuzz paket, dan uji sandbox Lua | `lib/core/plugin/plugin_package.dart`, `lib/core/runtime/{dsl_runtime,wasmtime/wasm_worker,wasmtime/wasmtime_engine,wasmtime/wasmtime_ffi}.dart`, `test/core/runtime/**`, `test/fixtures/wasm/stdout_flood.*` | `flutter analyze` 0 issue; `flutter test` 574 lulus; fuzz 200 mutasi deterministik | `673d3eb` |
 | 2026-11-20 | F16-T08 | Tooling registry: `keygen`/`validate`/`sign`/`build-index`/`verify`, model `registry.json`, Ed25519 + trust store, indeks deterministik, atomic write, review checklist | `lib/core/registry/**`, `tool/registry_cli.dart`, `tool/registry/registry_builder.dart`, `test/core/registry/**`, `test/tool/registry_*_test.dart` | `flutter analyze` 0 issue; `flutter test` 600 lulus; uji registry 25 lulus; alur CLI end-to-end | `ba5c187`, `f73301a` |
 | 2026-11-20 | D12 | Hosting registry v1: GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`, workflow PR/publish, deploy atomik | `registry-scaffold/**`, `REGISTRY.md`, `TODO.md`, docs terkait | JSON source valid; workflow YAML valid; `build-index` source kosong → sequence 1; `git diff --check` | `0c52889` |
+| 2026-11-20 | F16-T01 | Client registry read-only: transport HTTPS + redirect, cache file atomik, replay guard, fallback offline, verifikasi signature dengan trust store injeksi | `lib/core/registry/registry_{client,cache,cache_store,transport,error}.dart`, `test/core/registry/registry_client_test.dart`, `test/core/offline_audit_test.dart` | `flutter analyze` 0 issue; `flutter test` 613 lulus; uji registry + offline audit 28 lulus | `f61ac2e` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1786,6 +1787,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   trust store publik harus disiapkan manual.
 - Commit: `0c52889`
 
+### CP-079 - 2026-11-20 - F16-T01 client registry read-only
+
+- Status: Selesai
+- Perubahan:
+  - `registry_client.dart`: `refresh` HTTPS + verifikasi signature + parse +
+    replay guard + cache; `loadCached` memverifikasi ulang signature;
+    `loadWithFallback` memakai cache hanya untuk kegagalan jaringan/HTTP.
+  - `registry_transport.dart`: `HttpClient`, redirect manual maksimal 3 hop,
+    HTTPS di setiap hop, timeout koneksi 10 detik/total 30 detik, batas
+    ukuran streaming.
+  - `registry_cache.dart` + `registry_cache_store.dart`: envelope cache
+    (indeks, signature, `fetchedAt`, `sourceUrl`), file atomik di application
+    support, validasi ukuran; error terstruktur di `registry_error.dart`.
+  - Audit offline mengizinkan `HttpClient` hanya di transport registry.
+- File: `lib/core/registry/registry_client.dart`,
+  `registry_cache.dart`, `registry_cache_store.dart`,
+  `registry_transport.dart`, `registry_error.dart`,
+  `test/core/registry/registry_client_test.dart`,
+  `test/core/offline_audit_test.dart`, docs terkait.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 613 lulus; uji
+  registry + offline audit 28 lulus; `git diff --check` bersih.
+- Catatan/risiko: trust store masih diinjeksi; aset
+  `assets/registry_keys.json` dan kunci produksi menunggu D13. Izin Android
+  `INTERNET` belum ditambahkan (menunggu F16-T02). DNS
+  `plugins.bufferite.dev` harus aktif sebelum UI dirilis.
+- Commit: `f61ac2e`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1822,7 +1850,7 @@ bagian D.
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
-| 2026-11-20 | F16-T01/T03, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | F16-T03 dan signing produksi belum bisa difinalisasi; F16-T01 client read-only bisa dimulai | Terbuka (spesifikasi `REGISTRY.md` §12) |
+| 2026-11-20 | F16-T02/T03, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | UI katalog dan client (F16-T01) bisa dibangun dengan trust store injeksi/dev; trust anchor final dan signing produksi belum bisa difinalisasi | Terbuka (spesifikasi `REGISTRY.md` §12) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

@@ -126,11 +126,13 @@ Implementasi plugin MVP:
 - Sideload UI (F04-T05), bootstrap aset `core.berp` (F04-T08), dan
   `PluginManagerService`/provider (F04-T10) sudah tersedia.
 - Registry daring (F16): model `registry.json`, signature Ed25519, trust
-  store, dan tooling build/sign/verify sudah tersedia (F16-T08). Hosting
-  GitHub Pages sudah diputuskan (D12); client HTTP, UI katalog, dan instalasi
-  (F16-T01..T04) belum, dan signing produksi menunggu D13. Spesifikasi di
-  `REGISTRY.md`; modul di `lib/core/registry/`, `tool/registry_cli.dart`, dan
-  scaffold repo di `registry-scaffold/`.
+  store, tooling build/sign/verify (F16-T08), serta client read-only HTTPS +
+  cache + sequence + fallback offline (F16-T01) sudah tersedia. Hosting
+  GitHub Pages sudah diputuskan (D12). UI katalog, instalasi, dan
+  update/rollback (F16-T02/T04) belum; signing produksi dan trust anchor
+  final menunggu D13. Spesifikasi di `REGISTRY.md`; modul di
+  `lib/core/registry/`, `tool/registry_cli.dart`, dan scaffold repo di
+  `registry-scaffold/`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan

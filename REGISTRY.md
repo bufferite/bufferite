@@ -1,8 +1,9 @@
 # registry.md — Spesifikasi Registry Plugin Bufferite
 
 Versi dokumen: 1.0 (draf)
-Status: **Sebagian** — tooling registry + model/signature core tersedia
-(F16-T08); client, UI, dan instalasi (F16-T01..T04) belum
+Status: **Sebagian** — tooling registry, hosting, model/signature core, dan
+client read-only tersedia (F16-T08/D12/F16-T01); UI, instalasi, dan
+update/rollback (F16-T02/T04) belum.
 Berlaku untuk: registry resmi read-only Bufferite
 Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 [PRIVACY.md](PRIVACY.md)
@@ -13,10 +14,10 @@ Registry adalah katalog plugin `.berp` yang dapat dilihat dan diinstal dari
 dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
 
-Per 2026-11-20, tooling registry (F16-T08) dan model/signature core sudah
-tersedia. Hosting/URL publik sudah diputuskan (D12). Client HTTP, UI katalog,
-dan instalasi dari registry (F16-T01..T04) belum diimplementasikan; signing
-produksi dan trust anchor final menunggu D13.
+Per 2026-11-20, tooling registry (F16-T08), hosting (D12), dan client
+read-only (F16-T01) sudah tersedia. Verifier signature dan trust store core
+juga tersedia; trust anchor final dan signing produksi menunggu D13. UI
+katalog, instalasi, dan update/rollback (F16-T02/T04) belum diimplementasikan.
 
 Ruang lingkup v1:
 
@@ -348,28 +349,32 @@ Ancaman utama dan mitigasi:
 | Paket berbahaya | Batas `.berp`, sandbox, izin, review kurasi (F16-T07/T08) |
 | Disk penuh | Batas ukuran + pembersihan file sementara/cache |
 
-Kode error yang direncanakan (prefix `registry.`):
+Kode error (prefix `registry.`):
 
 `offline`, `consent_required`, `http`, `too_large`, `schema`,
 `signature_invalid`, `key_unknown`, `key_revoked`, `replay`,
 `entry_invalid`, `app_too_old`, `download_failed`, `hash_mismatch`,
 `package_signature_invalid`, `manifest_mismatch`, `downgrade`,
-`install_failed`, `cache_corrupt`.
+`install_failed`, `cache_corrupt`, `cache_io`.
 
 Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 (F16-T06).
 
 ## 11. Acceptance Criteria F16
 
-### F16-T01 — Registry client
+### F16-T01 - Registry client
 
-- Model + parser `registry.json` v1 dengan validasi §4 dan batas ukuran.
-- URL awal `https://plugins.bufferite.dev/registry/v1/registry.json` (D12).
-- Fetch HTTPS + cache + `sequence` + fallback offline.
-- Verifikasi signature indeks terintegrasi (dengan T03).
-- Unit test: indeks valid, field hilang, tipe salah, versi tak didukung,
-  replay, indeks kebesaran, cache korup, offline.
-- Tidak ada UI pada task ini.
+Selesai 2026-11-20 (CP-079): client read-only dengan transport HTTPS,
+cache file, replay guard, fallback offline, dan verifikasi signature memakai
+trust store yang diinjeksi. UI katalog belum ada (F16-T02).
+
+- [x] Model + parser `registry.json` v1 dengan validasi §4 dan batas ukuran.
+- [x] URL awal `https://plugins.bufferite.dev/registry/v1/registry.json` (D12).
+- [x] Fetch HTTPS + cache + `sequence` + fallback offline.
+- [x] Verifikasi signature indeks terintegrasi (dengan T03).
+- [x] Unit test: indeks valid, field hilang, tipe salah, versi tak didukung,
+      replay, indeks kebesaran, cache korup, offline.
+- [x] Tidak ada UI pada task ini.
 
 ### F16-T03 — Signature Ed25519
 
@@ -448,7 +453,11 @@ registry dibuka publik, signing indeks wajib dipindahkan ke offline/HSM.
 lib/core/registry/
   registry_index.dart        model + parser + validasi            (F16-T08)
   registry_signature.dart    Ed25519, signature file, trust store (F16-T08)
-  registry_client.dart       HTTP, cache, sequence, offline       (F16-T01, tertunda)
+  registry_client.dart       HTTP, cache, sequence, offline       (F16-T01)
+  registry_cache.dart        model cache indeks + signature        (F16-T01)
+  registry_cache_store.dart  cache file atomik di app support      (F16-T01)
+  registry_transport.dart    transport HTTPS + redirect           (F16-T01)
+  registry_error.dart        error jaringan/cache                 (F16-T01)
   registry_installer.dart    unduh, verifikasi, instal, provenance (F16-T02/T04, tertunda)
 lib/features/plugins/registry/
   registry_providers.dart             (F16-T02, tertunda)
@@ -462,9 +471,9 @@ registry-scaffold/
   .github/workflows/         validate PR + publish Pages       (D12)
 ```
 
-Tooling F16-T08 selesai 2026-11-20 (CP-077); hosting D12 selesai
-2026-11-20. Client, UI, dan instalasi (F16-T01..T04) bisa dimulai, tetapi
-signing produksi dan trust anchor final tetap menunggu D13.
+Tooling F16-T08, hosting D12, dan client F16-T01 selesai 2026-11-20. UI
+katalog dan instalasi (F16-T02/T04) bisa dimulai, tetapi signing produksi dan
+trust anchor final tetap menunggu D13.
 
 ### 13.2 CLI registry
 

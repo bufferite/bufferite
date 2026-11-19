@@ -507,11 +507,14 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T08 (selesai) → T01 + T03 → T02 → T04; D12 sudah
+Urutan yang disarankan: T08 + T01 (selesai) → T02 + sisa T03 → T04; D12 sudah
 selesai, D13 tetap diperlukan untuk signing produksi. T07 adalah gate sebelum
 registry dibuka publik.
 
-- [ ] **F16-T01** Registry resmi read-only + `registry.json` client.
+- [x] **F16-T01** Registry resmi read-only + `registry.json` client.
+  - `lib/core/registry/registry_client.dart`: transport HTTPS, cache file,
+    replay guard, fallback offline, verifikasi signature dengan trust store
+    injeksi. Test di `test/core/registry/registry_client_test.dart`.
 - [ ] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
 - [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
 - [ ] **F16-T04** Plugin update/rollback + notifikasi versi.

@@ -82,7 +82,7 @@ sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
 `lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
 selain engine wasmtime sendiri.
 
-### 4.2 Registry (Fase 2; tooling + hosting selesai, client rencana)
+### 4.2 Registry (Fase 2; tooling, hosting, dan client selesai; UI rencana)
 
 - Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
   registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
@@ -143,6 +143,6 @@ selain engine wasmtime sendiri.
   `build-index`, `verify`, model `registry.json`, signature Ed25519, dan trust
   store tersedia; test vector RFC 8032, domain separation, key unknown/revoked,
   determinisme indeks, dan batas ukuran lulus.
-- Sisa untuk registry publik: client HTTP/cache/sequence, UI katalog, update/
-  rollback (F16-T01..T04), serta keputusan D13. Hosting/URL (D12) sudah
-  selesai. Belum ada client registry di aplikasi.
+- Sisa untuk registry publik: UI katalog, instalasi, update/rollback
+  (F16-T02/T04), serta keputusan D13. Hosting/URL (D12) dan client read-only
+  (F16-T01) sudah selesai; UI belum ada di aplikasi.
