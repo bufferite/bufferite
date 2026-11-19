@@ -277,6 +277,24 @@ void main() {
     );
   });
 
+  test('menolak base index yang tidak ditemukan', () async {
+    final source = _source(temp, packages: const <Map<String, Object?>>[]);
+
+    await expectLater(
+      const RegistryIndexBuilder().build(
+        sourceFile: source,
+        baseIndexFile: File('${temp.path}/tidak-ada.json'),
+      ),
+      throwsA(
+        isA<RegistryFormatException>().having(
+          (error) => error.code,
+          'code',
+          'registry.io',
+        ),
+      ),
+    );
+  });
+
   test('writeFileAtomically menimpa isi lama', () {
     final file = File('${temp.path}/output.json')..writeAsStringSync('lama');
     writeFileAtomically(file, 'baru');

@@ -223,9 +223,9 @@ final class RegistryIndexBuilder {
     RegistryTrustStore? trustStore,
   }) async {
     final source = RegistryBuildSource.fromBytes(sourceFile.readAsBytesSync());
-    final baseIndex = baseIndexFile != null && baseIndexFile.existsSync()
-        ? RegistryIndex.fromBytes(baseIndexFile.readAsBytesSync())
-        : null;
+    final baseIndex = baseIndexFile == null
+        ? null
+        : _readBaseIndex(baseIndexFile);
 
     final built = <RegistryBuiltEntry>[];
     final keys = <String>{};
@@ -383,6 +383,16 @@ void writeFileAtomically(File target, String content) {
     }
     temporary.renameSync(target.path);
   }
+}
+
+RegistryIndex _readBaseIndex(File file) {
+  if (!file.existsSync()) {
+    throw RegistryFormatException(
+      'registry.io',
+      'Indeks lama tidak ditemukan: ${file.path}',
+    );
+  }
+  return RegistryIndex.fromBytes(file.readAsBytesSync());
 }
 
 File _resolvePackageFile(Directory sourceDir, String relative) {
