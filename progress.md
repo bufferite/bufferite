@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 126 / 131 |
+| Task MVP selesai | 127 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
-| Task berikutnya | — (scope 1.0 dibekukan; `F05-T06..T09` + `F14-T03` ke 1.1) |
-| Blocker aktif | F05-T06 (ABI plugin WASM belum ditetapkan), F05-T08 (cache kompilasi modul), F14-T03 |
+| Task berikutnya | — (scope 1.0 dibekukan; `F05-T06/T07/T09` + `F14-T03` ke 1.1) |
+| Blocker aktif | F05-T06 (ABI plugin WASM belum ditetapkan), F14-T03 |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (452 test, 2026-11-19) |
+| Test suite | Lulus (465 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -50,7 +50,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 8 | Selesai |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
-| F05 — Runtime & Sandbox | 9 | 5 | Sebagian (tier WASM belum ada) |
+| F05 — Runtime & Sandbox | 9 | 6 | Sebagian (ABI tier WASM 1.1) |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
@@ -206,6 +206,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F05-T04 | Runtime Lua `lua_dart` (Lua 5.5.1 FFI): sandbox, batas memori, 10 test | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 10 lulus; `type(io)`/`os.execute` nil | `aa6cc4a` |
 | 2026-11-19 | F05-T05 | Host API `transform(input, args)` + stdlib terbatas; akses terlarang → error terstruktur | `lib/core/runtime/lua_runtime.dart` | `flutter test` → `runtime.lua_error` untuk `io.open` | `aa6cc4a` |
 | 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `ef086f6` |
+| 2026-11-19 | F05-T08 | Cache runtime per plugin (LRU 4, idle 5 mnt) + worker WASM persisten | `lib/core/runtime/runtime_cache.dart`, `wasm_lua_runtime.dart`, `plugin_runtime.dart` | `flutter test` → 465 lulus; integration emulator 2 lulus | `1ebcac2` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1381,11 +1382,34 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   (`android/app/src/debug/jniLibs`); APK rilis 1.0 (52,9 MB universal) tidak
   membawa engine WASM. Pindahkan ke `src/main` saat engine menjadi default di
   1.1. Engine lua masih default `native` (D02); tier
-  `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Kompilasi modul WASM
-  masih per eksekusi (cache menunggu F05-T08). Satu run suite penuh sempat
-  flake di test engine (`output print`); rerun lulus — bila berulang, jalankan
-  `flutter test --concurrency=1`.
+  `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Saat checkpoint ini
+  kompilasi modul WASM masih per eksekusi (diselesaikan CP-064). Satu run
+  suite penuh sempat flake di test engine (`output print`); rerun lulus — bila
+  berulang, jalankan `flutter test --concurrency=1`.
 - Commit: `84d28da`
+
+### CP-064 — 2026-11-19 — F05-T08 cache & disposal runtime
+
+- Status: Selesai
+- Perubahan: `RuntimeCache` per plugin (LRU maksimal 4, idle 5 menit, entri
+  yang sedang dipakai tidak dibuang); `SandboxOperation` mengambil runtime
+  dari cache; `WasmLuaRuntime` memakai worker isolate persisten sehingga
+  engine + modul dikompilasi sekali dan tiap eksekusi memakai store WASI baru;
+  epoch deadline per-run agar store berikutnya tidak langsung trap setelah
+  timeout; `PluginRuntimeLoader.evictPlugin/dispose` dipanggil saat plugin
+  diinstal ulang, dinonaktifkan, atau dihapus.
+- File: `lib/core/runtime/runtime_cache.dart`,
+  `lib/core/runtime/plugin_runtime.dart`,
+  `lib/core/runtime/wasm_lua_runtime.dart`,
+  `lib/core/runtime/sandbox.dart`,
+  `lib/core/runtime/wasmtime/wasmtime_engine.dart`,
+  `lib/features/plugins/plugin_manager_service.dart`, test terkait.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 465 lulus; integration
+  emulator Android 2 lulus; test worker reuse + pulih setelah timeout lulus.
+- Catatan/risiko: disposal native menunggu worker menutup engine (300 ms)
+  sebelum kill; cache boleh sesaat melewati batas LRU bila semua entri sibuk.
+  Worker WASM tetap satu isolate per plugin; batas memori tetap per store.
+- Commit: `1ebcac2`
 
 ## 7. Template Checkpoint Baru
 
@@ -1435,6 +1459,6 @@ bagian D.
 | 2026-11-19 | D05 | MIT untuk aplikasi dan `core.berp` | Konsisten dengan LICENSE & manifest | Tidak ada perubahan |
 | 2026-11-19 | D06 | Default `stop`; lanjut dengan output terakhir hanya opt-in; izin/batal/runtime selalu stop | Menghindari output menyesatkan | F05-T07 menegakkan |
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
-| 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 |
+| 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 selesai (CP-064) |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |
 | 2026-11-19 | D11 | Engine Lua WASM (wasmtime) jadi opsi tier `lua`; default 1.0 tetap `lua_dart` | Kompilasi modul per eksekusi belum di-cache | `LuaEngine.wasm` dipakai setelah F05-T08 |

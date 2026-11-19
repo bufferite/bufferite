@@ -169,8 +169,8 @@ Implementasi storage MVP:
 - Runtime: DSL + Lua + WASM (satu kesatuan MVP).
   Catatan 1.0: Lua memakai `lua_dart` (FFI native) dengan capability sandbox
   sebagai default; engine Lua WASM (wasmtime C API + `lua_runtime.wasm`)
-  sudah tersedia dan tervalidasi di Windows/Android, tetapi pemilihannya
-  menunggu cache modul (F05-T08). Tier plugin `wasm` menunggu ABI (1.1).
+  sudah tersedia dan tervalidasi di Windows/Android, dengan cache runtime +
+  worker persisten (F05-T08/CP-064). Tier plugin `wasm` menunggu ABI (1.1).
 - Format paket: .berp.
 - Sideload didukung di MVP.
 - Signature opsional di MVP, wajib untuk registry resmi di Fase 2.

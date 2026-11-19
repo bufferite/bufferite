@@ -269,8 +269,14 @@ Catatan progres: lihat [progress.md](progress.md).
 - [ ] **F05-T07 (P0)** Penegakan izin di semua runtime.
   - Pemeriksaan sebelum side effect; pesan error jelas.
   - Acceptance: test matrix runtime × izin.
-- [ ] **F05-T08 (P1)** Cache dan disposal runtime.
-  - Hindari instansiasi ulang berlebihan; bersihkan memori setelah idle.
+- [x] **F05-T08 (P1)** Cache dan disposal runtime.
+  - Satu runtime per plugin, LRU maksimal 4, idle 5 menit; entri yang sedang
+    dipakai tidak dibuang. Plugin nonaktif/dihapus langsung mengevict cache.
+  - Engine + modul WASM dikompilasi sekali oleh worker isolate persisten;
+    setiap eksekusi tetap memakai store WASI baru.
+  - Verifikasi: `test/core/runtime/runtime_cache_test.dart` (7 lulus), worker
+    reuse + pulih setelah timeout (Windows & emulator Android), `flutter test`
+    465 lulus; `flutter analyze` 0 issue.
 - [ ] **F05-T09 (P0)** Contract test lintas runtime.
   - Operasi yang sama (contoh) dijalankan di DSL, Lua, dan WASM dengan
     hasil setara.

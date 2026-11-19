@@ -63,8 +63,11 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
 4. **Integrasi**
    - `PluginRuntimeLoader` + `SandboxOperation`: executor nyata untuk tier
      `dsl`/`lua` dan verifikasi hash entrypoint. `LuaEngine.native` tetap
-     default 1.0; `LuaEngine.wasm` siap dipakai setelah cache modul
-     (F05-T08). Tier `wasm` masih tanpa executor sampai ABI-nya ditetapkan.
+     default 1.0; `LuaEngine.wasm` siap dipakai. Tier `wasm` masih tanpa
+     executor sampai ABI-nya ditetapkan.
+   - Cache runtime per plugin (LRU 4, idle 5 menit) + worker WASM persisten:
+     engine/modul dikompilasi sekali, store WASI baru tiap eksekusi, dispose
+     saat idle/disable/hapus (F05-T08/CP-064).
    - Aset `assets/lua_runtime.wasm` dibundel; `loadLuaWasmModule` memeriksa
      pin SHA-256 sebelum modul dipakai.
    - Test: transform, sandbox, timeout, hash mismatch, kontrak
