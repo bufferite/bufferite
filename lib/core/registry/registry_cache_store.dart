@@ -56,10 +56,15 @@ final class FileRegistryCacheStore implements RegistryCacheStore {
       await file.parent.create(recursive: true);
       final temp = File('${file.path}.tmp');
       await temp.writeAsBytes(cache.encode(), flush: true);
-      if (file.existsSync()) {
-        await file.delete();
+      try {
+        await temp.rename(file.path);
+      } on FileSystemException {
+        // Windows tidak mengganti file yang sudah ada lewat rename.
+        if (file.existsSync()) {
+          await file.delete();
+        }
+        await temp.rename(file.path);
       }
-      await temp.rename(file.path);
     } on FileSystemException catch (error) {
       throw RegistryClientException(
         'registry.cache_io',

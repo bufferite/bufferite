@@ -1812,7 +1812,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `assets/registry_keys.json` dan kunci produksi menunggu D13. Izin Android
   `INTERNET` belum ditambahkan (menunggu F16-T02). DNS
   `plugins.bufferite.dev` harus aktif sebelum UI dirilis.
-- Commit: `f61ac2e`
+- Commit: `f61ac2e` (follow-up cache rename)
 
 ## 7. Template Checkpoint Baru
 

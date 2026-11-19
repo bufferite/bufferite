@@ -270,6 +270,18 @@ void main() {
     expect(read.fetchedAt, cache.fetchedAt);
     expect(read.sourceUrl, cache.sourceUrl);
 
+    await store.write(
+      RegistryCache(
+        indexBytes: Uint8List.fromList(<int>[9, 9]),
+        signatureBytes: Uint8List.fromList(<int>[8]),
+        fetchedAt: DateTime.utc(2026, 11, 20, 13),
+        sourceUrl: _indexUri,
+      ),
+    );
+    final updated = await store.read();
+    expect(updated!.indexBytes, <int>[9, 9]);
+    expect(updated.fetchedAt, DateTime.utc(2026, 11, 20, 13));
+
     final file = File(
       '${directory.path}${Platform.pathSeparator}registry_cache.json',
     );
