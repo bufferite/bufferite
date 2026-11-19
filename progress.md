@@ -1377,8 +1377,10 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   2 lulus (eksekusi + timeout epoch di emulator x86_64).
 - Catatan/risiko: JIT cranelift berjalan di emulator Android, arm64 belum
   diuji di perangkat fisik. `libwasmtime.so` tidak di-commit (jniLibs di
-  `.gitignore`) agar repo tidak membengkak; jalankan skrip build sebelum APK
-  yang memakai engine WASM. Engine lua masih default `native` (D02); tier
+  `.gitignore`) dan hanya dipasang untuk varian **debug**
+  (`android/app/src/debug/jniLibs`); APK rilis 1.0 (52,9 MB universal) tidak
+  membawa engine WASM. Pindahkan ke `src/main` saat engine menjadi default di
+  1.1. Engine lua masih default `native` (D02); tier
   `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Kompilasi modul WASM
   masih per eksekusi (cache menunggu F05-T08). Satu run suite penuh sempat
   flake di test engine (`output print`); rerun lulus — bila berulang, jalankan

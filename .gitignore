@@ -47,4 +47,4 @@ app.*.map.json
 *.obj
 
 # Native wasmtime untuk Android (hasilkan dengan tool/build_wasmtime_android.ps1)
-android/app/src/main/jniLibs/
+android/app/src/*/jniLibs/

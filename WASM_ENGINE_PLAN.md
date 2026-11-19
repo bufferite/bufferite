@@ -40,9 +40,10 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
    - Android: **selesai (CP-063)** — NDK 28.2 + Rust targets
      `aarch64-linux-android` dan `x86_64-linux-android` (API 24).
      Hasil di-strip: `arm64-v8a` 11,4 MB, `x86_64` 14,8 MB. Skrip:
-     `tool/build_wasmtime_android.ps1` → `android/app/src/main/jniLibs/`
-     (di-`.gitignore`, tidak di-commit). `armeabi-v7a` dilewati: cranelift
-     tidak mendukung ARM 32-bit.
+     `tool/build_wasmtime_android.ps1` → `android/app/src/debug/jniLibs/`
+     (di-`.gitignore`, tidak di-commit; hanya varian debug agar APK rilis 1.0
+     tidak membawa engine yang belum dipakai). `armeabi-v7a` dilewati:
+     cranelift tidak mendukung ARM 32-bit.
 3. **Dart FFI** — **selesai (Windows + Android)**
    - `wasmtime_ffi.dart` (binding), `wasmtime_engine.dart` (engine/modul/
      WASI/epoch), `wasm_lua_runtime.dart` (`SandboxRuntime` + isolate).

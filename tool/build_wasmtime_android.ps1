@@ -7,9 +7,9 @@
 # - NDK 28.x, path lewat -Ndk atau $env:ANDROID_NDK_HOME
 # - crate sudah dipatch: [lib] name="wasmtime", crate-type=["cdylib"]
 #
-# Hasil disalin ke android/app/src/main/jniLibs/<abi>/libwasmtime.so
-# (folder tersebut di-.gitignore; jalankan skrip ini sebelum build APK yang
-# memakai engine WASM).
+# Hasil disalin ke android/app/src/debug/jniLibs/<abi>/libwasmtime.so
+# (khusus varian debug; folder tersebut di-.gitignore). Pindahkan ke src/main
+# saat engine WASM menjadi default di 1.1.
 param(
   [string]$Ndk = $env:ANDROID_NDK_HOME,
   [string]$Api = '24',
@@ -32,7 +32,7 @@ if (-not (Test-Path (Join-Path $Crate 'Cargo.toml'))) {
 
 $bin = Join-Path $Ndk 'toolchains/llvm/prebuilt/windows-x86_64/bin'
 $strip = Join-Path $bin 'llvm-strip.exe'
-$jniLibs = Join-Path $root 'android/app/src/main/jniLibs'
+$jniLibs = Join-Path $root 'android/app/src/debug/jniLibs'
 
 $targets = [ordered]@{
   'aarch64-linux-android' = 'arm64-v8a'
