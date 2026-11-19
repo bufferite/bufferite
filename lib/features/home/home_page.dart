@@ -152,11 +152,17 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _openEditor([Recipe? recipe]) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => RecipeEditorPage(recipe: recipe),
-      ),
-    );
+    Navigator.of(context)
+        .push<Recipe>(
+          MaterialPageRoute<Recipe>(
+            builder: (context) => RecipeEditorPage(recipe: recipe),
+          ),
+        )
+        .then((saved) {
+          if (saved != null && mounted) {
+            _invalidate();
+          }
+        });
   }
 
   Future<bool> _confirmDelete(Recipe recipe) async {
