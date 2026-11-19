@@ -223,6 +223,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `be0e346` |
 | 2026-11-19 | Docs | Spesifikasi registry v1 + sinkronisasi dokumen basi (runtime, status implementasi, D12/D13) | `REGISTRY.md`, `PLUGINS.md`, `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`, `README.md`, `PRIVACY.md`, `ROADMAP.md`, `TODO.md` | Link Markdown lokal resolve; `git diff --check` bersih; 512 test tidak berubah | `583647a` |
 | 2026-11-19 | UX | Recipe Editor: output di bawah input, daftar step di panel kanan (end drawer), konfigurasi parameter jadi dialog tengah | `recipe_editor_page.dart`, `step_config_dialog.dart`, `step_card.dart`, `app_badge.dart` | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: drawer, picker, dialog, dan live output diverifikasi | `ad88b19` |
+| 2026-11-19 | UX | Istilah UI daftar step jadi "Ingredients" + ikon keranjang di AppBar | `recipe_editor_page.dart`, `step_card.dart`, test terkait | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: header "Ingredients (0)", tombol "Tambah ingredients", ikon keranjang tampil | `244cb2f` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1505,6 +1506,27 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: Operation Picker tetap bottom sheet sesuai keputusan;
   verifikasi visual hanya di emulator 720×1640, belum tablet/desktop.
 - Commit: `ad88b19`
+
+### CP-069 — 2026-11-19 — Istilah "Ingredients" + ikon keranjang
+
+- Status: Selesai
+- Perubahan:
+  - Label UI "Step" pada Recipe Editor diganti menjadi "Ingredients":
+    tooltip AppBar, header panel, tombol tambah, tooltip tutup/hapus/atur,
+    empty state, dan SnackBar hapus.
+  - Ikon aksi AppBar diganti dari daftar bernomor menjadi keranjang
+    (`Icons.shopping_basket`) agar cocok dengan metafora recipe.
+  - `DESIGN.md` §7, §8.2, dan §9, `CHANGELOG.md`, serta `TODO.md`
+    disinkronkan; widget test memakai label baru.
+- File: `lib/features/recipe/recipe_editor_page.dart`,
+  `lib/core/ui/components/step_card.dart`, test terkait.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 515 lulus;
+  emulator Android 12: header "Ingredients (0)", tombol "Tambah ingredients",
+  empty state, dan ikon keranjang diverifikasi lewat screenshot.
+- Catatan/risiko: istilah domain/kode (`RecipeStep`, `StepCard`,
+  `StepConfigDialog`) tidak diubah agar kontrak model dan dokumentasi teknis
+  tetap konsisten.
+- Commit: `244cb2f`
 
 ## 7. Template Checkpoint Baru
 
