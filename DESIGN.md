@@ -183,7 +183,8 @@ Aturan:
 
 ## 7. Navigasi
 - Bottom navigation 3 tab: Home, Library, Settings.
-- Home: daftar recipe tersimpan + tombol "Recipe Baru".
+- Home: daftar recipe tersimpan + tombol "Recipe Baru"; tile recipe punya
+  menu Duplikat/Hapus (dengan konfirmasi) dan swipe kiri juga menghapus.
 - Library: daftar operasi (dari plugin aktif) + pencarian.
 - Settings: tema, bahasa, plugin manager, tentang, privasi.
 - Recipe Editor dibuka sebagai layar penuh (bukan tab) dengan tombol back.

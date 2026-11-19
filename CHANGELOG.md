@@ -12,6 +12,8 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Lokalisasi antarmuka EN/ID berbasis katalog JSON
   (`assets/i18n/{id,en}.json`) dengan pemilih bahasa di Settings,
   interpolasi/plural, dan persistensi bahasa lewat `SettingsRepository`.
+- Opsi Hapus pada menu tile recipe di Home (selain swipe kiri), lengkap
+  dengan dialog konfirmasi dan Undo.
 
 ### Diubah
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,

@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (537 test, 2026-11-19) |
+| Test suite | Lulus (540 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -1606,6 +1606,28 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   invalidasi berlaku untuk semua instance family; tidak ada perubahan
   pada skema database atau format recipe.
 - Commit: `6ebef6a`
+
+### CP-073 - 2026-11-19 - Opsi hapus recipe di menu tile Home
+
+- Status: Selesai
+- Perubahan:
+  - Menu overflow tile recipe kini berisi aksi Duplikat dan Hapus; aksi
+    Hapus memakai dialog konfirmasi yang sama dengan swipe kiri, lalu
+    menghapus recipe dan menampilkan toast dengan Undo.
+  - Swipe kiri tetap tersedia. Sebelumnya hapus hanya bisa lewat swipe
+    sehingga tidak ditemukan pengguna di desktop/perangkat tanpa gestur
+    tersebut.
+  - Test widget ditambah untuk menu Hapus (Batal/konfirmasi), swipe hapus
+    end-to-end dengan SQLite FFI, serta helper `pumpUntil` bersama.
+- File: `lib/features/home/home_page.dart`,
+  `test/features/home/{home_page_test,home_page_delete_flow_test,home_page_save_flow_test}.dart`,
+  `test/core/support/async_pump.dart`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 540 lulus
+  (satu kegagalan flaky `wasm_lua_runtime_test` pada run pertama, lulus
+  saat dijalankan terpisah dan pada run penuh berikutnya).
+- Catatan/risiko: penghapusan tetap lewat `RecipeRepository.delete` yang
+  sudah ada; tidak ada perubahan skema atau format data.
+- Commit: `00bb78c`
 
 ## 7. Template Checkpoint Baru
 
