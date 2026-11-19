@@ -507,8 +507,8 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T01 + T03 → T08 → T02 → T04; T07 adalah gate
-sebelum registry dibuka publik.
+Urutan yang disarankan: T08 (selesai) → T01 + T03 → T02 → T04 setelah
+D12/D13; T07 adalah gate sebelum registry dibuka publik.
 
 - [ ] **F16-T01** Registry resmi read-only + `registry.json` client.
 - [ ] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
@@ -517,7 +517,9 @@ sebelum registry dibuka publik.
 - [x] **F16-T05** Streaming file besar tanpa OOM.
 - [x] **F16-T06** Log eksekusi opt-in + layar diagnostik.
 - [x] **F16-T07** Audit/fuzzing sandbox dan runtime WASM.
-- [ ] **F16-T08** Tooling registry (validasi, review checklist, publikasi).
+- [x] **F16-T08** Tooling registry (validasi, review checklist, publikasi).
+  - CLI `keygen`/`validate`/`sign`/`build-index`/`verify`, model+signature
+    core di `lib/core/registry/`, build indeks deterministik, atomic write.
 
 ## F17 — Backlog Fase 3 (P2)
 

@@ -40,7 +40,7 @@ lib/
     engine/          (recipe engine, pipeline executor)
     plugin/          (loader, manifest, registry, verifier)
     runtime/         (dsl, lua native, lua wasm, wasm, sandbox)
-    registry/        (rencana F16: client, signature, trust store)
+    registry/        (model + signature + trust store; F16-T08)
     storage/         (sqlite, settings)
     ui/              (tema, komponen shared)
     error/
@@ -125,9 +125,11 @@ Implementasi plugin MVP:
   `plugin_lifecycle.dart`.
 - Sideload UI (F04-T05), bootstrap aset `core.berp` (F04-T08), dan
   `PluginManagerService`/provider (F04-T10) sudah tersedia.
-- Registry daring (F16) belum diimplementasikan; spesifikasi di
-  `REGISTRY.md`. Rencana modul: `lib/core/registry/` + UI di
-  `lib/features/plugins/registry/`.
+- Registry daring (F16): model `registry.json`, signature Ed25519, trust
+  store, dan tooling build/sign/verify sudah tersedia (F16-T08). Client HTTP,
+  UI katalog, dan instalasi (F16-T01..T04) belum; menunggu D12/D13.
+  Spesifikasi di `REGISTRY.md`; modul di `lib/core/registry/` dan
+  `tool/registry_cli.dart`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
@@ -220,6 +222,7 @@ dipakai di kode.
 |---|---|---|---|
 | `flutter_riverpod` | State management & DI | Diwajibkan `AGENT.md`; testable, tanpa singleton mutable | `provider` (kurang terstruktur untuk async), `bloc` (boilerplate lebih besar) |
 | `crypto` | SHA-256, HMAC, hash operasi core | API ringkas, didukung luas, cukup untuk hash/HMAC | `pointycastle` (algoritma lebih lengkap, tetapi belum perlu untuk verifikasi hash) |
+| `cryptography` | Ed25519 sign/verify registry (F16-T08) | Implementasi Ed25519 murni Dart, API signature ringkas, lolos test vector RFC 8032 | `pointycastle` (belum menyediakan Ed25519), binding native (menambah platform/dependency) |
 | `archive` | Baca/tulis zip `.berp` | Mendukung zip encode/decode murni Dart | `zip`/`archive_io` (API lebih terbatas atau tidak perlu) |
 | `path_provider` | Direktori database dan paket plugin | Standar Flutter untuk path aplikasi lintas platform | Platform channel manual (reinventing) |
 | `sqflite` | Recipe, plugin, settings store | Sesuai `ARCHITECTURE.md` (SQLite); ringan, tanpa codegen | `drift` (codegen + build step), `isar` (binary DB, bukan SQLite) |
@@ -233,7 +236,9 @@ Catatan:
 - `cupertino_icons` dari template Flutter dihapus karena belum dipakai.
 - Dependency transitif tidak dicatat di sini; yang dicatat adalah dependency
   langsung di `pubspec.yaml`.
-- Penambahan dependency untuk Fase 2 (signature Ed25519) harus melalui
-  review keamanan dan pembaruan tabel ini. Kandidat: `package:cryptography`
-  (pure Dart, mendukung Ed25519); `pointycastle` 4.0.0 belum menyediakan
-  Ed25519. Belum ditambahkan ke `pubspec.yaml`.
+- Penambahan dependency untuk Fase 2 (signature Ed25519) sudah melalui
+  review: `package:cryptography` 2.9.0 (pure Dart, Ed25519) ditambahkan untuk
+  tooling registry F16-T08 dan akan dipakai verifikasi client F16-T03.
+  `pointycastle` 4.0.0 belum menyediakan Ed25519. Test vector RFC 8032 ada di
+  `test/core/registry/registry_signature_test.dart`. Custody kunci produksi
+  tetap mengikuti D13 (offline/HSM), bukan file repo.

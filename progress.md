@@ -30,14 +30,14 @@ Status yang dipakai:
 | Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
 | Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (spesifikasi siap) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 3 / 8 |
+| Task Fase 2 | 4 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 2 (D12, D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T08 (tooling registry), lalu registry publik setelah D12/D13 |
-| Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat spesifikasi |
+| Task berikutnya | F16-T01/T03 setelah D12/D13 (F16-T08 selesai) |
+| Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat tooling |
 | Analyze | Lulus (0 issue, 2026-11-20) |
-| Test suite | Lulus (574 test, 2026-11-20) |
+| Test suite | Lulus (600 test, 2026-11-20) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 3 | Berjalan |
+| F16 — Backlog Fase 2 | 8 | 4 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
@@ -229,6 +229,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F16-T06 | Log eksekusi opt-in (JSONL lokal, rotasi) + layar Diagnostik di Settings | `lib/core/diagnostics/**`, `lib/features/settings/diagnostics_page.dart`, `recipe_editor_page.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 556 lulus | `2e2a97b` |
 | 2026-11-19 | F16-T05 | Input file dibaca bertahap di isolate kerja dengan batas memori; output step dibatasi | `lib/core/engine/file_buffer_reader.dart`, `pipeline_executor.dart`, `pipeline_isolate.dart`, `recipe_editor_page.dart` | `flutter analyze` 0 issue; `flutter test` 564 lulus | `cd07b03` |
 | 2026-11-20 | F16-T07 | Audit sandbox/runtime: pre-scan central directory `.berp`, batas stdout/stderr WASI, serialisasi worker, batas kedalaman JSON DSL, fuzz paket, dan uji sandbox Lua | `lib/core/plugin/plugin_package.dart`, `lib/core/runtime/{dsl_runtime,wasmtime/wasm_worker,wasmtime/wasmtime_engine,wasmtime/wasmtime_ffi}.dart`, `test/core/runtime/**`, `test/fixtures/wasm/stdout_flood.*` | `flutter analyze` 0 issue; `flutter test` 574 lulus; fuzz 200 mutasi deterministik | `673d3eb` |
+| 2026-11-20 | F16-T08 | Tooling registry: `keygen`/`validate`/`sign`/`build-index`/`verify`, model `registry.json`, Ed25519 + trust store, indeks deterministik, atomic write, review checklist | `lib/core/registry/**`, `tool/registry_cli.dart`, `tool/registry/registry_builder.dart`, `test/core/registry/**`, `test/tool/registry_*_test.dart` | `flutter analyze` 0 issue; `flutter test` 600 lulus; uji registry 25 lulus; alur CLI end-to-end | `ba5c187`, `f73301a` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1728,6 +1729,36 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   pekerja setelah 250 ms. Keduanya dicatat di `THREAT_MODEL.md`.
 - Commit: `673d3eb`
 
+### CP-077 - 2026-11-20 - F16-T08 tooling registry
+
+- Status: Selesai
+- Perubahan:
+  - Model `registry.json` v1 + parser/validator (`RegistryIndex`,
+    `RegistryEntry`): batas 5 MiB/2.000 entri, semver, izin, hash, URL
+    relatif/absolut HTTPS, `allowedHosts`, duplikat, dan urutan kanonik.
+  - `registry_signature.dart`: file signature Ed25519, domain separation
+    index/package, trust store `active`/`revoked` + `usage`, sign/verify,
+    dan keygen lokal; test vector RFC 8032.
+  - `tool/registry_cli.dart` + `tool/registry/registry_builder.dart`:
+    `keygen`, `validate`, `sign`, `build-index`, `verify`; input
+    `registry-source.json`; `generatedAt`/`sequence` deterministik dan
+    menolak sequence yang tidak naik; signature paket wajib ada dan
+    diverifikasi bila keyring diberikan; file ditulis atomik; opsi tak
+    dikenal ditolak.
+  - Review checklist dan urutan publikasi atomik didokumentasikan di
+    `REGISTRY.md` §13.
+- File: `lib/core/registry/{registry_index,registry_signature}.dart`,
+  `tool/registry_cli.dart`, `tool/registry/registry_builder.dart`,
+  `test/core/registry/**`, `test/tool/registry_{builder,cli}_test.dart`,
+  `pubspec.yaml`, docs.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 600 lulus; uji
+  registry terarah 25 lulus; alur CLI package → sign → build-index → sign
+  index → verify diuji.
+- Catatan/risiko: `keygen` menulis kunci privat tanpa enkripsi; custody
+  produksi tetap menunggu D13. Client HTTP, UI, dan instalasi
+  (F16-T01..T04) belum diimplementasikan.
+- Commit: `ba5c187`, `f73301a`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1763,7 +1794,7 @@ bagian D.
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
-| 2026-11-19 | F16-T01/T03, D12/D13 | Hosting/URL registry dan custody kunci Ed25519 belum diputuskan | F16-T01/T03 belum bisa difinalisasi | Terbuka (spesifikasi `REGISTRY.md` §12; ditunda) |
+| 2026-11-19 | F16-T01/T03, D12/D13 | Hosting/URL registry dan custody kunci Ed25519 belum diputuskan | F16-T01/T03 belum bisa difinalisasi; F16-T08 tooling sudah selesai | Terbuka (spesifikasi `REGISTRY.md` §12; ditunda) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

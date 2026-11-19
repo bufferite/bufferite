@@ -1,7 +1,8 @@
 # registry.md — Spesifikasi Registry Plugin Bufferite
 
 Versi dokumen: 1.0 (draf)
-Status: **Belum diimplementasikan** — acuan F16-T01..T04 dan F16-T08
+Status: **Sebagian** — tooling registry + model/signature core tersedia
+(F16-T08); client, UI, dan instalasi (F16-T01..T04) belum
 Berlaku untuk: registry resmi read-only Bufferite
 Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 [PRIVACY.md](PRIVACY.md)
@@ -11,6 +12,10 @@ Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 Registry adalah katalog plugin `.berp` yang dapat dilihat dan diinstal dari
 dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
+
+Per 2026-11-20, tooling registry (F16-T08) dan model/signature core sudah
+tersedia. Client HTTP, UI katalog, dan instalasi dari registry
+(F16-T01..T04) belum diimplementasikan dan menunggu D12/D13.
 
 Ruang lingkup v1:
 
@@ -378,11 +383,17 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 
 ### F16-T08 — Tooling registry
 
-- CLI: `validate`, `sign`, `build-index`, `verify`.
-- Generate `registry.json` deterministik + naikkan `sequence`.
-- Review checklist: source Lua, izin, lisensi, tidak ada obfuscation,
-  hash/signature, batas paket.
-- Publikasi atomik: paket + signature dulu, indeks bertanda tangan terakhir.
+Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
+
+- [x] CLI: `keygen`, `validate`, `sign`, `build-index`, `verify`.
+- [x] Generate `registry.json` deterministik + naikkan `sequence`; sequence
+      eksplisit yang tidak lebih besar dari indeks lama ditolak.
+- [x] Review checklist: source Lua, izin, lisensi, tidak ada obfuscation,
+      hash/signature, batas paket.
+- [x] Publikasi atomik: paket + signature dulu, indeks bertanda tangan
+      terakhir.
+- [ ] Signing produksi menunggu D13 (custody kunci); `keygen` lokal menulis
+      file JSON tanpa enkripsi untuk dev/CI.
 
 ### Gate publik
 
@@ -395,7 +406,7 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 |---|---|---|---|
 | D12 | Hosting, URL publik, dan CDN registry | GitHub Pages/repo + CDN; URL final saat implementasi | Terbuka (ditunda) |
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/HSM; kunci paket di CI; rotasi 90 hari | Terbuka |
-| — | Library Ed25519 | `package:cryptography` (perlu review dependency) | Menunggu implementasi |
+| — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
 | — | TTL cache indeks | 24 jam | Usulan |
 | — | Jumlah versi lama disimpan | 1 versi sebelumnya | Usulan |
 | — | Registry pihak ketiga | Tidak ada di v1 | Usulan |
@@ -404,26 +415,152 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 
 Keputusan D12/D13 dicatat juga di `TODO.md` bagian D dan `progress.md` §8.
 
-## 13. Rencana Implementasi (belum ada kode)
+Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi untuk
+dev/CI. Kunci produksi wajib disimpan offline/HSM, tidak masuk repo, dan
+prosedur rotasi/revocation belum final sampai D13 diputuskan.
 
-Rencana modul (nama dapat berubah saat implementasi):
+## 13. Implementasi & Tooling
+
+### 13.1 Status modul
 
 ```text
 lib/core/registry/
-  registry_index.dart        model + parser + validasi
-  registry_signature.dart    Ed25519 verifier + signature file
-  registry_trust_store.dart  public key yang di-pin
-  registry_client.dart       HTTP, cache, sequence, offline
-  registry_installer.dart    unduh, verifikasi, instal, provenance
+  registry_index.dart        model + parser + validasi            (F16-T08)
+  registry_signature.dart    Ed25519, signature file, trust store (F16-T08)
+  registry_client.dart       HTTP, cache, sequence, offline       (F16-T01, tertunda)
+  registry_installer.dart    unduh, verifikasi, instal, provenance (F16-T02/T04, tertunda)
 lib/features/plugins/registry/
-  registry_providers.dart
-  registry_catalog_screen.dart
-  registry_detail_screen.dart
-tool/registry/
-  validate.dart
-  sign.dart
-  build_index.dart
+  registry_providers.dart             (F16-T02, tertunda)
+  registry_catalog_screen.dart        (F16-T02, tertunda)
+  registry_detail_screen.dart         (F16-T02, tertunda)
+tool/
+  registry_cli.dart          entry point CLI                     (F16-T08)
+  registry/
+    registry_builder.dart    source -> registry.json deterministik (F16-T08)
 ```
+
+Tooling F16-T08 selesai 2026-11-20 (CP-077). Client, UI, dan instalasi
+(F16-T01..T04) tetap menunggu D12/D13.
+
+### 13.2 CLI registry
+
+Jalankan dari root repo (`dart run tool/registry_cli.dart help`).
+
+| Perintah | Kegunaan |
+|---|---|
+| `keygen` | Buat pasangan kunci Ed25519 + trust store awal (lokal/CI). |
+| `validate package` | Decode paket, cek batas, `integrity.sha256`, dan signature opsional. |
+| `validate index` | Parse `registry.json`, batas, duplikat, dan URL vs `allowedHosts`. |
+| `sign package` | Tulis `<paket>.berp.sig` dengan domain package. |
+| `sign index` | Tulis `registry.json.sig` dengan domain index. |
+| `build-index` | Gabungkan source + manifest paket menjadi `registry.json`. |
+| `verify package` | Verifikasi signature paket terhadap keyring. |
+| `verify index` | Verifikasi signature indeks terhadap keyring. |
+
+Contoh alur rilis (kunci di contoh memakai `both`; produksi memisahkan kunci
+index offline dan kunci package CI sesuai D13):
+
+```powershell
+dart run tool/registry_cli.dart keygen --key-id official-2026-01 \
+  --usage both --out .keys/official-2026-01.json \
+  --public-out .keys/registry_keys.json
+
+dart run tool/registry_cli.dart validate package \
+  --in dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp
+dart run tool/registry_cli.dart sign package \
+  --in dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp \
+  --out dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp.sig \
+  --key .keys/official-2026-01.json
+
+dart run tool/registry_cli.dart build-index --source registry-source.json \
+  --out dist/registry.json --base dist/registry-lama.json \
+  --keyring .keys/registry_keys.json
+
+dart run tool/registry_cli.dart sign index --in dist/registry.json \
+  --out dist/registry.json.sig --key .keys/official-2026-01.json
+
+dart run tool/registry_cli.dart verify index --in dist/registry.json \
+  --sig dist/registry.json.sig --keyring .keys/registry_keys.json \
+  --base-url https://registry.contoh.dev/registry/v1/registry.json
+```
+
+`keygen` menolak menimpa file yang sudah ada tanpa `--force`, termasuk
+`--public-out`; file kunci ditulis tanpa enkripsi, jadi jangan commit.
+`build-index` menulis file tujuan secara atomik (temporary + rename).
+
+Input `build-index` adalah `registry-source.json` yang tidak dipublikasikan:
+
+```json
+{
+  "baseUrl": "https://registry.contoh.dev/registry/v1/registry.json",
+  "allowedHosts": ["registry.contoh.dev", "cdn.contoh.dev"],
+  "generatedAt": "2026-11-20T12:00:00Z",
+  "packages": [
+    {
+      "path": "packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp",
+      "summary": "Kumpulan operasi encoding tambahan.",
+      "publishedAt": "2026-11-20T10:00:00Z",
+      "status": "active",
+      "tags": ["encoding"]
+    }
+  ]
+}
+```
+
+- `path` relatif terhadap file source dan wajib berada di `packages/...`
+  kecuali `downloadUrl` diisi eksplisit.
+- `pluginId`, `version`, `name`, `tier`, `minAppVersion`, `permissions`,
+  `sizeBytes`, dan `sha256` selalu dibaca dari paket/manifest. `pluginId`
+  dan `version` di source hanya untuk verifikasi silang.
+- Metadata opsional source menimpa manifest: `description`, `author`,
+  `license`, `homepage`. Field khusus indeks: `summary`, `publishedAt`,
+  `status`, `tags`, `downloadUrl`, `signatureUrl`.
+- File `<paket>.berp.sig` wajib ada. Dengan `--keyring`, signature
+  diverifikasi; tanpa `--keyring` hanya keberadaan dan ukuran yang dicek.
+  Selalu pakai `--keyring` di CI rilis.
+- Determinisme: entri diurutkan `pluginId` lalu versi; `generatedAt`
+  dipilih dari `--generated-at` > source > `publishedAt` terbaru > indeks
+  lama > epoch; `sequence` default `indeks lama + 1`, dan nilai eksplisit
+  harus lebih besar dari indeks lama. Output byte-identik untuk input sama.
+  `--base` yang diberikan tetapi tidak ditemukan ditolak, bukan diam-diam
+  memulai ulang dari `sequence` 1.
+- Batas: indeks 5 MiB, signature 4 KiB, paket 32 MiB, 2.000 entri, dan
+  1-8 `allowedHosts`.
+
+### 13.3 Review checklist
+
+- [ ] Paket lolos `validate package`; `pluginId` dan versi cocok manifest.
+- [ ] Source Lua dibaca baris per baris; tidak ada obfuscation,
+      `load`/bytecode dinamis, akses jaringan/FS tersembunyi, atau data
+      pengguna yang dikirim keluar.
+- [ ] Tier WASM dibangun dari source yang direview dan dapat direproduksi;
+      hash paket dicatat.
+- [ ] Izin minimal dan dijelaskan: `net`, `file:read`, `file:write` hanya bila
+      fitur membutuhkannya.
+- [ ] Lisensi ada dan kompatibel; `summary`/`description` teks biasa, tanpa
+      markup/HTML.
+- [ ] Tidak ada secret, token, atau data pribadi di paket.
+- [ ] `sha256`, ukuran, dan signature cocok; `keyId` sesuai trust store dan
+      belum revoked.
+- [ ] `status` benar (`active`, `deprecated`, `yanked`, `revoked`) dan
+      `sequence` lebih besar dari indeks publik sebelumnya.
+- [ ] URL final HTTPS dan host hanya dari `allowedHosts`; path paket imutabel.
+
+`validate package` memberi warning untuk lisensi kosong dan izin `net`/file,
+tetapi warning bukan pengganti review manual.
+
+### 13.4 Publikasi atomik
+
+Urutan wajib:
+
+1. Unggah `.berp` + `.sig` ke path versi yang tidak akan ditimpa.
+2. Pastikan paket dapat diunduh dan hash-nya sama dengan entri.
+3. Tanda tangani `registry.json`, lalu unggah `registry.json` + `.sig`
+   terakhir. Jangan pernah menerbitkan indeks sebelum paket tersedia.
+4. Jika ada kesalahan, jangan turunkan `sequence` dan jangan timpa paket;
+   tandai `yanked`/`revoked`, lalu terbitkan indeks baru dengan `sequence`
+   lebih tinggi.
+5. Simpan `registry-source.json`, indeks, dan signature lama untuk audit.
 
 Fondasi yang sudah ada dan dapat dipakai ulang:
 

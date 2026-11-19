@@ -17,6 +17,10 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Log eksekusi opt-in untuk diagnostik lokal (JSONL, rotasi 200 entri /
   256 KiB) dan layar Diagnostik di Settings untuk melihat serta menghapus
   riwayat; log tidak memuat input, output, atau args step.
+- Tooling registry (F16-T08): CLI `keygen`, `validate`, `sign`,
+  `build-index`, dan `verify`; model `registry.json` + parser/validator,
+  signature Ed25519 dengan domain separation, trust store, indeks
+  deterministik dengan `sequence` monoton, dan penulisan file atomik.
 
 ### Diubah
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,
@@ -37,6 +41,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   output step yang melebihi batas dilaporkan sebagai error terstruktur.
 - `StepCard`: nama operasi ditampilkan (bukan ID), badge tier/status
   memakai wrap agar aman di panel sempit.
+- Dependency `cryptography` 2.9.0 (Ed25519 murni Dart) ditambahkan untuk
+  tooling/verifikasi registry; alasan dan alternatif dicatat di
+  `ARCHITECTURE.md` §12.
 
 ### Diperbaiki
 - Daftar recipe di Home tidak diperbarui setelah menyimpan dari Recipe

@@ -71,7 +71,7 @@ Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
 | UI responsif | Ya (isolate kerja) |
 | Isolasi memori / kontainmen bug native | **Tidak** (native in-process; engine WASM tersedia sebagai opsi, bukan default 1.0) |
 | Tier `wasm` | Isolasi memori WASM; tanpa host function net/fs (WASI tanpa preopen/socket) |
-| Plugin tepercaya | Registry resmi: hash + signature Ed25519 (rencana F16); sideload `unverified` = tidak tepercaya |
+| Plugin tepercaya | Registry resmi: hash + signature Ed25519 (tooling F16-T08; client F16-T03); sideload `unverified` = tidak tepercaya |
 | Sandbox OS | Android/iOS/desktop (UID, scoped storage); tanpa INTERNET di 1.0 |
 
 Konsekuensi: plugin Lua yang jahat tidak bisa memanggil file/net lewat API
@@ -82,7 +82,7 @@ sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
 `lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
 selain engine wasmtime sendiri.
 
-### 4.2 Registry (Fase 2, rencana)
+### 4.2 Registry (Fase 2; tooling selesai, client rencana)
 
 - Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
   registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
@@ -135,5 +135,10 @@ selain engine wasmtime sendiri.
   (F14-T06) sudah diuji.
 - F16-T07 selesai (2026-11-20): `flutter analyze` 0 issue dan 574 test lulus,
   termasuk batas kedalaman JSON DSL dan batas keluaran WASI.
-- Sisa untuk registry publik: test signature/rollback F16-T01..T04 dan
-  tooling F16-T08. Belum ada kode registry.
+- F16-T08 selesai (2026-11-20, CP-077): tooling `validate`, `sign`,
+  `build-index`, `verify`, model `registry.json`, signature Ed25519, dan trust
+  store tersedia; test vector RFC 8032, domain separation, key unknown/revoked,
+  determinisme indeks, dan batas ukuran lulus.
+- Sisa untuk registry publik: client HTTP/cache/sequence, UI katalog, update/
+  rollback (F16-T01..T04), serta keputusan D12/D13. Belum ada client registry
+  di aplikasi.
