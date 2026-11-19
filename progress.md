@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (515 test, 2026-11-19) |
+| Test suite | Lulus (521 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -64,6 +64,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | **Total MVP** | **131** | **131** | **Selesai** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
+| F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
 
 ## 4. Ringkasan Baseline (2026-11-11)
@@ -224,6 +225,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | Docs | Spesifikasi registry v1 + sinkronisasi dokumen basi (runtime, status implementasi, D12/D13) | `REGISTRY.md`, `PLUGINS.md`, `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`, `README.md`, `PRIVACY.md`, `ROADMAP.md`, `TODO.md` | Link Markdown lokal resolve; `git diff --check` bersih; 512 test tidak berubah | `583647a` |
 | 2026-11-19 | UX | Recipe Editor: output di bawah input, daftar step di panel kanan (end drawer), konfigurasi parameter jadi dialog tengah | `recipe_editor_page.dart`, `step_config_dialog.dart`, `step_card.dart`, `app_badge.dart` | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: drawer, picker, dialog, dan live output diverifikasi | `ad88b19` |
 | 2026-11-19 | UX | Istilah UI daftar step jadi "Ingredients" + ikon keranjang di AppBar | `recipe_editor_page.dart`, `step_card.dart`, test terkait | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: header "Ingredients (0)", tombol "Tambah ingredients", ikon keranjang tampil | `244cb2f` |
+| 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 521 lulus; paritas 198 key ID/EN | `088b7d6` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1527,6 +1529,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `StepConfigDialog`) tidak diubah agar kontrak model dan dokumentasi teknis
   tetap konsisten.
 - Commit: `244cb2f`
+
+### CP-070 — 2026-11-19 — Lokalisasi UI EN/ID (katalog JSON + pemilih bahasa)
+
+- Status: Selesai
+- Perubahan:
+  - Katalog `assets/i18n/id.json` dan `en.json` (198 key per bahasa) dimuat
+    sekali lewat `AppLocalizations.preload()`; lookup `context.tr` /
+    `context.trPlural` mendukung interpolasi `{arg}` dan plural
+    `_one`/`_other`.
+  - `AppLanguage` + key `language` di `SettingsRepository`;
+    `LanguageController` menyimpan locale aktif; Settings punya pemilih
+    Bahasa Indonesia/English.
+  - Seluruh teks antarmuka (shell, Home, Library, Recipe Editor, Plugin
+    Manager, Settings, dialog, toast) dimigrasikan ke katalog; istilah
+    "Ingredients" dipertahankan di kedua bahasa dan ikon AppBar tetap
+    `Icons.local_grocery_store` sesuai perubahan pengguna.
+- File: `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`,
+  `lib/features/settings/**`, `lib/features/recipe/**`, `lib/core/ui/**`,
+  `lib/features/{home,library,operations,plugins}/**`, test terkait.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 521 lulus;
+  paritas 198 key ID/EN; seluruh 177 key yang direferensikan kode tersedia
+  (plural memakai varian `_one`/`_other`).
+- Catatan/risiko: nama operasi/plugin, label runtime, dan pesan error domain
+  (`Recipe.validate`, `AppError`) masih berbahasa Indonesia; katalog hanya
+  mencakup teks antarmuka. `AppLocalizations.current` kosong sampai
+  `preload()` berjalan; test memakai `test/flutter_test_config.dart`.
+- Commit: `088b7d6`
 
 ## 7. Template Checkpoint Baru
 
