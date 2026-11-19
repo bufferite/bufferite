@@ -148,6 +148,7 @@ final class WasmtimeEngine {
     List<String> argv, {
     int memoryLimitBytes = 64 * 1024 * 1024,
     int epochDeadline = 1,
+    Uint8List? stdinBytes,
   }) {
     if (_closed) {
       throw WasmtimeException('Engine sudah ditutup.');
@@ -205,6 +206,26 @@ final class WasmtimeEngine {
           malloc.free(value);
         }
         calloc.free(argvPointers);
+      }
+
+      if (stdinBytes != null) {
+        // `wasm_byte_vec_new` menyalin byte ke Vec milik Rust;
+        // `wasi_config_set_stdin_bytes` mengambil alih Vec tersebut.
+        final vec = calloc<WasmByteVec>();
+        Pointer<Uint8>? data;
+        if (stdinBytes.isNotEmpty) {
+          data = calloc<Uint8>(stdinBytes.length);
+          data.asTypedList(stdinBytes.length).setAll(0, stdinBytes);
+        }
+        try {
+          _ffi.byteVecNew(vec, stdinBytes.length, data ?? nullptr);
+        } finally {
+          if (data != null) {
+            calloc.free(data);
+          }
+        }
+        _ffi.wasiConfigSetStdinBytes(wasi, vec);
+        calloc.free(vec);
       }
 
       final wasiError = _ffi.contextSetWasi(context, wasi);

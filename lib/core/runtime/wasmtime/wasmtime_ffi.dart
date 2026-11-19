@@ -131,6 +131,14 @@ typedef WasiSetFileNative =
     Uint8 Function(Pointer<WasiConfigOpaque>, Pointer<Utf8>);
 typedef WasiSetFileDart =
     int Function(Pointer<WasiConfigOpaque>, Pointer<Utf8>);
+typedef WasiSetStdinBytesNative =
+    Void Function(Pointer<WasiConfigOpaque>, Pointer<WasmByteVec>);
+typedef WasiSetStdinBytesDart =
+    void Function(Pointer<WasiConfigOpaque>, Pointer<WasmByteVec>);
+typedef ByteVecNewNative =
+    Void Function(Pointer<WasmByteVec>, IntPtr, Pointer<Uint8>);
+typedef ByteVecNewDart =
+    void Function(Pointer<WasmByteVec>, int, Pointer<Uint8>);
 typedef ContextSetWasiNative =
     Pointer<WasmtimeErrorOpaque> Function(
       Pointer<WasmtimeContextOpaque>,
@@ -267,6 +275,8 @@ final class WasmtimeFfi {
   wasiConfigSetStdoutFile;
   late final int Function(Pointer<WasiConfigOpaque>, Pointer<Utf8>)
   wasiConfigSetStderrFile;
+  late final void Function(Pointer<WasiConfigOpaque>, Pointer<WasmByteVec>)
+  wasiConfigSetStdinBytes;
   late final Pointer<WasmtimeErrorOpaque> Function(
     Pointer<WasmtimeContextOpaque>,
     Pointer<WasiConfigOpaque>,
@@ -315,6 +325,8 @@ final class WasmtimeFfi {
   late final void Function(Pointer<WasmTrapOpaque>, Pointer<WasmByteVec>)
   trapMessage;
   late final void Function(Pointer<WasmTrapOpaque>) trapDelete;
+  late final void Function(Pointer<WasmByteVec>, int, Pointer<Uint8>)
+  byteVecNew;
   late final void Function(Pointer<WasmByteVec>) byteVecDelete;
 
   void _bind() {
@@ -389,6 +401,10 @@ final class WasmtimeFfi {
       WasiSetFileNative,
       WasiSetFileDart
     >('wasi_config_set_stderr_file');
+    wasiConfigSetStdinBytes = _library.lookupFunction<
+      WasiSetStdinBytesNative,
+      WasiSetStdinBytesDart
+    >('wasi_config_set_stdin_bytes');
     contextSetWasi = _library.lookupFunction<
       ContextSetWasiNative,
       ContextSetWasiDart
@@ -433,6 +449,9 @@ final class WasmtimeFfi {
     );
     trapDelete = _library.lookupFunction<TrapDeleteNative, TrapDeleteDart>(
       'wasm_trap_delete',
+    );
+    byteVecNew = _library.lookupFunction<ByteVecNewNative, ByteVecNewDart>(
+      'wasm_byte_vec_new',
     );
     byteVecDelete = _library.lookupFunction<
       ByteVecDeleteNative,

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:bufferite/core/engine/buffer.dart';
+import 'package:bufferite/core/runtime/dsl_runtime.dart';
 import 'package:bufferite/core/runtime/lua_runtime.dart';
 import 'package:bufferite/core/runtime/sandbox.dart';
 import 'package:bufferite/core/runtime/wasm_lua_runtime.dart';
@@ -103,4 +104,90 @@ void main() {
       }, skip: skip);
     }
   });
+
+  group('kontrak DSL == Lua native == Lua WASM', () {
+    for (final entry in _dslCases) {
+      test(entry.name, () async {
+        final dsl = DslRuntime.parse(entry.dsl);
+        final native = LuaRuntime(entry.lua);
+        final wasm = WasmLuaRuntime(
+          source: entry.lua,
+          moduleBytes: moduleBytes,
+          libraryPath: _dllRelative,
+        );
+        try {
+          final expected = (await dsl.execute(
+            TextBuffer(entry.input),
+            const <String, Object?>{},
+            _context(),
+          )).asText();
+          final nativeOutput = (await native.execute(
+            TextBuffer(entry.input),
+            const <String, Object?>{},
+            _context(),
+          )).asText();
+          final wasmOutput = (await wasm.execute(
+            TextBuffer(entry.input),
+            const <String, Object?>{},
+            _context(),
+          )).asText();
+
+          expect(nativeOutput, expected, reason: 'Lua native ≠ DSL');
+          expect(wasmOutput, expected, reason: 'Lua WASM ≠ DSL');
+        } finally {
+          await wasm.dispose();
+        }
+      }, skip: skip);
+    }
+  });
 }
+
+typedef _DslContractCase = ({
+  String name,
+  String dsl,
+  String lua,
+  String input,
+});
+
+final List<_DslContractCase> _dslCases = <_DslContractCase>[
+  (
+    name: 'map',
+    dsl: '{"version":1,"steps":[{"op":"map","mapping":{"a":"o"}}]}',
+    lua: 'function transform(input) return (input:gsub("a", "o")) end',
+    input: 'banana',
+  ),
+  (
+    name: 'map_first_only',
+    dsl:
+        '{"version":1,"steps":[{"op":"map","mapping":{"a":"o"},"all":false}]}',
+    lua: 'function transform(input) return (input:gsub("a", "o", 1)) end',
+    input: 'banana',
+  ),
+  (
+    name: 'regex_replace',
+    dsl:
+        '{"version":1,"steps":[{"op":"regex_replace",'
+        '"pattern":"\\\\s+","replacement":" "}]}',
+    lua: 'function transform(input) return (input:gsub("%s+", " ")) end',
+    input: 'a   b\nc',
+  ),
+  (
+    name: 'regex_ignore_case',
+    dsl:
+        '{"version":1,"steps":[{"op":"regex_replace","pattern":"abc",'
+        '"replacement":"x","ignore_case":true}]}',
+    lua:
+        'function transform(input) '
+        'return (input:gsub("[Aa][Bb][Cc]", "x")) end',
+    input: 'ABC abc',
+  ),
+  (
+    name: 'rename_json',
+    dsl:
+        '{"version":1,"steps":[{"op":"rename","mapping":{"old":"new"}}]}',
+    lua:
+        'function transform(input) '
+        'return (input:gsub("\\"old\\"", "\\"new\\"")) end',
+    input: '{"old":1,"keep":2}',
+  ),
+];

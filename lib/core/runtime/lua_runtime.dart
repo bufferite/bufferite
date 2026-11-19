@@ -5,6 +5,7 @@ import 'package:lua_dart/lua_dart.dart';
 
 import '../engine/buffer.dart';
 import '../error/app_error.dart';
+import '../plugin/plugin_permission.dart';
 import 'lua_program.dart';
 import 'sandbox.dart';
 
@@ -28,6 +29,7 @@ final class LuaRuntime implements SandboxRuntime {
     SandboxContext context,
   ) async {
     context.ensureActive();
+    context.requirePermission(PluginPermission.cpu);
     if (input.kind == BufferKind.file) {
       throw AppError(
         category: ErrorCategory.runtime,

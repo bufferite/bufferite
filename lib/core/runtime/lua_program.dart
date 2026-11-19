@@ -13,6 +13,9 @@ String buildLuaTransformScript(
   final entry = printResult
       ? 'local __result = __bufferite_entry()\nprint = __print\nprint(__result)'
       : 'return __bufferite_entry()';
+  // Prelude ini menyamakan sandbox WASM dengan `openLibs(sandbox: true)` milik
+  // `lua_dart`: tanpa io/package/debug, tanpa fungsi `os` yang menyentuh host,
+  // dan `load` hanya menerima chunk teks (bukan bytecode).
   final sandboxPrelude = sandbox
       ? '''
 io = nil
@@ -25,7 +28,13 @@ os.execute = nil
 os.getenv = nil
 os.exit = nil
 os.remove = nil
+os.rename = nil
+os.setlocale = nil
 os.tmpname = nil
+local __bufferite_load = load
+load = function(chunk, chunkname, mode, env)
+  return __bufferite_load(chunk, chunkname, 't', env)
+end
 '''
       : '';
   return '''

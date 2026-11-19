@@ -15,6 +15,7 @@ import 'lua_runtime.dart';
 import 'runtime_cache.dart';
 import 'sandbox.dart';
 import 'wasm_lua_runtime.dart';
+import 'wasm_plugin_runtime.dart';
 
 /// Engine untuk tier `lua`.
 ///
@@ -88,13 +89,14 @@ final class SandboxOperation implements Operation {
 
 /// Membangun executor operasi plugin dari entrypoint yang terpasang.
 ///
-/// Tier yang didukung saat ini: `dsl` dan `lua` (native atau WASM). Tier
-/// `wasm` belum punya ABI plugin sehingga belum menghasilkan executor.
+/// Tier yang didukung: `dsl`, `lua` (native atau WASM), dan `wasm` (ABI
+/// command WASI, lihat `WasmPluginRuntime`).
 final class PluginRuntimeLoader {
   PluginRuntimeLoader({
     required this.sandboxConfig,
     this.luaEngine = LuaEngine.native,
     this.wasmModule,
+    this.wasmtimeLibraryPath,
     RuntimeCache? cache,
     PluginEntrypointReader? readEntrypoint,
   }) : cache = cache ?? RuntimeCache(),
@@ -103,6 +105,9 @@ final class PluginRuntimeLoader {
   final SandboxConfig Function() sandboxConfig;
   final LuaEngine luaEngine;
   final WasmLuaModule? wasmModule;
+
+  /// Path library wasmtime untuk tier `wasm`; `null` = default platform.
+  final String? wasmtimeLibraryPath;
   final RuntimeCache cache;
   final PluginEntrypointReader _readEntrypoint;
 
@@ -120,10 +125,6 @@ final class PluginRuntimeLoader {
       return null;
     }
     final tier = plugin.manifest.tier;
-    if (tier == RuntimeTier.wasm) {
-      // ABI plugin WASM belum didefinisikan (F05-T06, 1.1).
-      return null;
-    }
     return SandboxOperation(
       descriptor: operation.toDescriptor(
         pluginId: plugin.manifest.pluginId,
@@ -179,11 +180,11 @@ final class PluginRuntimeLoader {
       );
     }
 
-    final source = _decodeUtf8(bytes, manifest.entrypoint);
     switch (manifest.tier) {
       case RuntimeTier.dsl:
-        return DslRuntime.parse(source);
+        return DslRuntime.parse(_decodeUtf8(bytes, manifest.entrypoint));
       case RuntimeTier.lua:
+        final source = _decodeUtf8(bytes, manifest.entrypoint);
         if (luaEngine == LuaEngine.wasm) {
           final module = wasmModule;
           if (module == null) {
@@ -203,11 +204,9 @@ final class PluginRuntimeLoader {
         }
         return LuaRuntime(source);
       case RuntimeTier.wasm:
-        throw AppError(
-          category: ErrorCategory.unsupported,
-          code: 'runtime.tier_unsupported',
-          message: 'Tier wasm belum didukung pada versi ini.',
-          pluginId: manifest.pluginId,
+        return WasmPluginRuntime(
+          moduleBytes: bytes,
+          libraryPath: wasmtimeLibraryPath,
         );
     }
   }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../engine/buffer.dart';
 import '../error/app_error.dart';
 import '../operations/safe_regex.dart';
+import '../plugin/plugin_permission.dart';
 import 'sandbox.dart';
 
 /// Versi skema DSL yang didukung (keputusan D08).
@@ -83,6 +84,7 @@ final class DslRuntime implements SandboxRuntime {
     SandboxContext context,
   ) async {
     context.ensureActive();
+    context.requirePermission(PluginPermission.cpu);
     if (input.kind == BufferKind.file) {
       throw AppError(
         category: ErrorCategory.runtime,

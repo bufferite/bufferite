@@ -181,16 +181,15 @@ void main() {
     );
   });
 
-  test('tier wasm belum punya executor', () {
+  test('tier wasm menghasilkan executor ABI WASI', () {
     final plugin = _plugin(tier: 'wasm', entrypoint: 'main.wasm');
 
-    expect(
-      _loader(source: '').operationFor(
-        plugin,
-        plugin.manifest.operations.single,
-      ),
-      isNull,
+    final executor = _loader(source: '').operationFor(
+      plugin,
+      plugin.manifest.operations.single,
     );
+    expect(executor, isNotNull);
+    expect(executor!.id, 'test.operation');
   });
 
   test('plugin tanpa installPath belum punya executor', () {
