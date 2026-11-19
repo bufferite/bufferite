@@ -221,6 +221,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-15 | F10-T03 | Library: filter chip Semua/Favorit/kategori + nama plugin di kartu | `lib/features/library/library_page.dart`, `operation_catalog.dart` | `flutter test` (359 lulus); emulator: chip + "Bufferite Core" tampil | `be0e346` |
 | 2026-11-15 | F04-T05 | Sideload end-to-end di emulator | `lib/features/plugins/plugin_sideload.dart` | emulator: `sample.berp` → preview `Sample Pack` → Instal → muncul di Library (`unverified`) | `be0e346` |
 | 2026-11-15 | F15-T01 | Ikon launcher (biru + "B") + splash logo semua density & tema | `android/app/src/main/res/**` | emulator: ikon di app drawer; splash memakai warna tema (ikon splash sistem tidak dirender MuMu) | `be0e346` |
+| 2026-11-19 | Docs | Spesifikasi registry v1 + sinkronisasi dokumen basi (runtime, status implementasi, D12/D13) | `REGISTRY.md`, `PLUGINS.md`, `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`, `README.md`, `PRIVACY.md`, `ROADMAP.md`, `TODO.md` | Link Markdown lokal resolve; `git diff --check` bersih; 512 test tidak berubah | `583647a` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1455,6 +1456,27 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: tier `wasm`/`LuaEngine.wasm` di Android release menunggu
   libwasmtime dikemas; verifikasi perangkat arm64 fisik belum dilakukan.
 - Tag: `v1.0.0`
+
+### CP-067 — 2026-11-19 — Spesifikasi registry + sinkronisasi dokumen
+
+- Status: Selesai
+- Perubahan:
+  - `REGISTRY.md` v1 (draf): skema `registry.json`, signature Ed25519
+    detached + trust store, konsen/cache, instalasi, update/rollback,
+    revocation, dan acceptance criteria F16.
+  - `PLUGINS.md` §7 diarahkan ke spesifikasi; status runtime/WASM
+    disinkronkan; referensi `wasm_run` yang basi dihapus.
+  - Dokumen basi disinkronkan: README (status/struktur), AGENT (runtime),
+    operations (tier/engine), ARCHITECTURE (status implementasi),
+    THREAT_MODEL (registry), PRIVACY (jaringan), ROADMAP, CONTRIBUTING.
+  - TODO: D12 (hosting) dan D13 (custody kunci) dicatat; D02/D11 diperbarui.
+- File: `REGISTRY.md`, `PLUGINS.md`, `TODO.md`, `progress.md`, `README.md`,
+  `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`,
+  `PRIVACY.md`, `ROADMAP.md`, `CONTRIBUTING.md`, `CHANGELOG.md`.
+- Verifikasi: semua link Markdown lokal resolve; `git diff --check` bersih;
+  tidak ada perubahan kode (512 test tetap).
+- Catatan/risiko: registry belum diimplementasikan; D12/D13 masih terbuka.
+- Commit: `583647a`
 
 ## 7. Template Checkpoint Baru
 
