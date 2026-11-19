@@ -45,6 +45,16 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - File input besar tidak lagi dibaca utuh ke memori sebelum eksekusi,
   sehingga preview tidak memicu OOM; file di atas batas memori ditolak
   dengan pesan lokal sebelum alokasi.
+- Paket `.berp` dipindai dari central directory sebelum dekompresi: symlink,
+  jumlah entri, dan ukuran deklarasi yang melebihi batas ditolak lebih awal,
+  sehingga symlink besar dan zip dengan ratusan ribu entri tidak lagi memicu
+  alokasi/dekompresi sebelum validasi. Ditambah uji mutasi byte deterministik.
+- Runtime WASM membatasi stdout/stderr sebelum disalin ke memori, membebaskan
+  `wasi_config` pada jalur error, memakai deadline epoch relatif, dan
+  menyerialkan eksekusi paralel pada worker yang sama agar timeout/pembatalan
+  satu step tidak mengganggu step lain.
+- Step DSL `rename` menolak JSON dengan kedalaman berlebih sebelum decode,
+  mencegah `StackOverflowError` dari rekursi rename/encode.
 
 ## [1.0.0] - 2026-11-19
 

@@ -386,8 +386,7 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 
 ### Gate publik
 
-- F16-T07 (audit/fuzzing sandbox dan parser) selesai sebelum registry
-  dibuka untuk publik.
+- F16-T07 (audit/fuzzing sandbox dan parser) selesai 2026-11-20 (CP-076).
 - Tidak ada temuan kritis/tinggi yang terbuka.
 
 ## 12. Keputusan Terbuka

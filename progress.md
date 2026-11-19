@@ -1,7 +1,7 @@
 # progress.md — Bufferite Progress Checkpoints
 
 Versi: 1.0
-Terakhir diperbarui: 2026-11-19
+Terakhir diperbarui: 2026-11-20
 Sumber daftar task: [TODO.md](TODO.md)
 
 ---
@@ -30,14 +30,14 @@ Status yang dipakai:
 | Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
 | Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (spesifikasi siap) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 2 / 8 |
+| Task Fase 2 | 3 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 2 (D12, D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T07 (audit/fuzzing sandbox), lalu registry publik setelah D12/D13 |
+| Task berikutnya | F16-T08 (tooling registry), lalu registry publik setelah D12/D13 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat spesifikasi |
-| Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (564 test, 2026-11-19) |
+| Analyze | Lulus (0 issue, 2026-11-20) |
+| Test suite | Lulus (574 test, 2026-11-20) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 2 | Berjalan |
+| F16 — Backlog Fase 2 | 8 | 3 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
@@ -228,6 +228,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 536 lulus; paritas 331 key ID/EN | `899e2f8` |
 | 2026-11-19 | F16-T06 | Log eksekusi opt-in (JSONL lokal, rotasi) + layar Diagnostik di Settings | `lib/core/diagnostics/**`, `lib/features/settings/diagnostics_page.dart`, `recipe_editor_page.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 556 lulus | `2e2a97b` |
 | 2026-11-19 | F16-T05 | Input file dibaca bertahap di isolate kerja dengan batas memori; output step dibatasi | `lib/core/engine/file_buffer_reader.dart`, `pipeline_executor.dart`, `pipeline_isolate.dart`, `recipe_editor_page.dart` | `flutter analyze` 0 issue; `flutter test` 564 lulus | `cd07b03` |
+| 2026-11-20 | F16-T07 | Audit sandbox/runtime: pre-scan central directory `.berp`, batas stdout/stderr WASI, serialisasi worker, batas kedalaman JSON DSL, fuzz paket, dan uji sandbox Lua | `lib/core/plugin/plugin_package.dart`, `lib/core/runtime/{dsl_runtime,wasmtime/wasm_worker,wasmtime/wasmtime_engine,wasmtime/wasmtime_ffi}.dart`, `test/core/runtime/**`, `test/fixtures/wasm/stdout_flood.*` | `flutter analyze` 0 issue; `flutter test` 574 lulus; fuzz 200 mutasi deterministik | `673d3eb` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1687,6 +1688,45 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   Serialisasi hasil worker masih menyalin buffer, sehingga batas memori
   membatasi ukuran per buffer, bukan total memori proses.
 - Commit: `cd07b03`
+
+### CP-076 - 2026-11-20 - F16-T07 audit sandbox dan runtime WASM
+
+- Status: Selesai
+- Perubahan:
+  - `PluginPackage.decode` memindai central directory zip dengan
+    `ZipDirectory.headers(verify: true)` sebelum `ZipDecoder.decodeBytes`.
+    Symlink, jumlah entri, ukuran entri, dan total deklarasi di atas batas
+    ditolak sebelum dekompresi; pemeriksaan pasca-decode tetap dipertahankan.
+  - `WasmtimeEngine` membatasi stdout/stderr ke `maxOutputBytes` (default
+    batas memori), membebaskan `wasi_config` pada jalur error, dan memakai
+    deadline epoch relatif (`1`) alih-alih meneruskan jumlah interupsi.
+  - `WasmWorker.run` menyerialkan eksekusi pada worker yang sama agar
+    timeout/pembatalan satu step tidak menaikkan epoch atau mematikan isolate
+    step lain. Batas waktu baru dihitung setelah giliran dimulai.
+  - Step DSL `rename` menolak JSON dengan kedalaman di atas
+    `dslMaxJsonDepth = 128` sebelum decode, mencegah `StackOverflowError`
+    dari rekursi `_renameNode`/`jsonEncode`.
+  - Fixture `stdout_flood` (512 KiB) + uji batas keluaran, uji eksekusi
+    paralel, uji symlink/entry-count/ukuran deklarasi yang dipatch, uji
+    timeout berulang, fuzz 200 mutasi byte deterministik, dan asersi sandbox
+    Lua (`package`, `require`, `debug`, `dofile`, `loadfile`, `os.getenv`,
+    `os.tmpname`).
+- File: `lib/core/plugin/plugin_package.dart`,
+  `lib/core/runtime/dsl_runtime.dart`,
+  `lib/core/runtime/wasmtime/{wasm_worker,wasmtime_engine,wasmtime_ffi}.dart`,
+  `test/core/plugin_package_test.dart`, `test/core/runtime/**`,
+  `test/fixtures/wasm/stdout_flood.{c,wasm}`,
+  `tool/build_wasm_fixtures.ps1`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 574 lulus; uji
+  terarah runtime/package 84 lulus.
+- Catatan/risiko: keluaran WASI ditulis ke file temp lebih dulu dan baru
+  diperiksa saat dibaca; ukuran tulisan selama eksekusi dibatasi timeout 2
+  dtk dan file temp selalu dihapus, tetapi modul jahat masih dapat memakai
+  disk sementara selama jendela itu. DSL dieksekusi sinkron di isolate
+  pekerja, jadi `Future.timeout` tidak dapat memutus langkah DSL yang
+  CPU-bound; UI tetap responsif dan pembatalan pengguna mematikan isolate
+  pekerja setelah 250 ms. Keduanya dicatat di `THREAT_MODEL.md`.
+- Commit: `673d3eb`
 
 ## 7. Template Checkpoint Baru
 

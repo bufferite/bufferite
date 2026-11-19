@@ -25,12 +25,12 @@ Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
 | # | Jalur serang | Mitigasi |
 |---|---|---|
 | 1 | Zip-slip / path traversal di `.berp` | Validasi path relatif, tolak `..`, absolut, separator Windows |
-| 2 | Zip bomb / entri raksasa | Batas 32 MiB paket, 512 entri, 16 MiB/entri, 64 MiB total |
-| 3 | Symlink/duplikat entri | Tolak symlink; tolak duplikat case-insensitive |
+| 2 | Zip bomb / entri raksasa | Batas 32 MiB paket, 512 entri, 16 MiB/entri, 64 MiB total; central directory dipindai sebelum dekompresi |
+| 3 | Symlink/duplikat entri | Tolak symlink dan duplikat case-insensitive; symlink ditolak dari central directory sebelum decode |
 | 4 | Paket/runner dimodifikasi | SHA-256 dipin; mismatch = tolak eksekusi |
 | 5 | Akses net/fs tanpa izin | `PermissionGuard` + dialog izin; runtime tanpa `os`/`io` |
 | 6 | ReDoS dari regex | Batas panjang pola + timeout eksekusi |
-| 7 | Kehabisan resource | Batas waktu 2 dtk/operasi, memori 64 MiB |
+| 7 | Kehabisan resource | Batas waktu 2 dtk/operasi, memori 64 MiB, stdout/stderr WASI dibatasi sebelum disalin; eksekusi worker diserialisasi |
 | 8 | Acak tidak aman | CSPRNG (`Random.secure`) untuk operasi acak |
 | 9 | Jalur jaringan implisit | Offline-by-default; jaringan hanya untuk katalog (Fase 2) setelah konsen |
 | 10 | Data rusak di storage | Error storage terstruktur; fallback default settings |
@@ -40,6 +40,8 @@ Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
 | 14 | Replay indeks lama / downgrade | `sequence` monoton; semver; konfirmasi downgrade; status `revoked` |
 | 15 | Registry/CDN jadi pengintai | Hanya `GET` saat pengguna membuka katalog; tanpa cookie/ID/telemetri |
 | 16 | Cache registry dirusak | Signature diverifikasi ulang setiap cache dimuat; fail closed |
+| 17 | JSON sangat dalam memicu stack overflow di step DSL | Tolak kedalaman > 128 sebelum `jsonDecode`; rekursi rename/encode tidak pernah menerima input lebih dalam |
+| 18 | Modul WASM membanjiri stdout/stderr | Keluaran melebihi batas memori menjadi `runtime.wasm_error`; file temp dihapus di semua jalur |
 
 ## 4. Asumsi & batasan MVP
 
@@ -94,20 +96,44 @@ selain engine wasmtime sendiri.
   tidak diketahui — batasan yang ditampilkan di UI.
 - Detail lengkap: `REGISTRY.md` §5–§10.
 
+### 4.3 Batas runtime WASM dan DSL (F16-T07)
+
+- stdout/stderr WASI ditulis ke file temp, lalu hanya dibaca bila ukurannya
+  tidak melebihi `maxOutputBytes` (default: batas memori). File temp selalu
+  dihapus. Penulisan tidak dipotong saat streaming, jadi modul masih dapat
+  memakai disk sementara selama jendela timeout 2 dtk; salinan ke memori host
+  tidak pernah melewati batas.
+- `WasmWorker` menyerialkan eksekusi pada worker yang sama. Timeout atau
+  pembatalan satu step tidak lagi menaikkan epoch atau mematikan isolate step
+  lain; batas waktu dihitung setelah giliran eksekusi dimulai.
+- DSL dieksekusi sinkron. `Future.timeout` tidak dapat memutus langkah DSL
+  yang CPU-bound pada isolate yang sama; pipeline aplikasi berjalan di isolate
+  pekerja sehingga UI tetap responsif, dan pembatalan pengguna mematikan
+  isolate setelah 250 ms. Program DSL tetap dibatasi 200 step.
+- Step `rename` menolak JSON dengan kedalaman di atas 128 sebelum decode,
+  sehingga rekursi rename/encode tidak dapat memicu stack overflow.
+
 ## 5. Status verifikasi
 
-- Suspected: `test/core/plugin_package_test.dart`,
-  `test/core/plugin_integrity_test.dart`, `test/core/plugin_permission_test.dart`.
+- Paket & integritas: `test/core/plugin_package_test.dart`,
+  `test/core/plugin_integrity_test.dart`,
+  `test/core/plugin_permission_test.dart`; pre-scan central directory diuji
+  dengan symlink, jumlah entri, dan ukuran deklarasi yang dipatch, plus fuzz
+  200 mutasi byte deterministik.
 - Matriks bypass izin DSL/Lua native/Lua WASM: `permission_matrix_test.dart`
   (32 test; F05-T07/F14-T03). Tier `wasm`: `wasm_plugin_runtime_test.dart`
-  (fs host diblokir, import host ditolak, exit error, timeout pulih) +
-  integration emulator Android.
+  (fs host diblokir, import host ditolak, exit error, timeout pulih, eksekusi
+  paralel diserialisasi, stdout flood, timeout berulang) + integration
+  emulator Android.
 - Lua 1.0: 12 test sandbox/timeout + integration emulator (CP-057); batas
-  isolasi didokumentasikan di §4.1.
+  isolasi didokumentasikan di §4.1. Asersi tambahan memastikan `package`,
+  `require`, `debug`, `dofile`, `loadfile`, `os.getenv`, dan `os.tmpname`
+  tidak tersedia.
 - Engine Lua WASM: integration emulator Android (eksekusi + timeout epoch) dan
   kontrak 10 kasus vs `lua_dart` + 5 kasus DSL vs Lua vs WASM (CP-063/CP-065).
 - F14 selesai: ReDoS (F14-T04), CSPRNG (F14-T05), dan audit offline
   (F14-T06) sudah diuji.
-- Sisa untuk registry publik: F16-T07 (audit/fuzzing parser indeks/paket dan
-  runtime WASM) serta test signature/rollback F16-T01..T04. Belum ada kode
-  registry.
+- F16-T07 selesai (2026-11-20): `flutter analyze` 0 issue dan 574 test lulus,
+  termasuk batas kedalaman JSON DSL dan batas keluaran WASI.
+- Sisa untuk registry publik: test signature/rollback F16-T01..T04 dan
+  tooling F16-T08. Belum ada kode registry.

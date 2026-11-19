@@ -516,7 +516,7 @@ sebelum registry dibuka publik.
 - [ ] **F16-T04** Plugin update/rollback + notifikasi versi.
 - [x] **F16-T05** Streaming file besar tanpa OOM.
 - [x] **F16-T06** Log eksekusi opt-in + layar diagnostik.
-- [ ] **F16-T07** Audit/fuzzing sandbox dan runtime WASM.
+- [x] **F16-T07** Audit/fuzzing sandbox dan runtime WASM.
 - [ ] **F16-T08** Tooling registry (validasi, review checklist, publikasi).
 
 ## F17 — Backlog Fase 3 (P2)
