@@ -14,8 +14,9 @@ dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
 
 Per 2026-11-20, tooling registry (F16-T08) dan model/signature core sudah
-tersedia. Client HTTP, UI katalog, dan instalasi dari registry
-(F16-T01..T04) belum diimplementasikan dan menunggu D12/D13.
+tersedia. Hosting/URL publik sudah diputuskan (D12). Client HTTP, UI katalog,
+dan instalasi dari registry (F16-T01..T04) belum diimplementasikan; signing
+produksi dan trust anchor final menunggu D13.
 
 Ruang lingkup v1:
 
@@ -32,7 +33,8 @@ Di luar ruang lingkup v1:
 - Auto-update di latar belakang.
 - Registri pihak ketiga / URL kustom dari pengguna.
 - Ikon atau aset gambar dari jaringan (dapat ditambahkan nanti).
-- Hosting dan URL publik (keputusan D12, lihat §12).
+- Hosting pihak ketiga atau URL kustom dari pengguna (hosting resmi D12
+  sudah diputuskan, lihat §3).
 
 ## 2. Prinsip & Model Kepercayaan
 
@@ -57,7 +59,18 @@ Di luar ruang lingkup v1:
 
 ## 3. Hosting & Tata Letak File
 
-Hosting belum diputuskan (D12). Persyaratan minimum:
+Hosting v1 diputuskan di D12 (2026-11-20): GitHub Pages dari repo
+`bufferite/plugins` di org `bufferite`, disajikan pada domain kanonis
+`https://plugins.bufferite.dev`. Aplikasi hanya membaca
+`https://plugins.bufferite.dev/registry/v1/registry.json` dan signature-nya.
+DNS CNAME harus aktif sebelum client registry dirilis; jangan mengganti URL
+setelah rilis. `allowedHosts` v1 hanya berisi `plugins.bufferite.dev`.
+
+Kontribusi lewat pull request ke repo registry; branch bukan kanal publikasi.
+Hanya hasil deploy dari `main` yang dibaca aplikasi. Scaffold repo tersedia di
+[`registry-scaffold/`](registry-scaffold/).
+
+Persyaratan minimum:
 
 - HTTPS dengan sertifikat valid; tidak ada HTTP atau cleartext.
 - File statis, read-only, dan dapat di-cache CDN.
@@ -65,7 +78,7 @@ Hosting belum diputuskan (D12). Persyaratan minimum:
 - `Content-Type: application/json` untuk indeks dan signature;
   `application/octet-stream` untuk `.berp`.
 
-Tata letak yang direkomendasikan:
+Tata letak:
 
 ```text
 /registry/v1/registry.json
@@ -351,6 +364,7 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 ### F16-T01 — Registry client
 
 - Model + parser `registry.json` v1 dengan validasi §4 dan batas ukuran.
+- URL awal `https://plugins.bufferite.dev/registry/v1/registry.json` (D12).
 - Fetch HTTPS + cache + `sequence` + fallback offline.
 - Verifikasi signature indeks terintegrasi (dengan T03).
 - Unit test: indeks valid, field hilang, tipe salah, versi tak didukung,
@@ -400,11 +414,11 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 - F16-T07 (audit/fuzzing sandbox dan parser) selesai 2026-11-20 (CP-076).
 - Tidak ada temuan kritis/tinggi yang terbuka.
 
-## 12. Keputusan Terbuka
+## 12. Keputusan & Status
 
-| ID | Keputusan | Usulan | Status |
+| ID | Keputusan | Keputusan/Usulan | Status |
 |---|---|---|---|
-| D12 | Hosting, URL publik, dan CDN registry | GitHub Pages/repo + CDN; URL final saat implementasi | Terbuka (ditunda) |
+| D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20) |
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/HSM; kunci paket di CI; rotasi 90 hari | Terbuka |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
 | — | TTL cache indeks | 24 jam | Usulan |
@@ -415,9 +429,16 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 
 Keputusan D12/D13 dicatat juga di `TODO.md` bagian D dan `progress.md` §8.
 
+Catatan D12: scaffold repo ada di `registry-scaffold/`. Workflow validasi PR
+berjalan tanpa secret; workflow publish memakai environment `registry-publish`
+dengan required reviewers. Branch bukan kanal publikasi; hanya `registry.json`
+bertanda tangan hasil deploy dari `main` yang dibaca aplikasi.
+
 Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi untuk
 dev/CI. Kunci produksi wajib disimpan offline/HSM, tidak masuk repo, dan
-prosedur rotasi/revocation belum final sampai D13 diputuskan.
+prosedur rotasi/revocation belum final sampai D13 diputuskan. Scaffold publish
+memakai secret environment untuk kedua kunci sebagai bootstrap; sebelum
+registry dibuka publik, signing indeks wajib dipindahkan ke offline/HSM.
 
 ## 13. Implementasi & Tooling
 
@@ -437,10 +458,13 @@ tool/
   registry_cli.dart          entry point CLI                     (F16-T08)
   registry/
     registry_builder.dart    source -> registry.json deterministik (F16-T08)
+registry-scaffold/
+  .github/workflows/         validate PR + publish Pages       (D12)
 ```
 
-Tooling F16-T08 selesai 2026-11-20 (CP-077). Client, UI, dan instalasi
-(F16-T01..T04) tetap menunggu D12/D13.
+Tooling F16-T08 selesai 2026-11-20 (CP-077); hosting D12 selesai
+2026-11-20. Client, UI, dan instalasi (F16-T01..T04) bisa dimulai, tetapi
+signing produksi dan trust anchor final tetap menunggu D13.
 
 ### 13.2 CLI registry
 
@@ -561,6 +585,11 @@ Urutan wajib:
    tandai `yanked`/`revoked`, lalu terbitkan indeks baru dengan `sequence`
    lebih tinggi.
 5. Simpan `registry-source.json`, indeks, dan signature lama untuk audit.
+
+Di GitHub, scaffold `registry-scaffold/` memakai `actions/deploy-pages`
+sehingga paket + indeks terbit dalam satu deployment atomik. Workflow PR
+memakai kunci sementara tanpa secret; workflow publish menandatangani paket di
+CI dan indeks dengan kunci environment (lihat catatan D13 di §12).
 
 Fondasi yang sudah ada dan dapat dipakai ulang:
 

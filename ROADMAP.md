@@ -109,6 +109,6 @@ Definisi done:
 - Tidak ada regresi pada recipe dan plugin.
 
 ## 9. Pertanyaan Terbuka
-- Hosting/URL registry (D12) dan custody kunci Ed25519 (D13) — lihat
-  `REGISTRY.md` §12.
+- Custody/rotasi kunci Ed25519 (D13) — lihat `REGISTRY.md` §12. Hosting/URL
+  registry (D12) sudah selesai.
 - Target rilis MVP sudah ditetapkan dan tercapai: 2026-12-31 (D07).

@@ -32,10 +32,10 @@ Status yang dipakai:
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 4 / 8 |
 | Task Fase 3 | 0 / 5 |
-| Keputusan terbuka | 2 (D12, D13) |
+| Keputusan terbuka | 1 (D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T01/T03 setelah D12/D13 (F16-T08 selesai) |
-| Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat tooling |
+| Task berikutnya | F16-T01 (client registry read-only) |
+| Blocker aktif | D13 (custody kunci) - tidak menghambat F16-T01 |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (600 test, 2026-11-20) |
 
@@ -65,7 +65,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F16 — Backlog Fase 2 | 8 | 4 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
-| D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
+| D — Keputusan Manusia | 13 | 12 | 1 terbuka (D13) |
 
 ## 4. Ringkasan Baseline (2026-11-11)
 
@@ -230,6 +230,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F16-T05 | Input file dibaca bertahap di isolate kerja dengan batas memori; output step dibatasi | `lib/core/engine/file_buffer_reader.dart`, `pipeline_executor.dart`, `pipeline_isolate.dart`, `recipe_editor_page.dart` | `flutter analyze` 0 issue; `flutter test` 564 lulus | `cd07b03` |
 | 2026-11-20 | F16-T07 | Audit sandbox/runtime: pre-scan central directory `.berp`, batas stdout/stderr WASI, serialisasi worker, batas kedalaman JSON DSL, fuzz paket, dan uji sandbox Lua | `lib/core/plugin/plugin_package.dart`, `lib/core/runtime/{dsl_runtime,wasmtime/wasm_worker,wasmtime/wasmtime_engine,wasmtime/wasmtime_ffi}.dart`, `test/core/runtime/**`, `test/fixtures/wasm/stdout_flood.*` | `flutter analyze` 0 issue; `flutter test` 574 lulus; fuzz 200 mutasi deterministik | `673d3eb` |
 | 2026-11-20 | F16-T08 | Tooling registry: `keygen`/`validate`/`sign`/`build-index`/`verify`, model `registry.json`, Ed25519 + trust store, indeks deterministik, atomic write, review checklist | `lib/core/registry/**`, `tool/registry_cli.dart`, `tool/registry/registry_builder.dart`, `test/core/registry/**`, `test/tool/registry_*_test.dart` | `flutter analyze` 0 issue; `flutter test` 600 lulus; uji registry 25 lulus; alur CLI end-to-end | `ba5c187`, `f73301a` |
+| 2026-11-20 | D12 | Hosting registry v1: GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`, workflow PR/publish, deploy atomik | `registry-scaffold/**`, `REGISTRY.md`, `TODO.md`, docs terkait | JSON source valid; workflow YAML valid; `build-index` source kosong → sequence 1; `git diff --check` | `0c52889` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1759,6 +1760,32 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   (F16-T01..T04) belum diimplementasikan.
 - Commit: `ba5c187`, `f73301a`
 
+### CP-078 - 2026-11-20 - D12 hosting GitHub Pages + scaffold registry
+
+- Status: Selesai
+- Perubahan:
+  - D12: hosting registry v1 memakai GitHub Pages dari repo
+    `bufferite/plugins` di org `bufferite`, domain kanonis
+    `plugins.bufferite.dev`, kontribusi lewat PR (bukan branch publikasi),
+    dan deploy atomik dari `main`.
+  - Scaffold `registry-scaffold/`: `registry-source.json`, panduan trust
+    store publik, folder paket, `COMMUNITY.md`, workflow
+    `validate.yml` (PR tanpa secret, kunci sementara) dan `publish.yml`
+    (sign paket, build indeks dengan `--base`, cek immutability, sign
+    indeks, deploy Pages).
+  - Dokumentasi D12 disinkronkan; D13 tetap terbuka untuk custody kunci.
+- File: `registry-scaffold/**`, `REGISTRY.md`, `TODO.md`, `progress.md`,
+  `AGENT.md`, `ARCHITECTURE.md`, `PLUGINS.md`, `ROADMAP.md`,
+  `THREAT_MODEL.md`, `operations.md`, `README.md`, `CONTRIBUTING.md`.
+- Verifikasi: workflow YAML parse; `registry-source.json` parse;
+  `build-index` source kosong → `sequence` 1, 0 entri; `git diff --check`
+  bersih.
+- Catatan/risiko: scaffold publish menandatangani indeks dengan secret
+  environment sampai D13; actions masih memakai tag major dan wajib dipin ke
+  commit SHA sebelum produksi. Custom domain, DNS, environment reviewers, dan
+  trust store publik harus disiapkan manual.
+- Commit: `0c52889`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1794,7 +1821,8 @@ bagian D.
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
-| 2026-11-19 | F16-T01/T03, D12/D13 | Hosting/URL registry dan custody kunci Ed25519 belum diputuskan | F16-T01/T03 belum bisa difinalisasi; F16-T08 tooling sudah selesai | Terbuka (spesifikasi `REGISTRY.md` §12; ditunda) |
+| 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
+| 2026-11-20 | F16-T01/T03, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | F16-T03 dan signing produksi belum bisa difinalisasi; F16-T01 client read-only bisa dimulai | Terbuka (spesifikasi `REGISTRY.md` §12) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
@@ -1807,6 +1835,7 @@ bagian D.
 | 2026-11-19 | D04 | Font sistem untuk MVP; Inter ditunda | Sesuai fallback DESIGN.md, APK lebih kecil | Tidak ada aset font |
 | 2026-11-19 | D05 | MIT untuk aplikasi dan `core.berp` | Konsisten dengan LICENSE & manifest | Tidak ada perubahan |
 | 2026-11-19 | D06 | Default `stop`; lanjut dengan output terakhir hanya opt-in; izin/batal/runtime selalu stop | Menghindari output menyesatkan | F05-T07 menegakkan |
+| 2026-11-20 | D12 | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR untuk kontribusi, deploy atomik dari `main` | URL stabil, tidak perlu CDN terpisah, review tetap di GitHub | Scaffold `registry-scaffold/`; F16-T01/T03 unblocked |
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
 | 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 selesai (CP-064) |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |

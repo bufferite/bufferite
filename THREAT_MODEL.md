@@ -82,7 +82,7 @@ sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
 `lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
 selain engine wasmtime sendiri.
 
-### 4.2 Registry (Fase 2; tooling selesai, client rencana)
+### 4.2 Registry (Fase 2; tooling + hosting selesai, client rencana)
 
 - Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
   registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
@@ -94,6 +94,10 @@ selain engine wasmtime sendiri.
   disebarkan lewat indeks bertanda tangan.
 - Cache diverifikasi ulang saat dimuat. Tanpa jaringan, revocation terbaru
   tidak diketahui — batasan yang ditampilkan di UI.
+- Hosting v1 memakai GitHub Pages (D12). Scaffold publish menyimpan kunci
+  indeks di secret environment sebagai bootstrap; ini memperluas permukaan
+  serangan CI sampai D13 memindahkan signing indeks ke offline/HSM. Kompromi
+  repo tanpa secret tetap tidak bisa memalsukan indeks.
 - Detail lengkap: `REGISTRY.md` §5–§10.
 
 ### 4.3 Batas runtime WASM dan DSL (F16-T07)
@@ -140,5 +144,5 @@ selain engine wasmtime sendiri.
   store tersedia; test vector RFC 8032, domain separation, key unknown/revoked,
   determinisme indeks, dan batas ukuran lulus.
 - Sisa untuk registry publik: client HTTP/cache/sequence, UI katalog, update/
-  rollback (F16-T01..T04), serta keputusan D12/D13. Belum ada client registry
-  di aplikasi.
+  rollback (F16-T01..T04), serta keputusan D13. Hosting/URL (D12) sudah
+  selesai. Belum ada client registry di aplikasi.

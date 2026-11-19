@@ -126,10 +126,11 @@ Implementasi plugin MVP:
 - Sideload UI (F04-T05), bootstrap aset `core.berp` (F04-T08), dan
   `PluginManagerService`/provider (F04-T10) sudah tersedia.
 - Registry daring (F16): model `registry.json`, signature Ed25519, trust
-  store, dan tooling build/sign/verify sudah tersedia (F16-T08). Client HTTP,
-  UI katalog, dan instalasi (F16-T01..T04) belum; menunggu D12/D13.
-  Spesifikasi di `REGISTRY.md`; modul di `lib/core/registry/` dan
-  `tool/registry_cli.dart`.
+  store, dan tooling build/sign/verify sudah tersedia (F16-T08). Hosting
+  GitHub Pages sudah diputuskan (D12); client HTTP, UI katalog, dan instalasi
+  (F16-T01..T04) belum, dan signing produksi menunggu D13. Spesifikasi di
+  `REGISTRY.md`; modul di `lib/core/registry/`, `tool/registry_cli.dart`, dan
+  scaffold repo di `registry-scaffold/`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
@@ -199,7 +200,7 @@ Implementasi storage MVP:
 - Signature: sideload cukup SHA-256; registry resmi wajib signature Ed25519
   untuk indeks + paket (Fase 2, `REGISTRY.md`).
 - Registry read-only: satu registry resmi, trust anchor kunci di aplikasi,
-  tanpa sinkronisasi latar belakang (D12/D13 terbuka).
+  tanpa sinkronisasi latar belakang (D13 terbuka; D12 selesai).
 - Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di worker
   isolate persisten; `wasi_config` (stdout/stderr file, stdin bytes) + epoch
   untuk timeout. Engine + modul dikompilasi sekali per plugin.
@@ -207,8 +208,8 @@ Implementasi storage MVP:
 ## 11. Pertanyaan Terbuka
 - Streaming end-to-end berbasis chunk belum ada; input file dimaterialisasi
   bertahap di worker isolate dengan batas memori (F16-T05 selesai).
-- Hosting/URL registry (D12) dan custody kunci Ed25519 (D13); detail di
-  `REGISTRY.md` §12.
+- Custody/rotasi kunci Ed25519 (D13); detail di `REGISTRY.md` §12. Hosting/URL
+  registry (D12) sudah selesai.
 - Ukuran `core.berp` sudah diputuskan (D03: 2 MiB, pecah per kategori bila
   melewati).
 

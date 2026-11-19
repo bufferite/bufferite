@@ -309,8 +309,9 @@ B. Instalasi via lokal (sideload):
 ## 14. Distribusi & Moderasi
 - Spesifikasi registry, signature, update/rollback, dan moderasi ada di
   [REGISTRY.md](REGISTRY.md).
-- Registry resmi di-host di sumber read-only (misal GitHub Pages/Repo);
-  hosting dan URL final menunggu D12.
+- Registry resmi di-host di GitHub Pages dari repo `bufferite/plugins` pada
+  `https://plugins.bufferite.dev`; kontribusi lewat PR dan publikasi dari
+  `main` (D12). Scaffold ada di `registry-scaffold/`.
 - Kurator awal: pembuat proyek + komunitas open-source GitHub.
 - Moderasi: kurator komunitas + maintainer; kriteria: keamanan,
   fungsionalitas, lisensi jelas.
@@ -334,7 +335,7 @@ B. Instalasi via lokal (sideload):
 - Tier: dsl + lua + wasm diimplementasikan berbarengan di MVP.
 
 ## 16. Pertanyaan Terbuka
-- Hosting/URL registry dan custody kunci Ed25519: lihat
-  [REGISTRY.md](REGISTRY.md) §12 (D12/D13).
+- Custody/rotasi kunci Ed25519 (D13): lihat [REGISTRY.md](REGISTRY.md) §12.
+  Hosting/URL registry (D12) sudah selesai.
 - Pertanyaan runtime 1.0 sudah ditutup: `lua_dart` default (D02/D11),
   plugin DSL dibungkus `.berp` (D10).

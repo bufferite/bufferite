@@ -170,5 +170,5 @@ dilaporkan ke manusia.
   reinstalasi; aplikasi tetap bisa dibuka.
 
 ## 14. Pertanyaan Terbuka (isi saat ada)
-- D12: hosting/URL publik registry — lihat `REGISTRY.md` §12.
-- D13: custody/rotasi kunci Ed25519 — lihat `REGISTRY.md` §12.
+- D13: custody/rotasi kunci Ed25519 — lihat `REGISTRY.md` §12. Hosting/URL
+  publik registry (D12) sudah selesai.

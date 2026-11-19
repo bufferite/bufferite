@@ -507,8 +507,9 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T08 (selesai) → T01 + T03 → T02 → T04 setelah
-D12/D13; T07 adalah gate sebelum registry dibuka publik.
+Urutan yang disarankan: T08 (selesai) → T01 + T03 → T02 → T04; D12 sudah
+selesai, D13 tetap diperlukan untuk signing produksi. T07 adalah gate sebelum
+registry dibuka publik.
 
 - [ ] **F16-T01** Registry resmi read-only + `registry.json` client.
 - [ ] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
@@ -578,9 +579,12 @@ D12/D13; T07 adalah gate sebelum registry dibuka publik.
   sebagai opsi tier `lua` lewat `PluginRuntimeLoader`/`LuaEngine.wasm`;
   default 1.0 tetap `lua_dart` (D02). Cache runtime + worker persisten
   selesai (F05-T08), dan tier plugin `wasm` ABI v1 selesai (F05-T06/CP-065).
-- [ ] **D12** Hosting, URL publik, dan CDN registry resmi. Usulan: hosting
-  statis HTTPS + CDN, URL final ditetapkan saat implementasi. Detail:
+- [x] **D12** Hosting, URL publik, dan CDN registry resmi: GitHub Pages dari
+  repo `bufferite/plugins` di org `bufferite`, domain kanonis
+  `plugins.bufferite.dev`, kontribusi lewat PR (bukan branch publikasi), dan
+  deploy atomik dari `main`. Scaffold di `registry-scaffold/`. Detail:
   `REGISTRY.md` §3 dan §12.
 - [ ] **D13** Custody, rotasi, dan revocation kunci Ed25519 registry. Usulan:
-  kunci indeks offline/HSM, kunci paket di CI, rotasi 90 hari. Detail:
+  kunci indeks offline/HSM, kunci paket di CI, rotasi 90 hari. Scaffold publish
+  memakai secret environment sebagai bootstrap sampai D13 selesai. Detail:
   `REGISTRY.md` §5 dan §12.

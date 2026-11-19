@@ -17,8 +17,9 @@ menyetujui izin eksplisit.
 - Offline & privacy-first: tanpa akses jaringan secara default.
 - Sandbox: plugin berjalan dengan batas resource; runtime WASM di-pin hash.
 - Sideload: instal plugin dari file .berp lokal untuk pengembangan.
-- Registry (rencana Fase 2): katalog read-only dengan verifikasi hash +
-  signature Ed25519; spesifikasi di `REGISTRY.md`.
+- Registry (Fase 2): katalog read-only dengan verifikasi hash + signature
+  Ed25519; hosting GitHub Pages (D12) dan tooling selesai, client/UI menyusul,
+  signing produksi menunggu D13. Spesifikasi di `REGISTRY.md`.
 - Core pack: core.berp berisi hampir semua operasi CyberChef, diinstal
   otomatis saat first-run.
 
@@ -28,7 +29,8 @@ menyetujui izin eksplisit.
 - Operasi: semua plugin (termasuk core.berp).
 - Paket plugin: .berp (zip berisi manifest + entrypoint + aset).
 - Verifikasi: SHA-256 untuk runtime WASM dan paket .berp; registry resmi
-  menambahkan signature Ed25519 (rencana F16, lihat `REGISTRY.md`).
+  menambahkan signature Ed25519 (tooling selesai, client Fase 2; lihat
+  `REGISTRY.md`).
 
 ## Struktur Repo
 lib/
@@ -36,6 +38,7 @@ lib/
   features/    (recipe, operations, library, plugins, settings)
 assets/        (core.berp, lua_runtime.wasm)
 plugins/       (source operasi core.berp)
+registry-scaffold/ (benih repo registry GitHub Pages)
 test/          (unit, contract, widget test)
 Dokumen proyek berada di root repo:
   README.md, AGENT.md, ARCHITECTURE.md, PLUGINS.md, REGISTRY.md,
@@ -68,7 +71,8 @@ MIT untuk inti dan core.berp (lihat [LICENSE](LICENSE)). Plugin komunitas
 mengikuti lisensi masing-masing.
 
 ## Status
-MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 512 lulus,
-`flutter analyze` 0 issue. Fase 2 berikutnya: registry plugin
-(`REGISTRY.md`), streaming file besar, dan diagnostik. Lihat `ROADMAP.md` dan
-`progress.md` untuk detail.
+MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 600 lulus,
+`flutter analyze` 0 issue. Fase 2 berjalan: tooling registry dan scaffold
+GitHub Pages (D12) selesai, client/UI registry menyusul, signing produksi
+menunggu D13; streaming file besar dan diagnostik selesai. Lihat `ROADMAP.md`
+dan `progress.md` untuk detail.
