@@ -114,7 +114,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byTooltip('Hapus step'));
+    await tester.tap(find.byTooltip('Hapus ingredients'));
     expect(deleted, isTrue);
   });
 
@@ -124,7 +124,7 @@ void main() {
     );
 
     expect(find.byIcon(Icons.chevron_right), findsNothing);
-    expect(find.byTooltip('Atur step'), findsNothing);
+    expect(find.byTooltip('Atur ingredients'), findsNothing);
   });
 
   testWidgets('aksi atur menampilkan chevron', (tester) async {
@@ -133,6 +133,6 @@ void main() {
     );
 
     expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-    expect(find.byTooltip('Atur step'), findsOneWidget);
+    expect(find.byTooltip('Atur ingredients'), findsOneWidget);
   });
 }

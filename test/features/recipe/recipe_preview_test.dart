@@ -44,7 +44,7 @@ String? _output(WidgetTester tester) {
 }
 
 Future<void> _openSteps(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Step'));
+  await tester.tap(find.byTooltip('Ingredients'));
   await tester.pumpAndSettle();
 }
 

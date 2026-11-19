@@ -125,20 +125,20 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byTooltip('Step'));
+    await tester.tap(find.byTooltip('Ingredients'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Belum ada step. Tambahkan operasi dari Library.'),
+      find.text('Belum ada ingredients. Tambahkan operasi dari Library.'),
       findsOneWidget,
     );
-    await tester.tap(find.text('Tambah step'));
+    await tester.tap(find.text('Tambah ingredients'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reverse Text'));
     await tester.pumpAndSettle();
 
     expect(find.byType(StepCard), findsOneWidget);
     expect(
-      find.text('Belum ada step. Tambahkan operasi dari Library.'),
+      find.text('Belum ada ingredients. Tambahkan operasi dari Library.'),
       findsNothing,
     );
   });

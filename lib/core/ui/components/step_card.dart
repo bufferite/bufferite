@@ -132,13 +132,13 @@ class StepCard extends StatelessWidget {
                   ),
                 if (onDelete != null)
                   IconButton(
-                    tooltip: 'Hapus step',
+                    tooltip: 'Hapus ingredients',
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete_outline, size: 20),
                   ),
                 if (onTap != null)
                   IconButton(
-                    tooltip: 'Atur step',
+                    tooltip: 'Atur ingredients',
                     onPressed: _isUnsupported ? null : onTap,
                     icon: const Icon(Icons.chevron_right, size: 24),
                   ),

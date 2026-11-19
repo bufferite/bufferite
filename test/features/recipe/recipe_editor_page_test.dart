@@ -49,12 +49,12 @@ Widget _host({Recipe? recipe}) {
 }
 
 Future<void> _openSteps(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Step'));
+  await tester.tap(find.byTooltip('Ingredients'));
   await tester.pumpAndSettle();
 }
 
 Future<void> _closeSteps(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Tutup panel step'));
+  await tester.tap(find.byTooltip('Tutup panel ingredients'));
   await tester.pumpAndSettle();
 }
 
@@ -74,12 +74,12 @@ void main() {
     );
 
     await _openSteps(tester);
-    expect(find.text('Step (0)'), findsOneWidget);
+    expect(find.text('Ingredients (0)'), findsOneWidget);
     expect(
-      find.text('Belum ada step. Tambahkan operasi dari Library.'),
+      find.text('Belum ada ingredients. Tambahkan operasi dari Library.'),
       findsOneWidget,
     );
-    expect(find.text('Tambah step'), findsOneWidget);
+    expect(find.text('Tambah ingredients'), findsOneWidget);
   });
 
   testWidgets('editor terisi menampilkan nama, step, dan output', (
@@ -155,7 +155,7 @@ void main() {
     await tester.pump();
     await _openSteps(tester);
 
-    await tester.tap(find.byTooltip('Hapus step').first);
+    await tester.tap(find.byTooltip('Hapus ingredients').first);
     await tester.pumpAndSettle();
     expect(find.byType(StepCard), findsNothing);
 
@@ -183,7 +183,7 @@ void main() {
     await tester.pump();
     await _openSteps(tester);
 
-    await tester.tap(find.byTooltip('Atur step'));
+    await tester.tap(find.byTooltip('Atur ingredients'));
     await tester.pumpAndSettle();
 
     expect(find.byType(Dialog), findsOneWidget);
@@ -243,7 +243,7 @@ void main() {
     await tester.pumpWidget(_host());
     await _openSteps(tester);
 
-    await tester.tap(find.text('Tambah step'));
+    await tester.tap(find.text('Tambah ingredients'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reverse Text'));
     await tester.pumpAndSettle();

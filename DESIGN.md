@@ -173,9 +173,10 @@ Aturan:
 - Library: daftar operasi (dari plugin aktif) + pencarian.
 - Settings: tema, plugin manager, tentang, privasi.
 - Recipe Editor dibuka sebagai layar penuh (bukan tab) dengan tombol back.
-- Panel step di Recipe Editor dibuka dari ikon Step di AppBar dan meluncur
-  dari kanan (end drawer) berisi seluruh daftar step, tambah step, reorder,
-  toggle, hapus, dan akses konfigurasi.
+- Panel ingredients di Recipe Editor dibuka dari ikon Ingredients (keranjang)
+  di AppBar dan meluncur dari kanan (end drawer) berisi seluruh daftar
+  ingredients, tambah ingredients, reorder, toggle, hapus, dan akses
+  konfigurasi.
 - Plugin Manager dibuka dari Settings.
 
 ## 8. Wireframe Tekstual (ASCII)
@@ -203,7 +204,7 @@ Aturan:
 
 ### 8.2 Recipe Editor
 +-----------------------------------+
-| <  Nama Recipe   [step] [menu][simpan] |
+| <  Nama Recipe [ingredients] [menu][simpan] |
 +-----------------------------------+
 | Nama recipe                       |
 | [.............................]   |
@@ -222,10 +223,10 @@ Aturan:
 | +-------------------------------+ |
 +-----------------------------------+
 
-Panel Step (meluncur dari kanan):
+Panel Ingredients (meluncur dari kanan):
 +-----------------------------------+
-| Step (3)                     [x]  |
-| [+ Tambah step]                   |
+| Ingredients (3)              [x]  |
+| [+ Tambah ingredients]            |
 | +-------------------------------+ |
 | | :: Base64 Decode      [on] v  | |
 | +-------------------------------+ |
@@ -235,8 +236,8 @@ Panel Step (meluncur dari kanan):
 | +-------------------------------+ |
 +-----------------------------------+
 
-Tap kartu step (chevron) membuka dialog konfigurasi parameter di tengah
-layar; daftar step tetap terlihat di panel kanan.
+Tap kartu ingredient (chevron) membuka dialog konfigurasi parameter di tengah
+layar; daftar ingredients tetap terlihat di panel kanan.
 
 ### 8.3 Operation Picker
 +-----------------------------------+
@@ -284,7 +285,7 @@ layar; daftar step tetap terlihat di panel kanan.
 
 ## 9. Motion & Micro-interaction
 - Durasi: 150–200 ms untuk transisi kecil; 250 ms untuk bottom sheet dan
-  panel step (end drawer).
+  panel ingredients (end drawer).
 - Easing: ease-out untuk masuk, ease-in untuk keluar.
 - Drag: kartu terangkat (shadow + border accent) dan mengikuti jari.
 - Reorder: animasi posisi 150 ms.

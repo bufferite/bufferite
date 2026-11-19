@@ -99,14 +99,14 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           title: Text(widget.recipe == null ? 'Recipe Baru' : 'Edit Recipe'),
           actions: <Widget>[
             IconButton(
-              tooltip: 'Step',
+              tooltip: 'Ingredients',
               onPressed: _openStepsDrawer,
               icon: Badge.count(
                 count: _steps.length,
                 isLabelVisible: _steps.isNotEmpty,
                 backgroundColor: theme.colorScheme.primary,
                 textColor: theme.colorScheme.onPrimary,
-                child: const Icon(Icons.format_list_numbered),
+                child: const Icon(Icons.shopping_basket),
               ),
             ),
             PopupMenuButton<String>(
@@ -219,12 +219,12 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Step (${_steps.length})',
+                      'Ingredients (${_steps.length})',
                       style: theme.textTheme.titleLarge,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Tutup panel step',
+                    tooltip: 'Tutup panel ingredients',
                     onPressed: () =>
                         _scaffoldKey.currentState?.closeEndDrawer(),
                     icon: const Icon(Icons.close),
@@ -240,7 +240,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
                 AppSpacing.md,
               ),
               child: AppButton(
-                label: 'Tambah step',
+                label: 'Tambah ingredients',
                 variant: AppButtonVariant.secondary,
                 icon: Icons.add,
                 expand: true,
@@ -260,7 +260,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            'Belum ada step. Tambahkan operasi dari Library.',
+            'Belum ada ingredients. Tambahkan operasi dari Library.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall,
           ),
@@ -329,7 +329,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     _scaffoldKey.currentState?.closeEndDrawer();
     showAppToast(
       context,
-      message: 'Step dihapus',
+      message: 'Ingredients dihapus',
       tone: AppToastTone.warning,
       undoLabel: 'Undo',
       onUndo: () {

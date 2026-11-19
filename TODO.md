@@ -354,7 +354,7 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F09 — Fitur Recipe Editor
 
 - [x] **F09-T01 (P0)** Layout editor: nama, input panel, output panel
-  langsung di bawah input, daftar step di panel samping (end drawer),
+  langsung di bawah input, daftar ingredients di panel samping (end drawer),
   aksi simpan.
 - [x] **F09-T02 (P0)** Tambah step lewat Operation Picker.
 - [x] **F09-T03 (P0)** Reorder drag and drop + haptic.

@@ -14,9 +14,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Sinkronisasi dokumen dengan kondisi 1.0: `lua_dart` default, engine WASM
   opt-in, status implementasi sideload/bootstrap/isolate, dan penghapusan
   referensi `wasm_run`.
-- Recipe Editor: output langsung di bawah input; daftar step dipindah ke
-  panel samping (end drawer) dengan tombol Step di AppBar; konfigurasi
-  parameter memakai dialog tengah, bukan bottom sheet.
+- Recipe Editor: output langsung di bawah input; daftar ingredients dipindah
+  ke panel samping (end drawer) dengan tombol Ingredients berikon keranjang
+  di AppBar; konfigurasi parameter memakai dialog tengah, bukan bottom sheet.
 - `StepCard`: nama operasi ditampilkan (bukan ID), badge tier/status
   memakai wrap agar aman di panel sempit.
 
