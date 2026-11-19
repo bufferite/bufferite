@@ -1353,7 +1353,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   callback wasmtime berjalan di thread non-isolate (`NativeCallable.isolateLocal`
   memicu fatal). `wasmtime_engine_increment_epoch` dipakai untuk
   timeout/pembatalan lintas isolate.
-- Commit: `<hash>`
+- Commit: `9c2773c`
 
 ## 7. Template Checkpoint Baru
 
@@ -1367,7 +1367,7 @@ Salin format berikut saat menyelesaikan task:
 - File: <path utama>
 - Verifikasi: `<perintah>` → <hasil>
 - Catatan/risiko: <jika ada>
-- Commit: `<hash>`
+- Commit: `9c2773c`
 ```
 
 Dan tambahkan baris di §5 serta perbarui angka di §2 dan §3.
