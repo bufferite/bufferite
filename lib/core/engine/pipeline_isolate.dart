@@ -6,6 +6,7 @@ import '../operations/core_operations.dart';
 import '../plugin/operation.dart';
 import '../plugin/operation_registry.dart';
 import 'buffer.dart';
+import 'file_buffer_reader.dart';
 import 'pipeline.dart';
 import 'pipeline_executor.dart';
 
@@ -19,22 +20,22 @@ final class IsolatePipelineExecutor {
     required this.registry,
     this.stepTimeout = const Duration(seconds: 2),
     this.errorPolicy = PipelineErrorPolicy.stop,
+    this.memoryLimitBytes = 64 * 1024 * 1024,
   });
 
   final OperationRegistry registry;
   final Duration stepTimeout;
   final PipelineErrorPolicy errorPolicy;
+  final int memoryLimitBytes;
 
   PipelineExecutor get _fallback => PipelineExecutor(
     registry: registry,
     stepTimeout: stepTimeout,
     errorPolicy: errorPolicy,
+    memoryLimitBytes: memoryLimitBytes,
   );
 
-  bool _canIsolate(List<PipelineStep> steps, Buffer input) {
-    if (input.kind == BufferKind.file) {
-      return false;
-    }
+  bool _canIsolate(List<PipelineStep> steps) {
     return steps.every(
       (step) => coreOperationsById.containsKey(step.operationId),
     );
@@ -46,10 +47,13 @@ final class IsolatePipelineExecutor {
     void Function(PipelineEvent event)? onEvent,
     CancellationToken? cancellation,
   }) async {
-    if (!_canIsolate(steps, input)) {
+    if (!_canIsolate(steps)) {
+      final materialized = await FileBufferReader(
+        memoryLimitBytes: memoryLimitBytes,
+      ).materialize(input);
       return _fallback.execute(
         steps: steps,
-        input: input,
+        input: materialized,
         onEvent: onEvent,
         cancellation: cancellation,
       );
@@ -160,6 +164,7 @@ final class IsolatePipelineExecutor {
         'input': input.toJson(),
         'timeoutMs': stepTimeout.inMilliseconds,
         'errorPolicy': errorPolicy.name,
+        'memoryLimitBytes': memoryLimitBytes,
       });
 
       unawaited(
@@ -234,9 +239,15 @@ Future<void> _pipelineIsolateMain(SendPort mainPort) async {
       for (final step in rawSteps)
         if (step is Map<String, Object?>) PipelineStep.fromJson(step),
     ];
-    final input = Buffer.fromJson(rawInput);
     final timeoutMs = message['timeoutMs'];
     final policyName = message['errorPolicy'];
+    final rawMemoryLimit = message['memoryLimitBytes'];
+    final memoryLimitBytes = rawMemoryLimit is int && rawMemoryLimit > 0
+        ? rawMemoryLimit
+        : 64 * 1024 * 1024;
+    final input = await FileBufferReader(
+      memoryLimitBytes: memoryLimitBytes,
+    ).materialize(Buffer.fromJson(rawInput));
 
     final executor = PipelineExecutor(
       registry: _coreOnlyRegistry(),
@@ -247,6 +258,7 @@ Future<void> _pipelineIsolateMain(SendPort mainPort) async {
         (policy) => policy.name == policyName,
         orElse: () => PipelineErrorPolicy.stop,
       ),
+      memoryLimitBytes: memoryLimitBytes,
     );
 
     final result = await executor.execute(
@@ -265,14 +277,17 @@ Future<void> _pipelineIsolateMain(SendPort mainPort) async {
       'cancelled': result.cancelled,
     });
   } on Object catch (error) {
+    final wrapped = error is AppError
+        ? error
+        : AppError(
+            category: ErrorCategory.runtime,
+            code: 'runtime.isolate_failed',
+            message: 'Pipeline isolate gagal: $error',
+            details: <String, Object?>{'error': error.toString()},
+          );
     mainPort.send(<String, Object?>{
       'type': 'fatal',
-      'error': AppError(
-        category: ErrorCategory.runtime,
-        code: 'runtime.isolate_failed',
-        message: 'Pipeline isolate gagal: $error',
-        details: <String, Object?>{'error': error.toString()},
-      ).toJson(),
+      'error': wrapped.toJson(),
     });
   } finally {
     await controlSubscription.cancel();

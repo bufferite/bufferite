@@ -17,6 +17,7 @@ final class PipelineExecutor {
     required this.registry,
     this.stepTimeout = const Duration(seconds: 2),
     this.errorPolicy = PipelineErrorPolicy.stop,
+    this.memoryLimitBytes,
   }) {
     if (stepTimeout <= Duration.zero) {
       throw ArgumentError.value(
@@ -25,11 +26,21 @@ final class PipelineExecutor {
         'Harus lebih dari nol.',
       );
     }
+    if (memoryLimitBytes != null && memoryLimitBytes! <= 0) {
+      throw ArgumentError.value(
+        memoryLimitBytes,
+        'memoryLimitBytes',
+        'Harus lebih dari nol.',
+      );
+    }
   }
 
   final OperationRegistry registry;
   final Duration stepTimeout;
   final PipelineErrorPolicy errorPolicy;
+
+  /// Batas ukuran output per step. `null` berarti tanpa batas eksplisit.
+  final int? memoryLimitBytes;
 
   Future<PipelineResult> execute({
     required List<PipelineStep> steps,
@@ -142,6 +153,7 @@ final class PipelineExecutor {
           resolvedArgs.valueOrNull ?? const <String, Object?>{},
           cancellation,
         );
+        _ensureWithinMemory(output);
         current = output;
         emit(
           PipelineEvent(
@@ -254,6 +266,25 @@ final class PipelineExecutor {
     return controller.stream;
   }
 
+  void _ensureWithinMemory(Buffer buffer) {
+    final limit = memoryLimitBytes;
+    if (limit == null) {
+      return;
+    }
+    final size = buffer is TextBuffer && buffer.encoding.name == 'utf-8'
+        ? _utf8Length(buffer.value)
+        : buffer.length;
+    if (size > limit) {
+      throw AppError(
+        category: ErrorCategory.runtime,
+        code: 'runtime.memory_limit',
+        message:
+            'Output berukuran $size byte melebihi batas memori $limit byte.',
+        details: <String, Object?>{'size': size, 'limit': limit},
+      );
+    }
+  }
+
   Future<Buffer> _runOperation(
     RegisteredOperation entry,
     Buffer input,
@@ -312,4 +343,21 @@ final class PipelineExecutor {
 
     return Future.any<Buffer>(<Future<Buffer>>[withTimeout, cancelled]);
   }
+}
+
+/// Panjang UTF-8 tanpa membuat salinan byte, untuk cek batas memori.
+int _utf8Length(String value) {
+  var bytes = 0;
+  for (final rune in value.runes) {
+    if (rune <= 0x7F) {
+      bytes += 1;
+    } else if (rune <= 0x7FF) {
+      bytes += 2;
+    } else if (rune <= 0xFFFF) {
+      bytes += 3;
+    } else {
+      bytes += 4;
+    }
+  }
+  return bytes;
 }

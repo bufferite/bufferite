@@ -117,13 +117,11 @@
     "exportFailed": "Failed to export recipe: {error}",
     "imported": "Recipe imported",
     "importFailed": "Failed to import recipe: {error}",
-    "fileLabel": "file",
     "removeFile": "Remove file",
     "pickFileTitle": "Choose input file",
     "exportDialogTitle": "Save recipe",
     "importDialogTitle": "Import recipe",
     "fileUnreadable": "File cannot be read.",
-    "fileTooLarge": "File exceeds the {max} MiB limit.",
     "fileReadFailed": "Failed to read file: {error}"
   },
   "stepConfig": {
@@ -509,6 +507,11 @@
     }
   },
   "errors": {
+    "runtime": {
+      "memory_limit": "Data is {size} bytes, above the {limit}-byte memory limit.",
+      "file_too_large": "The file is {size} bytes, above the {limit}-byte memory limit.",
+      "file_read_failed": "Failed to read the file: {error}"
+    },
     "recipe": {
       "schema_unsupported": "Recipe schema version {schemaVersion} is not supported.",
       "schema_missing": "Recipe must have an integer schemaVersion.",
@@ -520,7 +523,6 @@
       "migration_loop": "Recipe migration exceeds the step limit.",
       "encode_failed": "Recipe contains a value that cannot be serialized.",
       "file_input_unsupported": "File input is not supported in .brecipe v1.",
-      "file_too_large": "File exceeds the {max} MiB limit.",
       "file_unreadable": "File cannot be read.",
       "import_cancelled": "Import cancelled.",
       "import_failed": "Failed to read the recipe file.",

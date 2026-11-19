@@ -117,13 +117,11 @@
     "exportFailed": "Gagal mengekspor recipe: {error}",
     "imported": "Recipe diimpor",
     "importFailed": "Gagal mengimpor recipe: {error}",
-    "fileLabel": "file",
     "removeFile": "Hapus file",
     "pickFileTitle": "Pilih file input",
     "exportDialogTitle": "Simpan recipe",
     "importDialogTitle": "Impor recipe",
     "fileUnreadable": "File tidak dapat dibaca.",
-    "fileTooLarge": "File melebihi batas {max} MiB.",
     "fileReadFailed": "Gagal membaca file: {error}"
   },
   "stepConfig": {
@@ -509,6 +507,11 @@
     }
   },
   "errors": {
+    "runtime": {
+      "memory_limit": "Data berukuran {size} byte melebihi batas memori {limit} byte.",
+      "file_too_large": "File berukuran {size} byte melebihi batas memori {limit} byte.",
+      "file_read_failed": "Gagal membaca file: {error}"
+    },
     "recipe": {
       "schema_unsupported": "Versi schema recipe {schemaVersion} tidak didukung.",
       "schema_missing": "Recipe wajib memiliki schemaVersion bertipe integer.",
@@ -520,7 +523,6 @@
       "migration_loop": "Migrasi recipe melebihi batas langkah.",
       "encode_failed": "Recipe memuat nilai yang tidak dapat diserialisasi.",
       "file_input_unsupported": "Input file tidak didukung di file .brecipe v1.",
-      "file_too_large": "File melebihi batas {max} MiB.",
       "file_unreadable": "File tidak dapat dibaca.",
       "import_cancelled": "Impor dibatalkan.",
       "import_failed": "Gagal membaca file recipe.",

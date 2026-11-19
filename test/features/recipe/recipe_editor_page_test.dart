@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bufferite/core/engine/buffer.dart';
 import 'package:bufferite/core/plugin/operation.dart';
 import 'package:bufferite/core/plugin/operation_registry.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../core/support/async_pump.dart';
 import '../../core/support/fake_operations.dart';
 
 Recipe _recipe() {
@@ -235,6 +238,35 @@ void main() {
   testWidgets('menyediakan aksi pilih file input', (tester) async {
     await tester.pumpWidget(_host());
     expect(find.text('Pilih file'), findsOneWidget);
+  });
+
+  testWidgets('input FileBuffer dimaterialisasi saat preview', (tester) async {
+    late final Directory temp;
+    late final File file;
+    await tester.runAsync(() async {
+      temp = await Directory.systemTemp.createTemp('bufferite_editor_');
+      file = File('${temp.path}/input.txt');
+      await file.writeAsString('Hello');
+    });
+    addTearDown(() {
+      if (temp.existsSync()) {
+        temp.deleteSync(recursive: true);
+      }
+    });
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'File',
+      steps: <RecipeStep>[
+        RecipeStep(id: 'step-1', operationId: 'test.reverse'),
+      ],
+      input: FileBuffer(path: file.path, name: 'input.txt', size: 5),
+    );
+
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump(const Duration(milliseconds: 300));
+    await pumpUntil(tester, () => find.text('olleH').evaluate().isNotEmpty);
+
+    expect(find.text('olleH'), findsOneWidget);
   });
 
   testWidgets('alur: tambah step, live output, disable, simpan invalid', (

@@ -15,6 +15,7 @@ import '../../core/error/app_error.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/localized_error.dart';
 import '../../core/i18n/operation_localization.dart';
+import '../../core/runtime/sandbox.dart';
 import '../../core/storage/storage_providers.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/components/app_toast.dart';
@@ -24,6 +25,7 @@ import '../../core/ui/design_tokens.dart';
 import '../operations/operation_picker.dart';
 import '../operations/operation_providers.dart';
 import '../operations/step_config_dialog.dart';
+import '../settings/settings_provider.dart';
 import 'recipe.dart';
 import 'recipe_id.dart';
 import 'recipe_io.dart';
@@ -44,7 +46,6 @@ class RecipeEditorPage extends ConsumerStatefulWidget {
 
 class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   static const Duration previewDebounce = Duration(milliseconds: 200);
-  static const int maxInputBytes = 5 * 1024 * 1024;
 
   late final TextEditingController _nameController;
   late final TextEditingController _inputController;
@@ -58,8 +59,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   Map<String, AppError> _stepErrors = const <String, AppError>{};
   bool _dirty = false;
   bool _saving = false;
-  Uint8List? _inputBytes;
-  String? _inputFileName;
+  FileBuffer? _inputFile;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -68,13 +68,18 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     final recipe = widget.recipe;
     _nameController = TextEditingController(text: recipe?.name ?? '');
     final input = recipe?.input;
+    _inputFile = input != null && input.kind == BufferKind.file
+        ? input as FileBuffer
+        : null;
     _inputController = TextEditingController(
       text: input != null && input.kind == BufferKind.text
           ? input.asText()
           : '',
     );
     _steps = List<RecipeStep>.of(recipe?.steps ?? const <RecipeStep>[]);
-    _previewText = recipe?.output?.asText();
+    _previewText = recipe?.output?.kind == BufferKind.text
+        ? recipe!.output!.preview().asText()
+        : null;
     _nameController.addListener(_markDirty);
     _inputController.addListener(_schedulePreview);
     WidgetsBinding.instance.addPostFrameCallback((_) => _schedulePreview());
@@ -166,8 +171,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             const SizedBox(height: AppSpacing.lg),
             _section(theme, context.tr('recipe.input')),
             const SizedBox(height: AppSpacing.sm),
-            if (_inputBytes != null)
-              _fileInputCard(theme)
+            if (_inputFile != null)
+              _fileInputCard()
             else
               TextField(
                 controller: _inputController,
@@ -460,15 +465,33 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       input: _inputBuffer(),
     );
 
+    final settings = ref.read(settingsProvider).value;
     final executor = IsolatePipelineExecutor(
       registry: ref.read(operationRegistryProvider),
+      memoryLimitBytes:
+          settings?.memoryLimitBytes ?? SandboxConfig.defaults.memoryLimitBytes,
     );
     final stopwatch = Stopwatch()..start();
-    final result = await executor.execute(
-      steps: draft.toPipelineSteps(),
-      input: draft.input,
-      cancellation: token,
-    );
+    PipelineResult result;
+    try {
+      result = await executor.execute(
+        steps: draft.toPipelineSteps(),
+        input: draft.input,
+        cancellation: token,
+      );
+    } on AppError catch (error) {
+      stopwatch.stop();
+      if (token.isCancelled || !mounted) {
+        return;
+      }
+      setState(() {
+        _previewing = false;
+        _stepErrors = const <String, AppError>{};
+        _previewError = error;
+        _previewText = null;
+      });
+      return;
+    }
     stopwatch.stop();
     if (mounted) {
       final outcome = result.cancelled
@@ -512,7 +535,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
           ? (result.errors.isEmpty ? null : result.errors.first)
           : null;
       _previewText = result.output.kind == BufferKind.text
-          ? result.output.asText()
+          ? result.output.preview().asText()
           : null;
     });
   }
@@ -712,26 +735,26 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         : '';
     setState(() {
       _steps = List<RecipeStep>.of(recipe.steps);
-      _inputBytes = null;
-      _inputFileName = null;
+      _inputFile = recipe.input.kind == BufferKind.file
+          ? recipe.input as FileBuffer
+          : null;
       _dirty = true;
     });
     _schedulePreview();
   }
 
-  Widget _fileInputCard(ThemeData theme) {
-    final bytes = _inputBytes!;
+  Widget _fileInputCard() {
+    final file = _inputFile!;
     return Card(
       child: ListTile(
         leading: const Icon(Icons.insert_drive_file_outlined),
-        title: Text(_inputFileName ?? context.tr('recipe.fileLabel')),
-        subtitle: Text(context.trPlural('common.bytes', bytes.length)),
+        title: Text(file.name),
+        subtitle: Text(context.trPlural('common.bytes', file.length)),
         trailing: IconButton(
           tooltip: context.tr('recipe.removeFile'),
           onPressed: () {
             setState(() {
-              _inputBytes = null;
-              _inputFileName = null;
+              _inputFile = null;
               _dirty = true;
             });
             _schedulePreview();
@@ -743,10 +766,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   }
 
   Buffer _inputBuffer() {
-    final bytes = _inputBytes;
-    return bytes != null
-        ? BytesBuffer(bytes)
-        : TextBuffer(_inputController.text);
+    return _inputFile ?? TextBuffer(_inputController.text);
   }
 
   Future<void> _pickInputFile() async {
@@ -766,25 +786,29 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
         );
       }
       final handle = File(path);
-      final size = handle.lengthSync();
-      if (size > maxInputBytes) {
+      if (!handle.existsSync()) {
         throw AppError(
-          category: ErrorCategory.validation,
-          code: 'recipe.file_too_large',
-          message: context.tr(
-            'recipe.fileTooLarge',
-            args: <String, Object?>{'max': maxInputBytes ~/ (1024 * 1024)},
-          ),
-          details: <String, Object?>{
-            'size': size,
-            'max': maxInputBytes ~/ (1024 * 1024),
-          },
+          category: ErrorCategory.storage,
+          code: 'recipe.file_unreadable',
+          message: context.tr('recipe.fileUnreadable'),
         );
       }
-      final bytes = handle.readAsBytesSync();
+      final size = handle.lengthSync();
+      final memoryLimit =
+          ref.read(settingsProvider).value?.memoryLimitBytes ??
+          SandboxConfig.defaults.memoryLimitBytes;
+      if (size > memoryLimit) {
+        throw AppError(
+          category: ErrorCategory.runtime,
+          code: 'runtime.file_too_large',
+          message:
+              'File ${file.name} berukuran $size byte, melebihi batas '
+              'memori $memoryLimit byte.',
+          details: <String, Object?>{'size': size, 'limit': memoryLimit},
+        );
+      }
       setState(() {
-        _inputBytes = bytes;
-        _inputFileName = file.name;
+        _inputFile = FileBuffer(path: path, name: file.name, size: size);
         _inputController.text = '';
         _dirty = true;
       });
