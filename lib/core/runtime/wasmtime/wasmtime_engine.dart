@@ -147,6 +147,7 @@ final class WasmtimeEngine {
     WasmtimeModule module,
     List<String> argv, {
     int memoryLimitBytes = 64 * 1024 * 1024,
+    int epochDeadline = 1,
   }) {
     if (_closed) {
       throw WasmtimeException('Engine sudah ditutup.');
@@ -211,9 +212,10 @@ final class WasmtimeEngine {
         throw WasmtimeException(_readError(wasiError));
       }
 
-      // Deadline 1 tick: trap hanya terjadi setelah host memanggil
-      // [incrementEpoch] (dipakai untuk timeout/pembatalan).
-      _ffi.contextSetEpochDeadline(context, 1);
+      // Deadline relatif terhadap epoch engine saat ini. Host menaikkan epoch
+      // untuk timeout/pembatalan; worker meneruskan deadline berikutnya agar
+      // store baru tidak langsung trap setelah satu interupsi.
+      _ffi.contextSetEpochDeadline(context, epochDeadline);
 
       linker = _ffi.linkerNew(_engine);
       if (linker == nullptr) {

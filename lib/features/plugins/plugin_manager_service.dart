@@ -96,6 +96,7 @@ final class PluginManagerService {
       installPath: installPath,
     );
     await _repository.save(plugin);
+    await _runtimeLoader?.evictPlugin(plugin.pluginId);
     _registry.unregisterByPlugin(plugin.pluginId);
     register(plugin);
     return plugin;
@@ -142,6 +143,7 @@ final class PluginManagerService {
     }
     final updated = plugin.copyWith(enabled: enabled);
     await _repository.save(updated);
+    await _runtimeLoader?.evictPlugin(pluginId);
     _registry.unregisterByPlugin(pluginId);
     register(updated);
     return true;
@@ -151,6 +153,7 @@ final class PluginManagerService {
   Future<bool> remove(String pluginId) async {
     final removed = await _repository.delete(pluginId);
     if (removed) {
+      await _runtimeLoader?.evictPlugin(pluginId);
       _registry.unregisterByPlugin(pluginId);
     }
     return removed;

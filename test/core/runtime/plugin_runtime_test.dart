@@ -82,6 +82,30 @@ void main() {
     expect(reads, 1);
   });
 
+  test('evictPlugin memuat ulang entrypoint setelah runtime dilepas',
+      () async {
+    final plugin = _plugin();
+    var reads = 0;
+    final loader = _loader(
+      reader: (path) async {
+        reads++;
+        return Uint8List.fromList(
+          utf8.encode('function transform(input) return input end'),
+        );
+      },
+    );
+    final operation = loader.operationFor(
+      plugin,
+      plugin.manifest.operations.single,
+    )!;
+
+    await _execute(operation, 'a');
+    await loader.evictPlugin(plugin.manifest.pluginId);
+    await _execute(operation, 'b');
+
+    expect(reads, 2);
+  });
+
   test('tier dsl memakai DslRuntime', () async {
     final plugin = _plugin(tier: 'dsl', entrypoint: 'transform.json');
     final operation = _loader(

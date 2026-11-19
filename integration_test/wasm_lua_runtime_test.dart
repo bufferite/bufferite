@@ -31,12 +31,16 @@ void main() {
       source: 'function transform(input, args) return string.upper(input) end',
       moduleBytes: module.bytes,
     );
-    final output = await runtime.execute(
-      const TextBuffer('bufferite'),
-      const <String, Object?>{},
-      context(),
-    );
-    expect(output.asText(), 'BUFFERITE');
+    try {
+      final output = await runtime.execute(
+        const TextBuffer('bufferite'),
+        const <String, Object?>{},
+        context(),
+      );
+      expect(output.asText(), 'BUFFERITE');
+    } finally {
+      await runtime.dispose();
+    }
   });
 
   testWidgets('timeout dari epoch trap menghentikan loop', (tester) async {
@@ -44,19 +48,23 @@ void main() {
       source: 'function transform() while true do end end',
       moduleBytes: module.bytes,
     );
-    await expectLater(
-      runtime.execute(
-        const TextBuffer('x'),
-        const <String, Object?>{},
-        context(timeout: const Duration(milliseconds: 500)),
-      ),
-      throwsA(
-        isA<AppError>().having(
-          (error) => error.code,
-          'code',
-          'runtime.timeout',
+    try {
+      await expectLater(
+        runtime.execute(
+          const TextBuffer('x'),
+          const <String, Object?>{},
+          context(timeout: const Duration(milliseconds: 500)),
         ),
-      ),
-    );
+        throwsA(
+          isA<AppError>().having(
+            (error) => error.code,
+            'code',
+            'runtime.timeout',
+          ),
+        ),
+      );
+    } finally {
+      await runtime.dispose();
+    }
   });
 }

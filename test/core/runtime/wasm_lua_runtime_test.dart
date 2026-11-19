@@ -256,4 +256,77 @@ void main() {
       ),
     );
   }, skip: skip);
+
+  test('worker dipakai ulang dan pulih setelah timeout', () async {
+    final runtime = WasmLuaRuntime(
+      source:
+          'function transform(input) '
+          'if input == "loop" then while true do end end '
+          'return input end',
+      moduleBytes: moduleBytes,
+      libraryPath: _dllRelative,
+    );
+
+    final first = await runtime.execute(
+      const TextBuffer('a'),
+      const <String, Object?>{},
+      _context(),
+    );
+    expect(first.asText(), 'a');
+
+    await expectLater(
+      runtime.execute(
+        const TextBuffer('loop'),
+        const <String, Object?>{},
+        SandboxContext(
+          pluginId: 'com.example.lua',
+          operationId: 'lua.transform',
+          config: SandboxConfig(
+            stepTimeout: const Duration(milliseconds: 300),
+          ),
+        ),
+      ),
+      throwsA(
+        isA<AppError>().having(
+          (error) => error.code,
+          'code',
+          'runtime.timeout',
+        ),
+      ),
+    );
+
+    // Trap tidak boleh membuat store berikutnya langsung timeout (epoch naik).
+    final second = await runtime.execute(
+      const TextBuffer('b'),
+      const <String, Object?>{},
+      _context(),
+    );
+    expect(second.asText(), 'b');
+
+    await runtime.dispose();
+  }, skip: skip);
+
+  test('runtime yang sudah dilepas menolak eksekusi', () async {
+    final runtime = WasmLuaRuntime(
+      source: 'function transform(input) return input end',
+      moduleBytes: moduleBytes,
+      libraryPath: _dllRelative,
+    );
+    await runtime.dispose();
+
+    await expectLater(
+      runtime.execute(
+        const TextBuffer('x'),
+        const <String, Object?>{},
+        _context(),
+      ),
+      throwsA(
+        isA<AppError>().having(
+          (error) => error.code,
+          'code',
+          'runtime.disposed',
+        ),
+      ),
+    );
+  }, skip: skip);
 }

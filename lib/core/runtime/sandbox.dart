@@ -115,3 +115,9 @@ abstract interface class SandboxRuntime {
     SandboxContext context,
   );
 }
+
+/// Runtime yang memegang resource native/isolate dan harus dilepas saat cache
+/// mengeluarkannya (idle, LRU, plugin nonaktif/dihapus).
+abstract interface class DisposableSandboxRuntime {
+  Future<void> dispose();
+}

@@ -8,6 +8,7 @@ import 'package:bufferite/core/plugin/operation_param.dart';
 import 'package:bufferite/core/plugin/operation_registry.dart';
 import 'package:bufferite/core/plugin/plugin_package.dart';
 import 'package:bufferite/core/runtime/plugin_runtime.dart';
+import 'package:bufferite/core/runtime/runtime_cache.dart';
 import 'package:bufferite/core/runtime/sandbox.dart';
 import 'package:bufferite/core/storage/app_database.dart';
 import 'package:bufferite/features/plugins/plugin_manager_service.dart';
@@ -182,6 +183,43 @@ void main() {
       const <String, Object?>{},
     );
     expect(output.asText(), 'BUFFERITE');
+  });
+
+  test('disable dan hapus melepas runtime dari cache', () async {
+    final cache = RuntimeCache();
+    final pluginService = PluginManagerService(
+      repository: repository,
+      registry: registry,
+      writePackage: (package) async => '/plugins/com.test.pack',
+      runtimeLoader: PluginRuntimeLoader(
+        sandboxConfig: () => SandboxConfig.defaults,
+        cache: cache,
+        readEntrypoint: (path) async => Uint8List.fromList(
+          utf8.encode('function transform(input) return input end'),
+        ),
+      ),
+    );
+
+    await pluginService.install(package(), source: PluginSource.sideload);
+    await registry.byId('test.operation')!.executor!.execute(
+      const TextBuffer('a'),
+      const <String, Object?>{},
+    );
+    expect(cache.length, 1);
+
+    await pluginService.setEnabled('com.test.pack', false);
+    expect(cache.length, 0);
+
+    await pluginService.setEnabled('com.test.pack', true);
+    await registry.byId('test.operation')!.executor!.execute(
+      const TextBuffer('b'),
+      const <String, Object?>{},
+    );
+    expect(cache.length, 1);
+
+    await pluginService.remove('com.test.pack');
+    expect(cache.length, 0);
+    await cache.dispose();
   });
 }
 

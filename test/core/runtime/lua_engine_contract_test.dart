@@ -74,27 +74,31 @@ void main() {
   group('kontrak lua_dart == Lua WASM', () {
     for (final entry in _cases.entries) {
       test(entry.key, () async {
-        for (final input in _inputs) {
-          final args = <String, Object?>{'prefix': 'halo '};
-          final dartRuntime = LuaRuntime(entry.value);
-          final wasmRuntime = WasmLuaRuntime(
-            source: entry.value,
-            moduleBytes: moduleBytes,
-            libraryPath: _dllRelative,
-          );
+        final dartRuntime = LuaRuntime(entry.value);
+        final wasmRuntime = WasmLuaRuntime(
+          source: entry.value,
+          moduleBytes: moduleBytes,
+          libraryPath: _dllRelative,
+        );
+        try {
+          for (final input in _inputs) {
+            final args = <String, Object?>{'prefix': 'halo '};
 
-          final expected = await _run(
-            () => dartRuntime.execute(TextBuffer(input), args, _context()),
-          );
-          final actual = await _run(
-            () => wasmRuntime.execute(TextBuffer(input), args, _context()),
-          );
+            final expected = await _run(
+              () => dartRuntime.execute(TextBuffer(input), args, _context()),
+            );
+            final actual = await _run(
+              () => wasmRuntime.execute(TextBuffer(input), args, _context()),
+            );
 
-          expect(
-            actual,
-            expected,
-            reason: 'Kasus ${entry.key} berbeda untuk input "$input"',
-          );
+            expect(
+              actual,
+              expected,
+              reason: 'Kasus ${entry.key} berbeda untuk input "$input"',
+            );
+          }
+        } finally {
+          await wasmRuntime.dispose();
         }
       }, skip: skip);
     }

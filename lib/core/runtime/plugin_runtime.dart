@@ -12,6 +12,7 @@ import '../plugin/plugin_manifest.dart';
 import '../plugin/plugin_permission.dart';
 import 'dsl_runtime.dart';
 import 'lua_runtime.dart';
+import 'runtime_cache.dart';
 import 'sandbox.dart';
 import 'wasm_lua_runtime.dart';
 
@@ -40,20 +41,20 @@ typedef PluginEntrypointReader =
 /// Membungkus [SandboxRuntime] menjadi [Operation] agar bisa dipanggil mesin
 /// pipeline.
 ///
-/// Runtime dimuat malas pada eksekusi pertama lalu dipakai ulang, sehingga
-/// registrasi plugin tetap sinkron dan file plugin hanya dibaca saat perlu.
+/// Runtime diambil dari [RuntimeCache] per plugin, sehingga source/entrypoint
+/// dibaca dan modul WASM dikompilasi sekali selama cache hidup.
 final class SandboxOperation implements Operation {
   SandboxOperation({
     required this.descriptor,
     required this.createRuntime,
     required this.sandboxConfig,
+    required this.cache,
   });
 
   final OperationDescriptor descriptor;
   final Future<SandboxRuntime> Function() createRuntime;
   final SandboxConfig Function() sandboxConfig;
-
-  Future<SandboxRuntime>? _pending;
+  final RuntimeCache cache;
 
   @override
   String get id => descriptor.id;
@@ -71,35 +72,17 @@ final class SandboxOperation implements Operation {
   OperationIO get io => descriptor.io;
 
   @override
-  Future<Buffer> execute(Buffer input, Map<String, Object?> args) async {
-    final runtime = await _runtime();
-    return runtime.execute(
-      input,
-      args,
-      SandboxContext(
-        pluginId: descriptor.pluginId,
-        operationId: descriptor.id,
-        config: sandboxConfig(),
-      ),
+  Future<Buffer> execute(Buffer input, Map<String, Object?> args) {
+    final context = SandboxContext(
+      pluginId: descriptor.pluginId,
+      operationId: descriptor.id,
+      config: sandboxConfig(),
     );
-  }
-
-  Future<SandboxRuntime> _runtime() async {
-    final pending = _pending;
-    if (pending != null) {
-      return pending;
-    }
-    final created = createRuntime();
-    _pending = created;
-    try {
-      return await created;
-    } on Object {
-      // Jangan cache kegagalan; perbaikan file/manifest harus bisa dicoba lagi.
-      if (identical(_pending, created)) {
-        _pending = null;
-      }
-      rethrow;
-    }
+    return cache.use(
+      descriptor.pluginId,
+      createRuntime,
+      (runtime) => runtime.execute(input, args, context),
+    );
   }
 }
 
@@ -112,13 +95,22 @@ final class PluginRuntimeLoader {
     required this.sandboxConfig,
     this.luaEngine = LuaEngine.native,
     this.wasmModule,
+    RuntimeCache? cache,
     PluginEntrypointReader? readEntrypoint,
-  }) : _readEntrypoint = readEntrypoint ?? _readFile;
+  }) : cache = cache ?? RuntimeCache(),
+       _readEntrypoint = readEntrypoint ?? _readFile;
 
   final SandboxConfig Function() sandboxConfig;
   final LuaEngine luaEngine;
   final WasmLuaModule? wasmModule;
+  final RuntimeCache cache;
   final PluginEntrypointReader _readEntrypoint;
+
+  /// Lepas runtime plugin (nonaktif/hapus) agar worker/engine WASM berhenti.
+  Future<void> evictPlugin(String pluginId) => cache.evict(pluginId);
+
+  /// Lepas semua runtime (shutdown/test).
+  Future<void> dispose() => cache.dispose();
 
   /// Executor untuk [operation], atau `null` bila tier belum didukung/belum
   /// terpasang.
@@ -140,6 +132,7 @@ final class PluginRuntimeLoader {
       ),
       createRuntime: () => _loadRuntime(plugin, installPath),
       sandboxConfig: _configFor(plugin.manifest),
+      cache: cache,
     );
   }
 
