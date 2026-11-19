@@ -1,6 +1,6 @@
 import 'package:bufferite/core/plugin/operation_param.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
-import 'package:bufferite/features/operations/step_config_sheet.dart';
+import 'package:bufferite/features/operations/step_config_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,7 +42,7 @@ Future<Map<String, Object?>?> _show(
           body: Center(
             child: ElevatedButton(
               onPressed: () async {
-                result = await showStepConfigSheet(
+                result = await showStepConfigDialog(
                   context,
                   title: 'Konfigurasi',
                   params: _params,
@@ -62,6 +62,13 @@ Future<Map<String, Object?>?> _show(
 }
 
 void main() {
+  testWidgets('tampil sebagai dialog, bukan bottom sheet', (tester) async {
+    await _show(tester);
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+  });
+
   testWidgets('menampilkan field untuk tiap tipe parameter', (tester) async {
     await _show(tester);
 
@@ -69,6 +76,15 @@ void main() {
     expect(find.text('Shift'), findsOneWidget);
     expect(find.text('Uppercase'), findsOneWidget);
     expect(find.text('Mode'), findsOneWidget);
+  });
+
+  testWidgets('Batal menutup dialog tanpa hasil', (tester) async {
+    await _show(tester);
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Konfigurasi'), findsNothing);
   });
 
   testWidgets('Terapkan mengembalikan args tervalidasi', (tester) async {

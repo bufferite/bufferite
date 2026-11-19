@@ -125,6 +125,8 @@ void main() {
       ),
     );
 
+    await tester.tap(find.byTooltip('Step'));
+    await tester.pumpAndSettle();
     expect(
       find.text('Belum ada step. Tambahkan operasi dari Library.'),
       findsOneWidget,

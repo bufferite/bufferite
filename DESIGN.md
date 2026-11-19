@@ -103,8 +103,9 @@ Aturan:
 
 ### 6.2 Kartu Operasi (Recipe Step)
 - Container: surface, border 1px, radius medium, padding 12.
-- Isi: ikon drag handle (kiri), nama operasi + kategori (tengah), status
-  toggle enabled (kanan), tombol konfigurasi (chevron).
+- Isi: ikon drag handle (kiri), nama operasi + kategori dan badge
+  tier/status (tengah, badge memakai wrap agar tidak overflow di panel
+  sempit), status toggle enabled (kanan), tombol konfigurasi (chevron).
 - State:
   - default: border normal.
   - dragging: elevasi naik, border accent, opacity 0.95.
@@ -158,12 +159,23 @@ Aturan:
 - Ikon line besar (48), judul h2, deskripsi caption, satu aksi utama.
 - Contoh: "Belum ada recipe" + "Buat recipe baru".
 
+### 6.9 Dialog Konfigurasi Step
+- Muncul sebagai dialog tengah, bukan bottom sheet; lebar maksimum 480.
+- Judul = nama operasi, isi = field parameter per tipe (string, integer,
+  boolean, select) beserta bantuan.
+- Konten dapat digulir; error validasi tampil di dalam dialog.
+- Aksi: "Batal" (ghost) dan "Terapkan" (primary). Tap luar atau tombol
+  tutup membatalkan tanpa mengubah args.
+
 ## 7. Navigasi
 - Bottom navigation 3 tab: Home, Library, Settings.
 - Home: daftar recipe tersimpan + tombol "Recipe Baru".
 - Library: daftar operasi (dari plugin aktif) + pencarian.
 - Settings: tema, plugin manager, tentang, privasi.
 - Recipe Editor dibuka sebagai layar penuh (bukan tab) dengan tombol back.
+- Panel step di Recipe Editor dibuka dari ikon Step di AppBar dan meluncur
+  dari kanan (end drawer) berisi seluruh daftar step, tambah step, reorder,
+  toggle, hapus, dan akses konfigurasi.
 - Plugin Manager dibuka dari Settings.
 
 ## 8. Wireframe Tekstual (ASCII)
@@ -191,22 +203,17 @@ Aturan:
 
 ### 8.2 Recipe Editor
 +-----------------------------------+
-| <  Nama Recipe            [simpan]|
+| <  Nama Recipe   [step] [menu][simpan] |
 +-----------------------------------+
+| Nama recipe                       |
+| [.............................]   |
+|                                   |
 | Input                             |
 | +-------------------------------+ |
 | | SGVsbG8=                      | |
 | |                    [copy][v]  | |
 | +-------------------------------+ |
-|                                   |
-| Langkah (3)            [+ tambah] |
-| +-------------------------------+ |
-| | :: Base64 Decode      [on] v  | |
-| +-------------------------------+ |
-| | :: XOR               [on] v   | |
-| +-------------------------------+ |
-| | :: Hex to String     [off] v  | |
-| +-------------------------------+ |
+| [Pilih file]                      |
 |                                   |
 | Output                    [live]  |
 | +-------------------------------+ |
@@ -214,6 +221,22 @@ Aturan:
 | |                    [copy][v]  | |
 | +-------------------------------+ |
 +-----------------------------------+
+
+Panel Step (meluncur dari kanan):
++-----------------------------------+
+| Step (3)                     [x]  |
+| [+ Tambah step]                   |
+| +-------------------------------+ |
+| | :: Base64 Decode      [on] v  | |
+| +-------------------------------+ |
+| | :: XOR               [on] v   | |
+| +-------------------------------+ |
+| | :: Hex to String     [off] v  | |
+| +-------------------------------+ |
++-----------------------------------+
+
+Tap kartu step (chevron) membuka dialog konfigurasi parameter di tengah
+layar; daftar step tetap terlihat di panel kanan.
 
 ### 8.3 Operation Picker
 +-----------------------------------+
@@ -260,7 +283,8 @@ Aturan:
 +-----------------------------------+
 
 ## 9. Motion & Micro-interaction
-- Durasi: 150–200 ms untuk transisi kecil; 250 ms untuk bottom sheet.
+- Durasi: 150–200 ms untuk transisi kecil; 250 ms untuk bottom sheet dan
+  panel step (end drawer).
 - Easing: ease-out untuk masuk, ease-in untuk keluar.
 - Drag: kartu terangkat (shadow + border accent) dan mengikuti jari.
 - Reorder: animasi posisi 150 ms.

@@ -353,12 +353,13 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F09 — Fitur Recipe Editor
 
-- [x] **F09-T01 (P0)** Layout editor: nama, input panel, daftar step,
-  output panel, aksi simpan.
+- [x] **F09-T01 (P0)** Layout editor: nama, input panel, output panel
+  langsung di bawah input, daftar step di panel samping (end drawer),
+  aksi simpan.
 - [x] **F09-T02 (P0)** Tambah step lewat Operation Picker.
 - [x] **F09-T03 (P0)** Reorder drag and drop + haptic.
 - [x] **F09-T04 (P0)** Enable/disable dan hapus step (undo).
-- [x] **F09-T05 (P0)** Sheet konfigurasi parameter per tipe + validasi.
+- [x] **F09-T05 (P0)** Dialog konfigurasi parameter per tipe + validasi.
 - [x] **F09-T06 (P0)** Preview live dengan debounce 200 ms.
   - Batalkan eksekusi lama saat input berubah.
 - [x] **F09-T07 (P0)** Tampilan error per step dan badge unsupported.
@@ -366,8 +367,8 @@ Catatan progres: lihat [progress.md](progress.md).
   tersimpan.
 - [x] **F09-T09 (P0)** Impor/ekspor `.brecipe` dari editor.
 - [x] **F09-T10 (P1)** Input dari file (scoped, tanpa streaming besar).
-- [x] **F09-T11 (P0)** Widget test alur: tambah step, reorder, disable,
-  live output, simpan, error step.
+- [x] **F09-T11 (P0)** Widget test alur: tambah step dari panel samping,
+  reorder, disable, live output, simpan, error step, dan dialog parameter.
 
 ## F10 — Fitur Library & Operation Picker
 

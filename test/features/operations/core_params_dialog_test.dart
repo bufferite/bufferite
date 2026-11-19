@@ -1,6 +1,6 @@
 import 'package:bufferite/core/operations/core_operations.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
-import 'package:bufferite/features/operations/step_config_sheet.dart';
+import 'package:bufferite/features/operations/step_config_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,14 +14,14 @@ void main() {
   });
 
   for (final operation in withParams) {
-    testWidgets('sheet ${operation.id} menampilkan semua parameter', (
+    testWidgets('dialog ${operation.id} menampilkan semua parameter', (
       tester,
     ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light(),
           home: Scaffold(
-            body: StepConfigSheet(
+            body: StepConfigDialog(
               title: operation.name,
               params: operation.params,
               initialArgs: const <String, Object?>{},
@@ -50,7 +50,7 @@ void main() {
       MaterialApp(
         theme: AppTheme.light(),
         home: Scaffold(
-          body: StepConfigSheet(
+          body: StepConfigDialog(
             title: withoutParams.name,
             params: const [],
             initialArgs: const <String, Object?>{},

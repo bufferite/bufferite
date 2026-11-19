@@ -43,6 +43,11 @@ String? _output(WidgetTester tester) {
   return tester.widget<BufferPanel>(find.byType(BufferPanel)).content;
 }
 
+Future<void> _openSteps(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Step'));
+  await tester.pumpAndSettle();
+}
+
 Recipe _recipe(String input) {
   return Recipe(
     id: '11111111-1111-4111-8111-111111111111',
@@ -96,6 +101,7 @@ void main() {
     );
     await tester.pumpWidget(_host(recipe: recipe));
     await tester.pump();
+    await _openSteps(tester);
 
     expect(find.text('unsupported'), findsOneWidget);
   });
@@ -112,6 +118,7 @@ void main() {
     await tester.pumpWidget(_host(recipe: recipe));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
+    await _openSteps(tester);
 
     expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
   });

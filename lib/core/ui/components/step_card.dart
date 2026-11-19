@@ -70,39 +70,35 @@ class StepCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
+                      Text(
+                        name,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: _isDisabled
+                              ? palette.textMuted
+                              : palette.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
-                          Flexible(
-                            child: Text(
-                              name,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: _isDisabled
-                                    ? palette.textMuted
-                                    : palette.textPrimary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            category,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: palette.textSecondary,
                             ),
                           ),
-                          if (tier != null) ...<Widget>[
-                            const SizedBox(width: AppSpacing.sm),
-                            AppBadge(label: tier!),
-                          ],
-                          if (_isUnsupported) ...<Widget>[
-                            const SizedBox(width: AppSpacing.sm),
+                          if (tier != null) AppBadge(label: tier!),
+                          if (_isUnsupported)
                             const AppBadge(
                               label: 'unsupported',
                               tone: AppBadgeTone.warning,
                             ),
-                          ],
                         ],
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        category,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.textSecondary,
-                        ),
                       ),
                       if (_isError && errorMessage != null) ...<Widget>[
                         const SizedBox(height: AppSpacing.sm),

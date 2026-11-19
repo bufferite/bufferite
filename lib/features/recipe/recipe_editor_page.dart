@@ -18,7 +18,7 @@ import '../../core/ui/components/step_card.dart';
 import '../../core/ui/design_tokens.dart';
 import '../operations/operation_picker.dart';
 import '../operations/operation_providers.dart';
-import '../operations/step_config_sheet.dart';
+import '../operations/step_config_dialog.dart';
 import 'recipe.dart';
 import 'recipe_id.dart';
 import 'recipe_io.dart';
@@ -55,6 +55,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
   bool _saving = false;
   Uint8List? _inputBytes;
   String? _inputFileName;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -93,9 +94,21 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       canPop: !_dirty,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(widget.recipe == null ? 'Recipe Baru' : 'Edit Recipe'),
           actions: <Widget>[
+            IconButton(
+              tooltip: 'Step',
+              onPressed: _openStepsDrawer,
+              icon: Badge.count(
+                count: _steps.length,
+                isLabelVisible: _steps.isNotEmpty,
+                backgroundColor: theme.colorScheme.primary,
+                textColor: theme.colorScheme.onPrimary,
+                child: const Icon(Icons.format_list_numbered),
+              ),
+            ),
             PopupMenuButton<String>(
               tooltip: 'Lainnya',
               onSelected: (value) {
@@ -130,6 +143,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
             ),
           ],
         ),
+        endDrawer: _stepsDrawer(theme),
         body: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: <Widget>[
@@ -164,22 +178,6 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            _section(theme, 'Step'),
-            const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: AppButton(
-                label: 'Tambah step',
-                variant: AppButtonVariant.secondary,
-                icon: Icons.add,
-                onPressed: _addStep,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _stepsView(theme),
-            const SizedBox(height: AppSpacing.lg),
-            _section(theme, 'Output'),
-            const SizedBox(height: AppSpacing.sm),
             BufferPanel(
               label: 'Output',
               kind: widget.recipe?.output?.kind.name ?? 'text',
@@ -197,53 +195,116 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     return Text(title, style: theme.textTheme.titleLarge);
   }
 
+  void _openStepsDrawer() {
+    FocusScope.of(context).unfocus();
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  Widget _stepsDrawer(ThemeData theme) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    return Drawer(
+      width: screenWidth < 600 ? screenWidth : 400,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.sm,
+                0,
+              ),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Step (${_steps.length})',
+                      style: theme.textTheme.titleLarge,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Tutup panel step',
+                    onPressed: () =>
+                        _scaffoldKey.currentState?.closeEndDrawer(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              child: AppButton(
+                label: 'Tambah step',
+                variant: AppButtonVariant.secondary,
+                icon: Icons.add,
+                expand: true,
+                onPressed: _addStep,
+              ),
+            ),
+            Expanded(child: _stepsView(theme)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _stepsView(ThemeData theme) {
     if (_steps.isEmpty) {
-      return Text(
-        'Belum ada step. Tambahkan operasi dari Library.',
-        style: theme.textTheme.bodySmall,
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Text(
+            'Belum ada step. Tambahkan operasi dari Library.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall,
+          ),
+        ),
       );
     }
     final registry = ref.read(operationRegistryProvider);
-    return ReorderableListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    return ReorderableListView.builder(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       buildDefaultDragHandles: false,
       onReorderItem: _reorder,
-      children: <Widget>[
-        for (var index = 0; index < _steps.length; index++)
-          Builder(
-            key: ValueKey<String>(_steps[index].id),
-            builder: (context) {
-              final descriptor = registry
-                  .byId(_steps[index].operationId)
-                  ?.descriptor;
-              // Operasi tanpa parameter tidak perlu tombol atur (chevron).
-              final configurable =
-                  descriptor == null || descriptor.params.isNotEmpty;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: ReorderableDelayedDragStartListener(
-                  index: index,
-                  child: StepCard(
-                    name: _steps[index].operationId,
-                    category: descriptor?.category.label ?? 'Operasi',
-                    enabled: _steps[index].enabled,
-                    state: _stateFor(_steps[index]),
-                    errorMessage: _stepErrors[_steps[index].id]?.message,
-                    onEnabledChanged: (value) => setState(() {
-                      _steps[index] = _steps[index].copyWith(enabled: value);
-                      _dirty = true;
-                      _schedulePreview();
-                    }),
-                    onTap: configurable ? () => _configureStep(index) : null,
-                    onDelete: () => _deleteStep(index),
-                  ),
-                ),
-              );
-            },
+      itemCount: _steps.length,
+      itemBuilder: (context, index) {
+        final step = _steps[index];
+        final descriptor = registry.byId(step.operationId)?.descriptor;
+        // Operasi tanpa parameter tidak perlu tombol atur (chevron).
+        final configurable = descriptor == null || descriptor.params.isNotEmpty;
+        return Padding(
+          key: ValueKey<String>(step.id),
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: ReorderableDelayedDragStartListener(
+            index: index,
+            child: StepCard(
+              name: descriptor?.name ?? step.operationId,
+              category: descriptor?.category.label ?? 'Operasi',
+              enabled: step.enabled,
+              state: _stateFor(step),
+              errorMessage: _stepErrors[step.id]?.message,
+              onEnabledChanged: (value) => setState(() {
+                _steps[index] = step.copyWith(enabled: value);
+                _dirty = true;
+                _schedulePreview();
+              }),
+              onTap: configurable ? () => _configureStep(index) : null,
+              onDelete: () => _deleteStep(index),
+            ),
           ),
-      ],
+        );
+      },
     );
   }
 
@@ -264,6 +325,8 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       _dirty = true;
     });
     _schedulePreview();
+    // Tutup panel agar SnackBar + Undo terlihat di layar utama.
+    _scaffoldKey.currentState?.closeEndDrawer();
     showAppToast(
       context,
       message: 'Step dihapus',
@@ -318,7 +381,7 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
       );
       return;
     }
-    final args = await showStepConfigSheet(
+    final args = await showStepConfigDialog(
       context,
       title: descriptor.name,
       params: descriptor.params,

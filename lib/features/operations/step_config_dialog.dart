@@ -4,37 +4,31 @@ import '../../core/plugin/operation_param.dart';
 import '../../core/ui/components/app_button.dart';
 import '../../core/ui/design_tokens.dart';
 
-/// Sheet konfigurasi parameter satu step operasi.
+/// Dialog konfigurasi parameter satu step operasi.
 ///
 /// Mengembalikan args yang sudah tervalidasi, atau `null` bila dibatalkan.
-Future<Map<String, Object?>?> showStepConfigSheet(
+Future<Map<String, Object?>?> showStepConfigDialog(
   BuildContext context, {
   required String title,
   required List<OperationParam> params,
   required Map<String, Object?> initialArgs,
 }) {
-  return showModalBottomSheet<Map<String, Object?>>(
+  return showDialog<Map<String, Object?>>(
     context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (context) => Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: FractionallySizedBox(
-        heightFactor: 0.85,
-        child: StepConfigSheet(
-          title: title,
-          params: params,
-          initialArgs: initialArgs,
-        ),
-      ),
+    builder: (context) => StepConfigDialog(
+      title: title,
+      params: params,
+      initialArgs: initialArgs,
     ),
   );
 }
 
-class StepConfigSheet extends StatefulWidget {
-  const StepConfigSheet({
+/// Dialog tengah untuk mengatur parameter step.
+///
+/// Dipakai menggantikan bottom sheet agar daftar step di panel samping tetap
+/// terlihat dan konfigurasi tidak menutupi seluruh bagian bawah layar.
+class StepConfigDialog extends StatefulWidget {
+  const StepConfigDialog({
     super.key,
     required this.title,
     required this.params,
@@ -46,10 +40,10 @@ class StepConfigSheet extends StatefulWidget {
   final Map<String, Object?> initialArgs;
 
   @override
-  State<StepConfigSheet> createState() => _StepConfigSheetState();
+  State<StepConfigDialog> createState() => _StepConfigDialogState();
 }
 
-class _StepConfigSheetState extends State<StepConfigSheet> {
+class _StepConfigDialogState extends State<StepConfigDialog> {
   final Map<String, TextEditingController> _textControllers =
       <String, TextEditingController>{};
   final Map<String, bool> _boolValues = <String, bool>{};
@@ -89,43 +83,94 @@ class _StepConfigSheetState extends State<StepConfigSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Text(widget.title, style: theme.textTheme.titleLarge),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            children: <Widget>[
-              if (widget.params.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
-                  child: Text(
-                    'Operasi ini tidak punya parameter.',
-                    style: theme.textTheme.bodySmall,
+    return Dialog(
+      insetPadding: const EdgeInsets.all(AppSpacing.lg),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.sm,
+                0,
+              ),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: theme.textTheme.titleLarge,
+                    ),
                   ),
-                ),
-              for (final param in widget.params) _field(param),
-              if (_error != null) ...<Widget>[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
+                  IconButton(
+                    tooltip: 'Tutup',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
                   ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
                 ),
-              ],
-            ],
-          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (widget.params.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: Text(
+                          'Operasi ini tidak punya parameter.',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                    for (final param in widget.params) _field(param),
+                    if (_error != null) ...<Widget>[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        _error!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.lg,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  AppButton(
+                    label: 'Batal',
+                    variant: AppButtonVariant.ghost,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  AppButton(label: 'Terapkan', onPressed: _apply),
+                ],
+              ),
+            ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: AppButton(label: 'Terapkan', expand: true, onPressed: _apply),
-        ),
-      ],
+      ),
     );
   }
 

@@ -48,6 +48,16 @@ Widget _host({Recipe? recipe}) {
   );
 }
 
+Future<void> _openSteps(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Step'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _closeSteps(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Tutup panel step'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('editor baru menampilkan kerangka kosong', (tester) async {
     await tester.pumpWidget(_host());
@@ -55,13 +65,21 @@ void main() {
     expect(find.text('Recipe Baru'), findsOneWidget);
     expect(find.text('Nama recipe'), findsOneWidget);
     expect(find.text('Input'), findsOneWidget);
-    expect(find.text('Step'), findsOneWidget);
     expect(find.text('Output'), findsWidgets);
+    expect(find.byType(StepCard), findsNothing);
+    expect(find.text('Simpan'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byType(BufferPanel)).dy,
+      greaterThan(tester.getTopLeft(find.byType(TextField).at(1)).dy),
+    );
+
+    await _openSteps(tester);
+    expect(find.text('Step (0)'), findsOneWidget);
     expect(
       find.text('Belum ada step. Tambahkan operasi dari Library.'),
       findsOneWidget,
     );
-    expect(find.text('Simpan'), findsOneWidget);
+    expect(find.text('Tambah step'), findsOneWidget);
   });
 
   testWidgets('editor terisi menampilkan nama, step, dan output', (
@@ -71,14 +89,24 @@ void main() {
     await tester.pump();
 
     expect(find.text('Edit Recipe'), findsOneWidget);
-    expect(find.text('Base64 Decode'), findsOneWidget);
-    expect(find.text('test.base64_decode'), findsOneWidget);
     expect(find.text('Hello'), findsOneWidget);
+    expect(find.byType(StepCard), findsNothing);
+
+    await _openSteps(tester);
+    expect(
+      find.descendant(
+        of: find.byType(StepCard),
+        matching: find.text('Base64 Decode'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Encode/Decode'), findsOneWidget);
   });
 
   testWidgets('toggle step mengubah status enabled', (tester) async {
     await tester.pumpWidget(_host(recipe: _recipe()));
     await tester.pump();
+    await _openSteps(tester);
 
     await tester.tap(find.byType(Switch));
     await tester.pump();
@@ -98,6 +126,7 @@ void main() {
     );
     await tester.pumpWidget(_host(recipe: recipe));
     await tester.pump();
+    await _openSteps(tester);
 
     final list = tester.widget<ReorderableListView>(
       find.byType(ReorderableListView),
@@ -124,22 +153,42 @@ void main() {
     );
     await tester.pumpWidget(_host(recipe: recipe));
     await tester.pump();
+    await _openSteps(tester);
 
     await tester.tap(find.byTooltip('Hapus step').first);
-    await tester.pump();
-    expect(
-      tester.widgetList<StepCard>(find.byType(StepCard)).map((c) => c.name),
-      <String>['core.beta'],
-    );
+    await tester.pumpAndSettle();
+    expect(find.byType(StepCard), findsNothing);
 
     final action = tester.widget<SnackBarAction>(find.byType(SnackBarAction));
     expect(action.label, 'Undo');
     action.onPressed();
     await tester.pump();
+
+    await _openSteps(tester);
     expect(
       tester.widgetList<StepCard>(find.byType(StepCard)).map((c) => c.name),
       <String>['core.alpha', 'core.beta'],
     );
+  });
+
+  testWidgets('atur step membuka dialog konfigurasi', (tester) async {
+    final recipe = Recipe(
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Reverse',
+      steps: <RecipeStep>[RecipeStep(id: 's1', operationId: 'test.reverse')],
+      input: const TextBuffer('abc'),
+    );
+    await tester.pumpWidget(_host(recipe: recipe));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    await _openSteps(tester);
+
+    await tester.tap(find.byTooltip('Atur step'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Uppercase'), findsOneWidget);
   });
 
   testWidgets('Simpan menolak recipe tidak valid', (tester) async {
@@ -192,20 +241,26 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(_host());
+    await _openSteps(tester);
 
     await tester.tap(find.text('Tambah step'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reverse Text'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(StepCard), findsOneWidget);
+    await _closeSteps(tester);
+
     await tester.enterText(find.byType(TextField).at(1), 'abc');
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
     expect(tester.widget<BufferPanel>(find.byType(BufferPanel)).content, 'cba');
 
+    await _openSteps(tester);
     await tester.tap(find.byType(Switch));
     await tester.pump();
     expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    await _closeSteps(tester);
 
     await tester.tap(find.text('Simpan'));
     await tester.pump();
