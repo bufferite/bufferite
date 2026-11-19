@@ -22,7 +22,7 @@ menyetujui izin eksplisit.
 
 ## Arsitektur Singkat
 - Inti: recipe engine, pipeline executor, plugin loader, runtime
-  (DSL/Lua via WASM/WASM), sandbox, storage, UI.
+  (DSL, Lua native, Lua WASM; tier WASM menyusul 1.1), sandbox, storage, UI.
 - Operasi: semua plugin (termasuk core.berp).
 - Paket plugin: .berp (zip berisi manifest + entrypoint + aset).
 - Verifikasi: SHA-256 untuk runtime WASM dan paket .berp.

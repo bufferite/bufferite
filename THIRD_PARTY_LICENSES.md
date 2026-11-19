@@ -11,7 +11,8 @@ Bufferite (MIT) memakai paket Dart/Flutter berikut:
 | archive | MIT | Baca/tulis `.berp` (zip) |
 | path_provider | BSD-3-Clause | Direktori aplikasi |
 | file_picker | MIT | Pilih file (sideload/impor) |
-| wasm_run | MIT | Runtime WASM (belum aktif di MVP) |
+| wasmtime (C API) 48.0.9 | Apache-2.0 WITH LLVM-exception | Engine Lua WASM (tier `lua` via `LuaEngine.wasm`, 1.1) |
+| Lua 5.4.8 (wasm32-wasip1) | MIT | `assets/lua_runtime.wasm` (interpreter Lua, hash di-pin) |
 | lua_dart / Lua 5.5.1 | MIT | Runtime tier `lua` (FFI, prebuilt via Kiln) |
 
 Teks lisensi lengkap dapat ditampilkan di aplikasi lewat `showLicensePage`

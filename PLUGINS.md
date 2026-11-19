@@ -96,6 +96,8 @@ Tier 3 — WASM
 - Analisis tetap mungkin via WAT/decompile, tetapi tidak se-transparan Lua.
 - Wajib SHA-256 untuk semua; signature (Ed25519) opsional di MVP, wajib
   untuk registry resmi di Fase 2.
+- Status 1.0: engine WASM (wasmtime) sudah tersedia, tetapi ABI modul plugin
+  tier `wasm` belum ditetapkan; operasi tier ini belum punya executor (1.1).
 
 ## 4. Model Izin (Capabilities)
 Izin yang dikenal: "cpu", "net", "file:read", "file:write".
@@ -228,6 +230,13 @@ Mekanisme:
    Lua."
 4. Jika hash cocok, runtime diinstansiasi dan source Lua plugin dieksekusi
    di dalam sandbox (batas waktu, memori, tanpa os/io/net kecuali izin).
+
+Status implementasi (CP-063): aset `assets/lua_runtime.wasm` dibundel dengan
+pin SHA-256 (`luaRuntimeSha256`); `loadLuaWasmModule` menolak byte yang tidak
+cocok sebelum engine dibuat. Eksekusi memakai wasmtime C API di isolate
+(epoch untuk timeout/pembatalan, batas memori store). Pemilihan engine `wasm`
+untuk tier `lua` tersedia di `PluginRuntimeLoader` (`LuaEngine.wasm`) dan akan
+menjadi default setelah cache modul (F05-T08) selesai.
 
 Catatan:
 - Yang di-hash adalah file WASM interpreter, BUKAN source Lua plugin.

@@ -167,16 +167,19 @@ Implementasi storage MVP:
 - Inti minimal; semua operasi plugin.
 - core.berp dibundel, diinstal otomatis, di-hash.
 - Runtime: DSL + Lua + WASM (satu kesatuan MVP).
-  Catatan 1.0: Lua memakai `lua_dart` (FFI native) dengan capability sandbox;
-  engine WASM ditunda ke 1.1 (`WASM_ENGINE_PLAN.md`).
+  Catatan 1.0: Lua memakai `lua_dart` (FFI native) dengan capability sandbox
+  sebagai default; engine Lua WASM (wasmtime C API + `lua_runtime.wasm`)
+  sudah tersedia dan tervalidasi di Windows/Android, tetapi pemilihannya
+  menunggu cache modul (F05-T08). Tier plugin `wasm` menunggu ABI (1.1).
 - Format paket: .berp.
 - Sideload didukung di MVP.
 - Signature opsional di MVP, wajib untuk registry resmi di Fase 2.
-- Interpreter Lua via WASM dijalankan dengan wasm_run di isolate.
+- Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di isolate;
+  `wasi_config` + epoch untuk timeout, stdout lewat file sementara.
 
 ## 11. Pertanyaan Terbuka
-- Finalisasi interpreter Lua yang dikompilasi ke WASM.
-- Strategi cache runtime untuk banyak plugin.
+- ABI modul untuk plugin tier `wasm` (input/output, host function).
+- Strategi cache modul/runtime untuk banyak plugin (F05-T08).
 - Ukuran maksimum core.berp dan strategi lazy load operasi.
 - Streaming untuk file besar (Fase 2).
 
@@ -193,7 +196,8 @@ dipakai di kode.
 | `archive` | Baca/tulis zip `.berp` | Mendukung zip encode/decode murni Dart | `zip`/`archive_io` (API lebih terbatas atau tidak perlu) |
 | `path_provider` | Direktori database dan paket plugin | Standar Flutter untuk path aplikasi lintas platform | Platform channel manual (reinventing) |
 | `sqflite` | Recipe, plugin, settings store | Sesuai `ARCHITECTURE.md` (SQLite); ringan, tanpa codegen | `drift` (codegen + build step), `isar` (binary DB, bukan SQLite) |
-| `wasm_run` | Menjalankan runtime Lua/WASM | Diwajibkan `ARCHITECTURE.md` dan `PLUGINS.md` | `wasmer`/FFI native (kompleksitas build lintas platform) |
+| `lua_dart` | Runtime tier `lua` (default 1.0) | Lua 5.5.1 siap pakai via FFI; sandbox + batas memori didukung | Interpreter Dart murni (belum ada yang stabil), Lua WASM (butuh engine native + ukuran) |
+| `ffi` | Binding wasmtime C API untuk engine Lua WASM | C API stabil, tanpa codegen besar; bisa dipakai lintas desktop/Android | `wasm_run` (tidak mendukung wasm-EH), `wasmer` (build berat) |
 | `file_picker` | Sideload `.berp` dan impor `.brecipe` | Mendukung Android/iOS/desktop, scoped user pick | Platform channel manual per OS |
 | `sqflite_common_ffi` (dev) | Test storage tanpa device | Menjalankan SQLite di host/CI | Mock repository (tidak menguji SQL/migrasi) |
 

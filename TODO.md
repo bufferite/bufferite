@@ -518,7 +518,9 @@ Catatan progres: lihat [progress.md](progress.md).
 - [x] **D02** Lua 5.5.1 via `lua_dart` (FFI; native prebuilt + hash dari
   paket, `sandbox: true`, batas memori, interrupt). Revisi 2026-11-19:
   jalur WASM (`wasm_run`/wasmtime 14) tidak mendukung wasm-EH yang dibutuhkan
-  Lua; aset `lua_runtime.wasm` dihapus.
+  Lua; aset `lua_runtime.wasm` dihapus. Revisi 2 (CP-063): engine wasmtime
+  C API + `lua_runtime.wasm` (Lua 5.4.8 wasm-EH) terbukti jalan di Windows
+  dan Android; default 1.0 tetap `lua_dart` sampai cache modul siap.
 - [x] **D03** Batas `core.berp` bundel **2 MiB**; MVP memuat semua operasi
   dalam satu paket (saat ini 4,2 KiB). Bila melewati batas, pecah per kategori
   dan muat sesuai permintaan di Fase 2.
@@ -539,3 +541,7 @@ Catatan progres: lihat [progress.md](progress.md).
   memori mengikuti `SandboxConfig`.
 - [x] **D10** Plugin DSL dibungkus `.berp` (manifest + `transform.json`),
   sama seperti tier lain.
+- [x] **D11** Engine Lua WASM (wasmtime C API, `lua_runtime.wasm`) tersedia
+  sebagai opsi tier `lua` lewat `PluginRuntimeLoader`/`LuaEngine.wasm`;
+  default 1.0 tetap `lua_dart` sampai cache kompilasi modul (F05-T08) ada.
+  Tier plugin `wasm` tetap menunggu ABI (1.1).

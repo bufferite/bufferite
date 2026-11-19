@@ -56,14 +56,17 @@ Versi: 1.0 · Fase: MVP
 | Batas memori | 64 MiB via allocator Lua (`memoryLimit`) |
 | Waktu / DoS | Timeout + interrupt + kill isolate |
 | UI responsif | Ya (isolate kerja) |
-| Isolasi memori / kontainmen bug native | **Tidak** (native in-process) |
+| Isolasi memori / kontainmen bug native | **Tidak** (native in-process; engine WASM tersedia sebagai opsi, bukan default 1.0) |
 | Plugin tepercaya | Hanya hash paket; sideload `unverified` = tidak tepercaya |
 | Sandbox OS | Android/iOS/desktop (UID, scoped storage, tanpa INTERNET) |
 
 Konsekuensi: plugin Lua yang jahat tidak bisa memanggil file/net lewat API
 Lua, tetapi **bug native** (Lua/binding/libc) berpotensi keluar dari sandbox
 Lua dan menyentuh proses aplikasi. Untuk plugin tak tepercaya, isolasi WASM
-atau proses terpisah diperlukan (1.1).
+atau proses terpisah diperlukan (1.1). Engine WASM + `lua_runtime.wasm`
+(CP-063) sudah tervalidasi di Windows dan Android; setelah dijadikan default,
+jalur Lua tidak lagi berbagi ruang alamat dengan host (selain engine wasmtime
+sendiri).
 
 ## 5. Status verifikasi
 
@@ -73,3 +76,5 @@ atau proses terpisah diperlukan (1.1).
   (F14-T04), CSPRNG operasi acak (F14-T05), audit offline (F14-T06).
 - Lua 1.0: 12 test sandbox/timeout + integration emulator (CP-057); batas
   isolasi didokumentasikan di §4.1.
+- Engine Lua WASM: integration emulator Android (eksekusi + timeout epoch) dan
+  kontrak 10 kasus vs `lua_dart` (CP-063).

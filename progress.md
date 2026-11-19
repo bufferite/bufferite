@@ -1370,8 +1370,9 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `tool/build_wasmtime_android.ps1`,
   `integration_test/wasm_lua_runtime_test.dart`,
   `test/core/runtime/plugin_runtime_test.dart`,
-  `test/core/runtime/lua_engine_contract_test.dart`.
-- Verifikasi: `flutter analyze` 0 issue; `flutter test` 452 lulus;
+  `test/core/runtime/lua_engine_contract_test.dart`,
+  `test/core/runtime/lua_runtime_asset_test.dart`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 454 lulus;
   `flutter test integration_test/wasm_lua_runtime_test.dart -d 127.0.0.1:7555`
   2 lulus (eksekusi + timeout epoch di emulator x86_64).
 - Catatan/risiko: JIT cranelift berjalan di emulator Android, arm64 belum
@@ -1379,7 +1380,9 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `.gitignore`) agar repo tidak membengkak; jalankan skrip build sebelum APK
   yang memakai engine WASM. Engine lua masih default `native` (D02); tier
   `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Kompilasi modul WASM
-  masih per eksekusi (cache menunggu F05-T08).
+  masih per eksekusi (cache menunggu F05-T08). Satu run suite penuh sempat
+  flake di test engine (`output print`); rerun lulus — bila berulang, jalankan
+  `flutter test --concurrency=1`.
 - Commit: `84d28da`
 
 ## 7. Template Checkpoint Baru
@@ -1432,3 +1435,4 @@ bagian D.
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
 | 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |
+| 2026-11-19 | D11 | Engine Lua WASM (wasmtime) jadi opsi tier `lua`; default 1.0 tetap `lua_dart` | Kompilasi modul per eksekusi belum di-cache | `LuaEngine.wasm` dipakai setelah F05-T08 |
