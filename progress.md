@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (521 test, 2026-11-19) |
+| Test suite | Lulus (536 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -225,7 +225,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | Docs | Spesifikasi registry v1 + sinkronisasi dokumen basi (runtime, status implementasi, D12/D13) | `REGISTRY.md`, `PLUGINS.md`, `AGENT.md`, `ARCHITECTURE.md`, `operations.md`, `THREAT_MODEL.md`, `README.md`, `PRIVACY.md`, `ROADMAP.md`, `TODO.md` | Link Markdown lokal resolve; `git diff --check` bersih; 512 test tidak berubah | `583647a` |
 | 2026-11-19 | UX | Recipe Editor: output di bawah input, daftar step di panel kanan (end drawer), konfigurasi parameter jadi dialog tengah | `recipe_editor_page.dart`, `step_config_dialog.dart`, `step_card.dart`, `app_badge.dart` | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: drawer, picker, dialog, dan live output diverifikasi | `ad88b19` |
 | 2026-11-19 | UX | Istilah UI daftar step jadi "Ingredients" + ikon keranjang di AppBar | `recipe_editor_page.dart`, `step_card.dart`, test terkait | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: header "Ingredients (0)", tombol "Tambah ingredients", ikon keranjang tampil | `244cb2f` |
-| 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 521 lulus; paritas 198 key ID/EN | `088b7d6` |
+| 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 536 lulus; paritas 331 key ID/EN | `899e2f8` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1556,6 +1556,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   mencakup teks antarmuka. `AppLocalizations.current` kosong sampai
   `preload()` berjalan; test memakai `test/flutter_test_config.dart`.
 - Commit: `088b7d6`
+
+### CP-071 - 2026-11-19 - Lokalisasi metadata operasi inti + error umum
+
+- Status: Selesai
+- Perubahan:
+  - Katalog ID/EN diperluas dari 198 ke 331 key: nama/kategori 38 operasi
+    inti, label/help/opsi parameter, serta error validasi recipe, parameter
+    operasi, aset core, dan paket plugin.
+  - Helper presentasi `operationName`, `operationCategoryLabel`,
+    `operationParamLabel/Help/OptionLabel`, dan `localizedError` (dengan
+    override label parameter via `operationId`) dipakai Library, Operation
+    Picker, Step Config Dialog, Recipe Editor, Plugin Detail, toast, dan
+    bootstrap.
+  - `AppError` membawa detail tambahan (`max`, `maxBytes`, `param`, `label`,
+    `assetPath`, `variant`) agar pesan dapat diinterpolasi; error plugin yang
+    tidak dikenal tetap fallback ke pesan domain.
+- File: `assets/i18n/{id,en}.json`,
+  `lib/core/i18n/{operation_localization,localized_error}.dart`,
+  `lib/core/plugin/operation_param.dart`,
+  `lib/features/{home,library,operations,recipe,plugins,settings}/**`,
+  `lib/core/bootstrap/**`, test terkait.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 536 lulus;
+  paritas 331 key ID/EN; test metadata operasi inti dan error EN/ID.
+- Catatan/risiko: nama/deskripsi plugin pihak ketiga dan pesan error plugin
+  spesifik tetap memakai teks manifest/domain; label runtime
+  (`dsl`/`lua`/`wasm`) belum diterjemahkan.
+- Commit: `899e2f8`
 
 ## 7. Template Checkpoint Baru
 

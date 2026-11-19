@@ -174,8 +174,12 @@ Aturan:
 - Interpolasi memakai placeholder `{nama}` dan plural `_one`/`_other`
   berdasarkan `count`.
 - Istilah "Ingredients" dipertahankan di kedua bahasa sebagai nama fitur.
-- Nama operasi, deskripsi plugin, dan pesan error domain belum diterjemahkan;
-  katalog hanya mencakup teks antarmuka.
+- Metadata operasi inti (nama, kategori, label/help/opsi parameter) diterjemahkan
+  lewat katalog; nama/deskripsi plugin pihak ketiga tetap memakai manifest
+  sebagai fallback.
+- Pesan error umum (validasi recipe, parameter operasi, impor/ekspor, aset
+  core, paket plugin) diterjemahkan dari `AppError.code` dan `details`; kode
+  plugin yang tidak dikenal jatuh ke pesan aslinya.
 
 ## 7. Navigasi
 - Bottom navigation 3 tab: Home, Library, Settings.

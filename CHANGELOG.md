@@ -17,6 +17,10 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,
   dialog, dan toast dipindahkan ke katalog terjemahan; istilah
   "Ingredients" dipertahankan di kedua bahasa.
+- Metadata operasi inti (nama, kategori, label/help/opsi parameter) dan pesan
+  error umum (validasi recipe, parameter operasi, impor/ekspor, aset core,
+  paket plugin) kini mengikuti bahasa aktif; metadata plugin pihak ketiga
+  tetap memakai manifest sebagai fallback.
 - Sinkronisasi dokumen dengan kondisi 1.0: `lua_dart` default, engine WASM
   opt-in, status implementasi sideload/bootstrap/isolate, dan penghapusan
   referensi `wasm_run`.

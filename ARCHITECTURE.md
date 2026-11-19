@@ -175,6 +175,10 @@ Implementasi storage MVP:
   `AppLocalizationsScope` menyediakan `context.tr`/`context.trPlural`, dan
   `LanguageController` menyimpan bahasa aktif lewat `SettingsRepository`
   (key `language`).
+- Metadata operasi inti dan pesan error umum diterjemahkan di lapisan
+  presentasi (`operation_localization.dart`, `localized_error.dart`) dengan
+  fallback ke metadata manifest/pesan domain agar plugin pihak ketiga tetap
+  tampil.
 
 ## 10. Keputusan Terkunci
 - Inti minimal; semua operasi plugin.

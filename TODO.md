@@ -534,7 +534,9 @@ sebelum registry dibuka publik.
   - `assets/i18n/{id,en}.json`, loader/delegate, persistensi locale di
     `SettingsRepository`, dan migrasi string UI (Home, Library, Editor,
     Plugin Manager, Settings, dialog, toast).
-  - Nama operasi/plugin dan pesan error domain belum diterjemahkan.
+  - Metadata operasi inti (nama, kategori, label/help/opsi parameter) dan
+    pesan error umum diterjemahkan lewat katalog; metadata plugin pihak
+    ketiga tetap memakai manifest sebagai fallback.
 
 ---
 
