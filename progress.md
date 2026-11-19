@@ -1380,7 +1380,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   yang memakai engine WASM. Engine lua masih default `native` (D02); tier
   `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Kompilasi modul WASM
   masih per eksekusi (cache menunggu F05-T08).
-- Commit: `PENDING`
+- Commit: `84d28da`
 
 ## 7. Template Checkpoint Baru
 
