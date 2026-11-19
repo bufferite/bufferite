@@ -33,6 +33,7 @@ dependencies:
 
   archive: ^4.6.0
   crypto: ^3.0.8
+  ffi: ^2.1.4
   file_picker: ^13.3.3
   flutter_riverpod: ^3.5.0
   path_provider: ^2.1.6

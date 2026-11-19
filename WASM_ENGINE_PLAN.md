@@ -38,11 +38,20 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
    - Windows: **selesai** — `wasmtime.dll` 48.0.9 (14,9 MB) +
      harness C; `print`/`pcall` lulus.
    - Android: NDK 28.2 + Rust targets (arm64-v8a, armeabi-v7a, x86_64).
-3. **Dart FFI**
-   - `wasm_engine_new`, `wasmtime_module_new`, `wasmtime_linker_new`,
-     `wasmtime_context_set_wasi`, instantiate, `_start`.
-   - Tangkap stdout via `wasi_config` callback; timeout lewat epoch/fuel.
-   - Bungkus `SandboxRuntime` + isolate (pola sama dengan CP-057).
+3. **Dart FFI** — **selesai (Windows)**
+   - `wasmtime_ffi.dart` (binding), `wasmtime_engine.dart` (engine/modul/
+     WASI/epoch), `wasm_lua_runtime.dart` (`SandboxRuntime` + isolate).
+   - Skrip transform dipakai bersama (`lua_program.dart`) agar semantik
+     tier `lua` dan `wasm` identik.
+   - stdout/stderr ditangkap lewat **file sementara** karena callback
+     `wasi_config_set_stdout_custom` dipanggil dari thread non-isolate
+     (`NativeCallable.isolateLocal` crash: "Cannot invoke native callback
+     outside an isolate"). Rencana berikutnya: `NativeCallable.listener`
+     atau pipe.
+   - Timeout/pembatalan: isolate utama memanggil
+     `wasmtime_engine_increment_epoch` pada alamat engine; deadline store = 1.
+   - Verifikasi: 7 test engine + 12 test runtime (transform, args, unicode,
+     sandbox, error, timeout, cancel) lulus di Windows.
 4. **Integrasi**
    - Pilih runtime per tier: `lua`/`wasm` memakai engine WASM; DSL tetap Dart.
    - Test: transform, sandbox, timeout, hash mismatch, Android.
@@ -52,6 +61,6 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
 
 - Ukuran APK bertambah (engine native + 0,7 MB Lua WASM).
 - Cross-compile wasmtime untuk Android butuh Rust targets + NDK (berat).
-- Callback stdout C→Dart perlu `NativeCallable`; jika gagal, pakai pipe/preopen
-  file untuk output.
+- Output WASI harus lewat file sementara (callback lintas thread tidak bisa
+  memakai `NativeCallable.isolateLocal`); berpotensi lambat untuk output besar.
 - Fallback D07 (1.0 DSL+Lua FFI) tetap berlaku bila port tidak selesai.

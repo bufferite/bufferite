@@ -1338,6 +1338,22 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: `wasm_exceptions` digerbangi fitur `gc` dan engine menuntut
   kolektor (`gc-drc`). Android cross-compile (NDK + Rust targets) berikutnya.
 - Commit: `6f0e6a0`
+### CP-062 - 2026-11-19 - Dart FFI wasmtime + runtime Lua WASM (Windows)
+
+- Status: Selesai
+- Perubahan: binding FFI wasmtime (`wasmtime_ffi.dart`), engine WASI
+  (`wasmtime_engine.dart`), dan `WasmLuaRuntime` (`SandboxRuntime`, isolate +
+  epoch). Skrip transform dipindah ke `lua_program.dart` supaya identik dengan
+  `lua_dart`.
+- File: `lib/core/runtime/wasmtime/*`, `lib/core/runtime/lua_program.dart`,
+  `lib/core/runtime/wasm_lua_runtime.dart`, test engine + runtime.
+- Verifikasi: 7 test engine + 12 test runtime lulus di Windows; suite penuh
+  432 lulus; `flutter analyze` 0 issue.
+- Catatan/risiko: stdout/stderr WASI ditangkap lewat file sementara karena
+  callback wasmtime berjalan di thread non-isolate (`NativeCallable.isolateLocal`
+  memicu fatal). `wasmtime_engine_increment_epoch` dipakai untuk
+  timeout/pembatalan lintas isolate.
+- Commit: `<hash>`
 
 ## 7. Template Checkpoint Baru
 

@@ -275,6 +275,8 @@ Catatan progres: lihat [progress.md](progress.md).
 > Catatan 2026-11-19: F05-T06..T09 dan F14-T03 **ditunda ke 1.1**
 > (fallback D07). Scope 1.0 = DSL + Lua (`lua_dart`, isolate + sandbox) +
 > 38 operasi core. Rencana engine WASM ada di `WASM_ENGINE_PLAN.md`.
+> Progres 2026-11-19: Dart FFI wasmtime + `WasmLuaRuntime` sudah jalan di
+> Windows (CP-062); sisa integrasi Android/cross-compile.
 
 ## F06 — Storage
 
