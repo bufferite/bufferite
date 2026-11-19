@@ -186,7 +186,8 @@ Aturan:
 - Home: daftar recipe tersimpan + tombol "Recipe Baru"; tile recipe punya
   menu Duplikat/Hapus (dengan konfirmasi) dan swipe kiri juga menghapus.
 - Library: daftar operasi (dari plugin aktif) + pencarian.
-- Settings: tema, bahasa, plugin manager, tentang, privasi.
+- Settings: tema, bahasa, plugin manager, tentang, privasi, dan log
+  diagnostik lokal (opt-in).
 - Recipe Editor dibuka sebagai layar penuh (bukan tab) dengan tombol back.
 - Panel ingredients di Recipe Editor dibuka dari ikon Ingredients (keranjang)
   di AppBar dan meluncur dari kanan (end drawer) berisi seluruh daftar

@@ -14,6 +14,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   interpolasi/plural, dan persistensi bahasa lewat `SettingsRepository`.
 - Opsi Hapus pada menu tile recipe di Home (selain swipe kiri), lengkap
   dengan dialog konfirmasi dan Undo.
+- Log eksekusi opt-in untuk diagnostik lokal (JSONL, rotasi 200 entri /
+  256 KiB) dan layar Diagnostik di Settings untuk melihat serta menghapus
+  riwayat; log tidak memuat input, output, atau args step.
 
 ### Diubah
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,

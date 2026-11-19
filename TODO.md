@@ -515,7 +515,7 @@ sebelum registry dibuka publik.
 - [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
 - [ ] **F16-T04** Plugin update/rollback + notifikasi versi.
 - [ ] **F16-T05** Streaming file besar tanpa OOM.
-- [ ] **F16-T06** Log eksekusi opt-in + layar diagnostik.
+- [x] **F16-T06** Log eksekusi opt-in + layar diagnostik.
 - [ ] **F16-T07** Audit/fuzzing sandbox dan runtime WASM.
 - [ ] **F16-T08** Tooling registry (validasi, review checklist, publikasi).
 

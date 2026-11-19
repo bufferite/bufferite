@@ -27,17 +27,17 @@ Status yang dipakai:
 
 | Item | Nilai |
 |---|---|
-| Fase aktif | Fase 2 — Registry & pengerasan (belum mulai) |
-| Milestone aktif | M5 — Rilis MVP (selesai, tag `v1.0.0`); M6 — Registry (spesifikasi siap) |
+| Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
+| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (spesifikasi siap) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 0 / 8 |
+| Task Fase 2 | 1 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 2 (D12, D13) |
-| Task sedang berjalan | — |
-| Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
-| Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
+| Task sedang berjalan | - |
+| Task berikutnya | F16-T05 (streaming file besar), lalu F16-T07 sebelum registry publik |
+| Blocker aktif | D12/D13 (hosting & custody kunci) - tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (540 test, 2026-11-19) |
+| Test suite | Lulus (556 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 0 | Belum |
+| F16 — Backlog Fase 2 | 8 | 1 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
@@ -226,6 +226,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | UX | Recipe Editor: output di bawah input, daftar step di panel kanan (end drawer), konfigurasi parameter jadi dialog tengah | `recipe_editor_page.dart`, `step_config_dialog.dart`, `step_card.dart`, `app_badge.dart` | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: drawer, picker, dialog, dan live output diverifikasi | `ad88b19` |
 | 2026-11-19 | UX | Istilah UI daftar step jadi "Ingredients" + ikon keranjang di AppBar | `recipe_editor_page.dart`, `step_card.dart`, test terkait | `flutter analyze` 0 issue; `flutter test` 515 lulus; emulator: header "Ingredients (0)", tombol "Tambah ingredients", ikon keranjang tampil | `244cb2f` |
 | 2026-11-19 | F18-T01 | Lokalisasi UI EN/ID berbasis katalog JSON + pemilih bahasa persisten di Settings | `assets/i18n/{id,en}.json`, `lib/core/i18n/**`, `lib/main.dart`, `settings_repository.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 536 lulus; paritas 331 key ID/EN | `899e2f8` |
+| 2026-11-19 | F16-T06 | Log eksekusi opt-in (JSONL lokal, rotasi) + layar Diagnostik di Settings | `lib/core/diagnostics/**`, `lib/features/settings/diagnostics_page.dart`, `recipe_editor_page.dart`, `settings_page.dart` | `flutter analyze` 0 issue; `flutter test` 556 lulus | `2e2a97b` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1628,6 +1629,34 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: penghapusan tetap lewat `RecipeRepository.delete` yang
   sudah ada; tidak ada perubahan skema atau format data.
 - Commit: `00bb78c`
+
+### CP-074 - 2026-11-19 - F16-T06 log eksekusi opt-in + layar diagnostik
+
+- Status: Selesai
+- Perubahan:
+  - Preview recipe di Recipe Editor mencatat metadata eksekusi ke
+    `execution.log` (JSONL) saat opsi log aktif: timestamp, ID/nama recipe,
+    operationId yang aktif, durasi, outcome, dan kode error. Input, output,
+    dan args step tidak pernah dicatat.
+  - File log dirotasi maksimum 200 entri / 256 KiB; kegagalan menulis log
+    tidak menggagalkan preview.
+  - Layar Diagnostik dibuka dari Settings: menampilkan entri terbaru,
+    peringatan saat log nonaktif, aksi muat ulang, dan hapus log dengan
+    dialog konfirmasi.
+  - Label opt-in diperjelas agar tidak menyiratkan pengiriman data: log
+    hanya disimpan lokal.
+- File: `lib/core/diagnostics/{execution_log,execution_log_store,diagnostics_providers}.dart`,
+  `lib/features/settings/{diagnostics_page,settings_page}.dart`,
+  `lib/features/recipe/recipe_editor_page.dart`,
+  `test/core/diagnostics/**`, `test/features/settings/**`,
+  `assets/i18n/{id,en}.json`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 556 lulus.
+  Satu run penuh sempat gagal di `wasm_lua_runtime_test` yang sudah diketahui
+  flaky; dua run penuh berikutnya lulus.
+- Catatan/risiko: saat ini hanya preview Recipe Editor yang menjalankan
+  pipeline; komponen registry/plugin dapat memakai `ExecutionLogService`
+  yang sama saat F16-T01/T02 dikerjakan.
+- Commit: `2e2a97b`
 
 ## 7. Template Checkpoint Baru
 
