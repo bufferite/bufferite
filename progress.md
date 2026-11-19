@@ -27,15 +27,15 @@ Status yang dipakai:
 
 | Item | Nilai |
 |---|---|
-| Fase aktif | Fase 1 — MVP |
-| Milestone aktif | M5 — Rilis MVP (selesai, tag `v1.0.0`) |
+| Fase aktif | Fase 2 — Registry & pengerasan (belum mulai) |
+| Milestone aktif | M5 — Rilis MVP (selesai, tag `v1.0.0`); M6 — Registry (spesifikasi siap) |
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
-| Keputusan terbuka | 0 |
+| Keputusan terbuka | 2 (D12, D13) |
 | Task sedang berjalan | — |
-| Task berikutnya | — (MVP 1.0 selesai; lanjut Fase 2/F16 bila diminta) |
-| Blocker aktif | — (libwasmtime Android release masih di luar 1.0; tier `wasm` butuh build yang menyertakan engine) |
+| Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
+| Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
 | Test suite | Lulus (512 test, 2026-11-19) |
 
@@ -61,10 +61,10 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F13 — core.berp: Tooling & Operasi | 11 | 11 | Selesai |
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
-| **Total MVP** | **131** | **126** | **Berjalan** |
+| **Total MVP** | **131** | **131** | **Selesai** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
-| D — Keputusan Manusia | 10 | 0 | Terbuka |
+| D — Keputusan Manusia | 13 | 11 | 2 terbuka (D12, D13) |
 
 ## 4. Ringkasan Baseline (2026-11-11)
 
@@ -1490,7 +1490,8 @@ bagian D.
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
-| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Sebagian (wasmtime jalan di Windows + Android; ABI plugin WASM belum ada) |
+| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
+| 2026-11-19 | F16-T01/T03, D12/D13 | Hosting/URL registry dan custody kunci Ed25519 belum diputuskan | F16-T01/T03 belum bisa difinalisasi | Terbuka (spesifikasi `REGISTRY.md` §12; ditunda) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

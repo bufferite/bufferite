@@ -17,7 +17,7 @@ Prioritas dokumen mengikuti `AGENT.md`: `ARCHITECTURE.md` > `PLUGINS.md` >
 ## 2. Prinsip
 
 - Semua operasi adalah plugin; tidak ada operasi hardcoded di inti.
-- Satu kontrak untuk DSL, Lua via WASM, dan WASM.
+- Satu kontrak untuk DSL, Lua native/WASM, dan WASM.
 - Operasi menerima satu `Buffer` dan argumen tervalidasi, lalu mengembalikan
   satu `Buffer` baru (immutable).
 - Operasi tidak boleh melakukan efek samping di luar izin plugin.
@@ -190,13 +190,11 @@ Status implementasi engine:
 - `PipelineExecutor` sudah menjalankan step sekuensial, skip disabled/
   unsupported, timeout per step, pembatalan best-effort, dan stream event.
 - Dua kebijakan error tersedia: `stop` (default) dan
-  `continueWithLastOutput`; keputusan final tetap menunggu D06.
-- Eksekusi masih berjalan di isolate pemanggil. Host isolate pekerja
-  (request/response/progress) belum diaktifkan karena menunggu runtime
-  plugin F05; timeout saat ini tidak dapat menghentikan paksa operasi yang
-  sudah berjalan. Task terkait: F03-T04.
-- Pembersihan isolate dan enforcement memori mengikuti host isolate di
-  F05.
+  `continueWithLastOutput` (opt-in per recipe, D06).
+- Pipeline berjalan di host isolate pekerja (request/response/progress,
+  timeout, dan cancel) sejak CP-054; UI tetap responsif.
+- Timeout dapat menghentikan isolate kerja; enforcement memori mengikuti
+  `SandboxConfig` dan batas runtime masing-masing.
 
 ## 7. Error Terstruktur
 
@@ -352,12 +350,13 @@ Aturan:
 | Tier | Eksekusi | Batasan |
 |---|---|---|
 | `dsl` | Engine bawaan | Tanpa kode asing; regex dengan timeout |
-| `lua` | Interpreter Lua via WASM (`wasm_run`) | Tanpa `os`, `io`, `package`, `debug`; tanpa net/fs kecuali izin |
-| `wasm` | Runtime WASM | Tanpa host function net/fs kecuali izin |
+| `lua` | `lua_dart` native (default 1.0) atau engine WASI `LuaEngine.wasm` (opt-in) | Tanpa `os`, `io`, `package`, `debug`; tanpa net/fs; batas memori |
+| `wasm` | Runtime WASM (wasmtime, ABI command WASI v1) | Tanpa host function/preopen net/fs |
 
 Semua tier tunduk pada:
 
 - hash runtime dan paket yang di-pin,
+- signature Ed25519 untuk registry resmi (`REGISTRY.md`),
 - batas waktu dan memori,
 - model izin `cpu`, `net`, `file:read`, `file:write`,
 - error terstruktur dan pembungkusan `pluginId`/`stepId`.
@@ -409,8 +408,7 @@ Catatan keamanan:
 
 ## 13. Pertanyaan Terbuka
 
-- D06: kebijakan final stop vs lanjut saat error step.
-- D08: detail skema DSL.
-- Batas ukuran input/output MVP dan strategi streaming file besar.
+- Streaming file besar dan batas input/output MVP (F16-T05).
+- Registry: hosting/kunci dan detail lain di `REGISTRY.md` §12.
 - Apakah operasi core perlu metadata contoh I/O di manifest, atau cukup di
   test vector repo.

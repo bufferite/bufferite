@@ -23,8 +23,9 @@ Cakupan:
 - Kontrak Operation + Buffer model.
 - Plugin loader + manifest parser + verifikasi SHA-256.
 - Runtime DSL (engine sederhana).
-- Runtime Lua via WASM (wasm_run + lua_runtime.wasm, hash di-pin).
-- Runtime WASM (loader + sandbox dasar).
+- Runtime Lua native `lua_dart` (default) + engine WASM opt-in (wasmtime
+  C API + lua_runtime.wasm, hash di-pin).
+- Runtime plugin WASM (ABI command WASI v1).
 - Storage (SQLite untuk recipe dan plugin).
 - UI minimal: Home, Recipe Editor, Operation Picker.
 
@@ -62,7 +63,8 @@ Definisi done:
 
 ## 5. Fase 2 — Pengerasan & Ekosistem Awal
 Cakupan:
-- Registry resmi (GitHub Pages/Repo) + UI katalog plugin.
+- Registry resmi (GitHub Pages/Repo) + UI katalog plugin
+  (spesifikasi: `REGISTRY.md`).
 - Signature wajib (Ed25519) untuk registry resmi.
 - Streaming untuk file besar.
 - Peningkatan sandbox (audit, fuzzing runtime).
@@ -88,11 +90,13 @@ Definisi done:
 
 ## 7. Risiko Teknis & Mitigasi
 1. Kompleksitas WASM di Flutter.
-   Mitigasi: mulai dengan wasm_run + isolate; prototipe awal di Fase 0.
-2. Performa Lua via WASM untuk operasi berat.
-   Mitigasi: tier WASM untuk operasi berat; benchmark sebelum rilis.
+   Mitigasi: wasmtime C API + worker isolate; `lua_dart` tetap default.
+2. Performa Lua untuk operasi berat.
+   Mitigasi: engine Lua WASM opt-in + tier plugin WASM; benchmark sebelum
+   dijadikan default.
 3. Keamanan plugin komunitas.
-   Mitigasi: sandbox ketat, review source (Lua), hash + signature (Fase 2).
+   Mitigasi: sandbox ketat, review source (Lua), hash + signature Ed25519
+   untuk registry resmi (`REGISTRY.md`).
 4. Ukuran core.berp besar.
    Mitigasi: lazy load operasi, kompresi, pisah aset jika perlu.
 5. Kontrak Operation berubah.
@@ -105,5 +109,7 @@ Definisi done:
 - Tidak ada regresi pada recipe dan plugin.
 
 ## 9. Pertanyaan Terbuka
-- Prioritas fitur pasca-MVP: registry atau streaming dulu?
-- Target waktu rilis MVP (internal) — perlu ditetapkan manusia.
+- Registry dikerjakan lebih dulu; streaming menyusul (F16-T05).
+- Hosting/URL registry (D12) dan custody kunci Ed25519 (D13) — lihat
+  `REGISTRY.md` §12.
+- Target rilis MVP sudah ditetapkan dan tercapai: 2026-12-31 (D07).

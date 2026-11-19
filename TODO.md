@@ -65,7 +65,7 @@ Catatan progres: lihat [progress.md](progress.md).
     tetap bersih.
 - [x] **F00-T02 (P0)** Tambahkan dependency inti beserta alasan.
   - Kandidat: `flutter_riverpod`, `crypto`, `archive`, `path_provider`,
-    `sqflite`, `wasm_run`, `file_picker`; dev: `sqflite_common_ffi`.
+    `sqflite`, `lua_dart`, `file_picker`; dev: `sqflite_common_ffi`.
   - Acceptance: `flutter pub get` sukses; tabel dependency + alasan +
     alternatif yang ditolak ditulis di `ARCHITECTURE.md`.
 - [x] **F00-T03 (P0)** Perketat `analysis_options.yaml`.
@@ -243,9 +243,10 @@ Catatan progres: lihat [progress.md](progress.md).
   aset WASI dihapus; runtime Lua memakai `lua_dart` (prebuilt + hash dari
   paket, lihat D02 revisi).
   - Acceptance lama: hash terdokumentasi dan cocok dengan file aset.
-- [x] **F05-T04 (P0)** Verifikasi + instantiasi runtime Lua via
-    `wasm_run` di isolate.
-  - Hash mismatch = tolak eksekusi dengan pesan jelas.
+- [x] **F05-T04 (P0)** Verifikasi + instantiasi runtime Lua (`lua_dart`)
+    di isolate.
+  - Runtime harus memakai prebuilt `lua_dart` yang hash-nya cocok dengan
+    paket; sandbox + batas memori aktif.
   - Acceptance: test hash mismatch dan runtime valid.
   - Verifikasi: runtime Lua `lua_dart` (Lua 5.5.1 FFI) dengan
     `sandbox: true` + batas memori; eksekusi di isolate kerja dengan
@@ -504,6 +505,10 @@ Catatan progres: lihat [progress.md](progress.md).
 
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
+Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
+Urutan yang disarankan: T01 + T03 → T08 → T02 → T04; T07 adalah gate
+sebelum registry dibuka publik.
+
 - [ ] **F16-T01** Registry resmi read-only + `registry.json` client.
 - [ ] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
 - [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
@@ -534,7 +539,7 @@ Catatan progres: lihat [progress.md](progress.md).
   jalur WASM (`wasm_run`/wasmtime 14) tidak mendukung wasm-EH yang dibutuhkan
   Lua; aset `lua_runtime.wasm` dihapus. Revisi 2 (CP-063): engine wasmtime
   C API + `lua_runtime.wasm` (Lua 5.4.8 wasm-EH) terbukti jalan di Windows
-  dan Android; default 1.0 tetap `lua_dart` sampai cache modul siap.
+  dan Android; default 1.0 tetap `lua_dart` (D11).
 - [x] **D03** Batas `core.berp` bundel **2 MiB**; MVP memuat semua operasi
   dalam satu paket (saat ini 4,2 KiB). Bila melewati batas, pecah per kategori
   dan muat sesuai permintaan di Fase 2.
@@ -557,5 +562,11 @@ Catatan progres: lihat [progress.md](progress.md).
   sama seperti tier lain.
 - [x] **D11** Engine Lua WASM (wasmtime C API, `lua_runtime.wasm`) tersedia
   sebagai opsi tier `lua` lewat `PluginRuntimeLoader`/`LuaEngine.wasm`;
-  default 1.0 tetap `lua_dart` sampai cache kompilasi modul (F05-T08) ada.
-  Tier plugin `wasm` tetap menunggu ABI (1.1).
+  default 1.0 tetap `lua_dart` (D02). Cache runtime + worker persisten
+  selesai (F05-T08), dan tier plugin `wasm` ABI v1 selesai (F05-T06/CP-065).
+- [ ] **D12** Hosting, URL publik, dan CDN registry resmi. Usulan: hosting
+  statis HTTPS + CDN, URL final ditetapkan saat implementasi. Detail:
+  `REGISTRY.md` §3 dan §12.
+- [ ] **D13** Custody, rotasi, dan revocation kunci Ed25519 registry. Usulan:
+  kunci indeks offline/HSM, kunci paket di CI, rotasi 90 hari. Detail:
+  `REGISTRY.md` §5 dan §12.

@@ -29,7 +29,7 @@ operasi—termasuk encoding, crypto, format, dan analysis—adalah plugin.
 
 Yang berada di inti (hardcoded di aplikasi):
 - Recipe engine dan pipeline executor.
-- Plugin loader dan runtime (DSL, Lua via WASM, WASM).
+- Plugin loader dan runtime (DSL, Lua native/WASM, WASM).
 - Sandbox dan manajemen izin.
 - Storage (recipe, plugin, setting).
 - UI (Home, Recipe Editor, Operation Picker, Settings, Plugin Manager).
@@ -97,8 +97,8 @@ Tier 3 — WASM
   sandbox ketat (tanpa host function net/fs kecuali diizinkan).
 - Untuk performa tinggi dan library berat (kripto, parsing file besar).
 - Analisis tetap mungkin via WAT/decompile, tetapi tidak se-transparan Lua.
-- Wajib SHA-256 untuk semua; signature (Ed25519) opsional di MVP, wajib
-  untuk registry resmi di Fase 2.
+- Wajib SHA-256 untuk semua; signature Ed25519 wajib untuk registry resmi
+  ([REGISTRY.md](REGISTRY.md) §5), opsional untuk sideload.
 - Status 1.0: engine WASM (wasmtime) + ABI command WASI v1 sudah tersedia
   (`WasmPluginRuntime`). Libwasmtime hanya dikemas di varian debug Android;
   build release 1.0 belum memuatnya sehingga tier `wasm` memerlukan build
@@ -156,10 +156,13 @@ Izin yang dikenal: "cpu", "net", "file:read", "file:write".
     }
   ],
   "integrity": {
-    "sha256": "hash-entrypoint",
-    "signature": "signature-opsional"
+    "sha256": "hash-entrypoint"
   }
 }
+
+Signature registry bersifat **detached** (`<paket>.berp.sig`), bukan field
+di manifest. Hash di manifest hanya untuk integritas entrypoint; hash paket
+`.berp` ada di indeks registry.
 
 ## 6. Format Paket (.berp)
 - Ekstensi: .berp (BufferitePlugins).
@@ -183,39 +186,38 @@ Izin yang dikenal: "cpu", "net", "file:read", "file:write".
   untuk DSL, `.lua` untuk Lua, dan `.wasm` untuk WASM.
 
 ## 7. Registry (registry.json)
-{
-  "registryVersion": 1,
-  "updatedAt": "ISO-8601",
-  "plugins": [
-    {
-      "pluginId": "com.contoh.encoding-pack",
-      "name": "Encoding Pack",
-      "latestVersion": "1.2.0",
-      "minAppVersion": "1.0.0",
-      "tier": "lua",
-      "permissions": ["cpu"],
-      "downloadUrl": "https://.../encoding-pack-1.2.0.berp",
-      "sha256": "hash-paket",
-      "signature": "opsional",
-      "tags": ["encoding", "community"]
-    }
-  ]
-}
-Catatan: registry diunduh HANYA saat pengguna membuka katalog plugin,
-dengan peringatan bahwa aplikasi akan mengakses internet untuk mengambil
-daftar plugin. Di luar itu, aplikasi tetap offline.
+
+Spesifikasi lengkap ada di [REGISTRY.md](REGISTRY.md). Ringkasan:
+
+- Registry resmi bersifat read-only, statis, dan hanya diakses saat
+  pengguna membuka katalog atau menekan "Perbarui"; tidak ada sinkronisasi
+  latar belakang.
+- `registry.json` berisi satu entri per rilis plugin, dengan `sequence`
+  monoton untuk menolak replay indeks lama.
+- Setiap indeks dan paket `.berp` memiliki signature Ed25519 terpisah
+  (`.sig`); signature wajib untuk registry resmi dan diverifikasi sebelum
+  paket dibuka.
+- Public key Ed25519 di-pin di aplikasi, bukan diambil dari registry.
+- Hash SHA-256 + ukuran paket harus cocok dengan entri; manifest juga harus
+  cocok dengan `pluginId`, `version`, `tier`, dan set izin entri.
+- Cache indeks disimpan lokal bersama signature; saat offline katalog
+  menampilkan cache dengan peringatan.
+- Update/rollback mempertahankan maksimal dua versi dan meminta ulang izin
+  jika ada izin baru.
 
 ## 8. Kurasi & Verifikasi
 - Tier DSL: review ringan (skema valid, tidak ada eskalasi).
 - Tier Lua: review source WAJIB untuk masuk registry resmi. Fokus review:
   tidak ada upaya akses os/io/net, tidak ada resource abuse, logika benar.
-- Tier WASM: SHA-256 WAJIB; signature (Ed25519) opsional di MVP, wajib
-  untuk registry resmi di Fase 2.
+- Tier WASM: SHA-256 WAJIB; signature Ed25519 WAJIB untuk registry resmi
+  (F16-T03). Detail di [REGISTRY.md](REGISTRY.md) §5.
 - Sideload (instal dari file .berp lokal) didukung penuh, termasuk di MVP,
   untuk memudahkan developer menguji plugin. Plugin sideload ditandai
-  "unverified" dan izinnya tetap harus disetujui.
-- Semua paket diverifikasi SHA-256 sebelum instalasi. Jika mismatch,
-  instalasi ditolak.
+  "unverified", cukup diverifikasi SHA-256, dan izinnya tetap harus
+  disetujui. Sideload tidak pernah dianggap setara dengan plugin registry
+  bertanda tangan.
+- Semua paket diverifikasi SHA-256 sebelum instalasi. Untuk registry resmi,
+  signature paket juga wajib valid. Jika mismatch, instalasi ditolak.
 
 ## 9. Kontrak Operasi
 Semua operasi (bawaan maupun plugin) mengikuti interface Operation yang
@@ -244,12 +246,14 @@ Mekanisme:
 4. Jika hash cocok, runtime diinstansiasi dan source Lua plugin dieksekusi
    di dalam sandbox (batas waktu, memori, tanpa os/io/net kecuali izin).
 
-Status implementasi (CP-063): aset `assets/lua_runtime.wasm` dibundel dengan
-pin SHA-256 (`luaRuntimeSha256`); `loadLuaWasmModule` menolak byte yang tidak
-cocok sebelum engine dibuat. Eksekusi memakai wasmtime C API di isolate
-(epoch untuk timeout/pembatalan, batas memori store). Pemilihan engine `wasm`
-untuk tier `lua` tersedia di `PluginRuntimeLoader` (`LuaEngine.wasm`) dan akan
-menjadi default setelah cache modul (F05-T08) selesai.
+Status implementasi (CP-063/CP-065): aset `assets/lua_runtime.wasm`
+dibundel dengan pin SHA-256 (`luaRuntimeSha256`); `loadLuaWasmModule`
+menolak byte yang tidak cocok sebelum engine dibuat. Eksekusi memakai
+wasmtime C API di worker isolate persisten (epoch untuk timeout/pembatalan,
+batas memori store). Pemilihan engine `wasm` untuk tier `lua` tersedia di
+`PluginRuntimeLoader` (`LuaEngine.wasm`) dan bersifat opt-in; default 1.0
+tetap `lua_dart` (D11). Cache runtime + worker persisten selesai di
+F05-T08/CP-064.
 
 Catatan:
 - Yang di-hash adalah file WASM interpreter, BUKAN source Lua plugin.
@@ -257,9 +261,9 @@ Catatan:
   resmi) atau penandaan "unverified" (sideload).
 - Hash runtime di-pin per rilis aplikasi. Jika runtime diperbarui, hash baru
   harus disertakan dalam rilis aplikasi.
-- Implementasi Flutter: gunakan package wasm_run (Dart) untuk menjalankan
-  interpreter Lua yang dikompilasi ke WASM (misal omnilua atau sejenisnya).
-  Jalankan di isolate terpisah agar UI tidak blocking.
+- Implementasi Flutter: wasmtime C API via FFI (`lib/core/runtime/wasmtime/`)
+  di worker isolate persisten. Engine + modul dikompilasi sekali per plugin;
+  store baru per eksekusi. Bukan `wasm_run`.
 
 ## 11. Alur Instalasi
 A. Instalasi via registry:
@@ -268,10 +272,15 @@ A. Instalasi via registry:
 2. Pengguna memilih plugin; UI menampilkan tier, izin, ukuran, dan sumber.
 3. Jika plugin meminta izin selain "cpu", tampilkan dialog peringatan
    eksplisit; pengguna harus menyetujui.
-4. Aplikasi mengunduh paket .berp, memverifikasi SHA-256 (dan signature
-   jika ada).
+4. Aplikasi mengunduh paket .berp + signature, memverifikasi SHA-256,
+   ukuran, dan signature Ed25519 (wajib). Manifest harus cocok dengan entri
+   (`pluginId`, `version`, `tier`, izin).
 5. Plugin diinstal dan diaktifkan; operasi muncul di Operation Picker.
+   Provenance (sumber registry, keyId, hash) disimpan.
 6. Pengguna dapat menonaktifkan/menghapus plugin kapan saja dari Settings.
+7. Update/rollback mengikuti [REGISTRY.md](REGISTRY.md) §8: maksimal dua
+   versi disimpan, izin baru diminta ulang, rollback otomatis bila aktivasi
+   versi baru gagal.
 
 B. Instalasi via lokal (sideload):
 1. Pengguna memilih file .berp dari penyimpanan.
@@ -298,7 +307,10 @@ B. Instalasi via lokal (sideload):
   "needs update".
 
 ## 14. Distribusi & Moderasi
-- Registry resmi di-host di sumber read-only (misal GitHub Pages/Repo).
+- Spesifikasi registry, signature, update/rollback, dan moderasi ada di
+  [REGISTRY.md](REGISTRY.md).
+- Registry resmi di-host di sumber read-only (misal GitHub Pages/Repo);
+  hosting dan URL final menunggu D12.
 - Kurator awal: pembuat proyek + komunitas open-source GitHub.
 - Moderasi: kurator komunitas + maintainer; kriteria: keamanan,
   fungsionalitas, lisensi jelas.
@@ -314,13 +326,15 @@ B. Instalasi via lokal (sideload):
   aplikasi.
 - Format paket: .berp (zip).
 - Sideload: didukung di MVP.
-- Signature: opsional di MVP, wajib untuk registry resmi di Fase 2.
+- Signature: opsional untuk sideload, wajib untuk registry resmi
+  ([REGISTRY.md](REGISTRY.md) §5).
 - Kurator awal: pembuat proyek + komunitas open-source GitHub.
-- Runtime WASM Flutter: wasm_run + interpreter Lua dikompilasi ke WASM.
+- Runtime WASM Flutter: wasmtime C API via FFI, worker isolate persisten;
+  `lua_dart` tetap default untuk tier `lua` (D02/D11).
 - Tier: dsl + lua + wasm diimplementasikan berbarengan di MVP.
 
 ## 16. Pertanyaan Terbuka
-- Nama resmi interpreter Lua yang akan dikompilasi ke WASM (omnilua atau
-  alternatif) — finalisasi saat implementasi.
-- Apakah plugin DSL juga dibungkus dalam .berp, atau cukup file .json
-  terpisah? (Rekomendasi: tetap .berp agar seragam.)
+- Hosting/URL registry dan custody kunci Ed25519: lihat
+  [REGISTRY.md](REGISTRY.md) §12 (D12/D13).
+- Pertanyaan runtime 1.0 sudah ditutup: `lua_dart` default (D02/D11),
+  plugin DSL dibungkus `.berp` (D10).

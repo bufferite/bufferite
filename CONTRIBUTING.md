@@ -40,9 +40,11 @@ pada inti aplikasi, core.berp, dan plugin komunitas.
 3. Sertakan plugin.manifest.json, entrypoint, README, LICENSE.
 4. Bungkus sebagai .berp.
 5. Uji sideload di aplikasi sebelum mengajukan ke registry.
-6. Untuk registry resmi: ajukan PR ke repo registry; sertakan source (Lua)
-   atau hash + signature (WASM).
-7. Review: keamanan, fungsionalitas, lisensi jelas.
+6. Untuk registry resmi: ikuti `REGISTRY.md` (index + signature Ed25519
+   wajib); ajukan PR ke repo registry dengan source (Lua) atau paket WASM +
+   signature.
+7. Review: keamanan, fungsionalitas, lisensi jelas, izin minimum, dan
+   kepatuhan batas paket.
 
 ## 6. Gaya Kode
 - Dart: flutter_lints + analysis_options.yaml.

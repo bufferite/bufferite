@@ -17,6 +17,8 @@ menyetujui izin eksplisit.
 - Offline & privacy-first: tanpa akses jaringan secara default.
 - Sandbox: plugin berjalan dengan batas resource; runtime WASM di-pin hash.
 - Sideload: instal plugin dari file .berp lokal untuk pengembangan.
+- Registry (rencana Fase 2): katalog read-only dengan verifikasi hash +
+  signature Ed25519; spesifikasi di `REGISTRY.md`.
 - Core pack: core.berp berisi hampir semua operasi CyberChef, diinstal
   otomatis saat first-run.
 
@@ -25,17 +27,21 @@ menyetujui izin eksplisit.
   (DSL, Lua native, Lua WASM, plugin WASM), sandbox, storage, UI.
 - Operasi: semua plugin (termasuk core.berp).
 - Paket plugin: .berp (zip berisi manifest + entrypoint + aset).
-- Verifikasi: SHA-256 untuk runtime WASM dan paket .berp.
+- Verifikasi: SHA-256 untuk runtime WASM dan paket .berp; registry resmi
+  menambahkan signature Ed25519 (rencana F16, lihat `REGISTRY.md`).
 
 ## Struktur Repo
 lib/
   core/        (engine, plugin, runtime, storage, ui, error)
   features/    (recipe, operations, library, plugins, settings)
-  assets/      (core.berp, lua_runtime.wasm)
+assets/        (core.berp, lua_runtime.wasm)
+plugins/       (source operasi core.berp)
 test/          (unit, contract, widget test)
 Dokumen proyek berada di root repo:
-  README.md, AGENT.md, ARCHITECTURE.md, PLUGINS.md, operations.md,
-  DESIGN.md, ROADMAP.md, TODO.md, progress.md, CONTRIBUTING.md
+  README.md, AGENT.md, ARCHITECTURE.md, PLUGINS.md, REGISTRY.md,
+  operations.md, DESIGN.md, ROADMAP.md, TODO.md, progress.md,
+  THREAT_MODEL.md, WASM_ENGINE_PLAN.md, PRIVACY.md, CONTRIBUTING.md,
+  RELEASE_CHECKLIST.md
 
 ## Cara Build & Run
 1. Pastikan Flutter SDK terpasang.
@@ -44,19 +50,25 @@ Dokumen proyek berada di root repo:
 4. Untuk build rilis: flutter build apk / flutter build ios
 
 ## Dokumentasi
-- architecture.md — layer, struktur folder, alur data, bootstrap, keamanan.
-- plugins.md — sistem plugin, tier, izin, integritas WASM, registry.
-- operations.md — kontrak Operation, error, dan skema recipe v1.
-- design.md — design system, komponen, wireframe, aksesibilitas.
-- roadmap.md — fase dan prioritas.
-- agent.md — aturan kerja AI agent.
-- TODO.md — backlog task per fitur.
-- progress.md — checkpoint progres implementasi.
-- CONTRIBUTING.md — panduan kontribusi.
+- `ARCHITECTURE.md` — layer, struktur folder, alur data, bootstrap, keamanan.
+- `PLUGINS.md` — sistem plugin, tier, izin, integritas, alur instalasi.
+- `REGISTRY.md` — spesifikasi registry, signature Ed25519, update/rollback.
+- `operations.md` — kontrak Operation, error, dan skema recipe v1.
+- `DESIGN.md` — design system, komponen, wireframe, aksesibilitas.
+- `ROADMAP.md` — fase dan prioritas.
+- `AGENT.md` — aturan kerja AI agent.
+- `TODO.md` — backlog task per fitur.
+- `progress.md` — checkpoint progres implementasi.
+- `THREAT_MODEL.md` — model ancaman dan batas isolasi.
+- `PRIVACY.md` — komitmen offline-first dan perilaku jaringan.
+- `CONTRIBUTING.md` — panduan kontribusi.
 
 ## Lisensi
 MIT untuk inti dan core.berp (lihat [LICENSE](LICENSE)). Plugin komunitas
 mengikuti lisensi masing-masing.
 
 ## Status
-Fase 0 — fondasi. Lihat roadmap.md dan progress.md untuk detail.
+MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 512 lulus,
+`flutter analyze` 0 issue. Fase 2 berikutnya: registry plugin
+(`REGISTRY.md`), streaming file besar, dan diagnostik. Lihat `ROADMAP.md` dan
+`progress.md` untuk detail.

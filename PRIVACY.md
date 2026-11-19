@@ -1,4 +1,4 @@
-# Bufferite — Kebijakan Privasi (Offline-first)
+# Bufferite ï¿½ Kebijakan Privasi (Offline-first)
 
 Bufferite dirancang **offline-first**. Data Anda tidak keluar dari perangkat.
 
@@ -11,10 +11,15 @@ Bufferite dirancang **offline-first**. Data Anda tidak keluar dari perangkat.
 
 ## Jaringan
 
-- Tidak ada jaringan yang dipakai untuk memproses data atau menyimpan recipe.
-- Katalog plugin (Fase 2) akan memakai jaringan **hanya setelah Anda memilih
-  membukanya**, dengan peringatan eksplisit. Versi MVP belum mengaktifkan ini.
-- Manifest aplikasi tidak meminta izin INTERNET pada rilis.
+- Rilis 1.0 tidak memakai jaringan untuk memproses data atau menyimpan
+  recipe, dan manifest aplikasi tidak meminta izin INTERNET.
+- Katalog plugin (Fase 2, spesifikasi `REGISTRY.md`) hanya mengakses
+  jaringan setelah Anda membuka katalog dan menyetujui peringatan.
+- Saat aktif, aplikasi hanya melakukan `GET` untuk indeks dan paket yang
+  Anda pilih. Buffer, recipe, dan file tidak pernah diunggah.
+- Tidak ada cookie, akun, token, atau telemetri. Cache katalog disimpan
+  lokal dan dapat dihapus dari Settings; konsen dapat dicabut.
+- Izin INTERNET baru ditambahkan ke manifest saat fitur registry dirilis.
 
 ## Log
 

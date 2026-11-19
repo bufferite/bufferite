@@ -1,6 +1,6 @@
 # Bufferite — Threat Model (F14-T01)
 
-Versi: 1.0 · Fase: MVP
+Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
 
 ## 1. Aset yang dilindungi
 
@@ -15,7 +15,8 @@ Versi: 1.0 · Fase: MVP
 - **Pengguna** — pemilik perangkat.
 - **Plugin jahat** — paket `.berp` dari sideload/katalog yang mencoba keluar
   sandbox.
-- **Penyerang jaringan** — hanya relevan bila fitur katalog Fase 2 aktif.
+- **Penyerang jaringan** — relevan saat katalog registry Fase 2 aktif
+  (MITM, CDN/registry dimodifikasi, replay indeks).
 - **Penyerang lokal / aplikasi lain** — mencoba membaca data aplikasi atau
   menukar paket.
 
@@ -31,8 +32,14 @@ Versi: 1.0 · Fase: MVP
 | 6 | ReDoS dari regex | Batas panjang pola + timeout eksekusi |
 | 7 | Kehabisan resource | Batas waktu 2 dtk/operasi, memori 64 MiB |
 | 8 | Acak tidak aman | CSPRNG (`Random.secure`) untuk operasi acak |
-| 9 | Jalur jaringan implisit | Offline-by-default; jaringan hanya untuk katalog (Fase 2) |
+| 9 | Jalur jaringan implisit | Offline-by-default; jaringan hanya untuk katalog (Fase 2) setelah konsen |
 | 10 | Data rusak di storage | Error storage terstruktur; fallback default settings |
+| 11 | Indeks registry dimodifikasi | Signature Ed25519 indeks + trust store di aplikasi (`REGISTRY.md` §5) |
+| 12 | Paket registry ditukar setelah unduh | SHA-256 + signature paket diverifikasi sebelum `.berp` dibuka |
+| 13 | Kunci signing dicuri/diganti | Public key di-pin; rotasi 90 hari; pencabutan kunci lewat rilis aplikasi (plugin `revoked` lewat indeks) |
+| 14 | Replay indeks lama / downgrade | `sequence` monoton; semver; konfirmasi downgrade; status `revoked` |
+| 15 | Registry/CDN jadi pengintai | Hanya `GET` saat pengguna membuka katalog; tanpa cookie/ID/telemetri |
+| 16 | Cache registry dirusak | Signature diverifikasi ulang setiap cache dimuat; fail closed |
 
 ## 4. Asumsi & batasan MVP
 
@@ -48,8 +55,9 @@ Versi: 1.0 · Fase: MVP
   args JSON di argv, output stdout; linker WASI tanpa preopen direktori dan
   tanpa socket. Matriks izin lintas runtime ada di
   `test/core/runtime/permission_matrix_test.dart` (F05-T06/T07/T09, F14-T03).
-- Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop), izin
-  INTERNET tidak diminta, dan storage scoped.
+- Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop), storage
+  scoped, dan tidak adanya izin INTERNET pada rilis 1.0. Registry Fase 2 akan
+  menambahkan INTERNET hanya setelah konsen pengguna.
 
 ### 4.1 Batas isolasi Lua 1.0
 
@@ -61,16 +69,30 @@ Versi: 1.0 · Fase: MVP
 | UI responsif | Ya (isolate kerja) |
 | Isolasi memori / kontainmen bug native | **Tidak** (native in-process; engine WASM tersedia sebagai opsi, bukan default 1.0) |
 | Tier `wasm` | Isolasi memori WASM; tanpa host function net/fs (WASI tanpa preopen/socket) |
-| Plugin tepercaya | Hanya hash paket; sideload `unverified` = tidak tepercaya |
-| Sandbox OS | Android/iOS/desktop (UID, scoped storage, tanpa INTERNET) |
+| Plugin tepercaya | Registry resmi: hash + signature Ed25519 (rencana F16); sideload `unverified` = tidak tepercaya |
+| Sandbox OS | Android/iOS/desktop (UID, scoped storage); tanpa INTERNET di 1.0 |
 
 Konsekuensi: plugin Lua yang jahat tidak bisa memanggil file/net lewat API
 Lua, tetapi **bug native** (Lua/binding/libc) berpotensi keluar dari sandbox
 Lua dan menyentuh proses aplikasi. Untuk plugin tak tepercaya, isolasi WASM
-atau proses terpisah diperlukan (1.1). Engine WASM + `lua_runtime.wasm`
-(CP-063) sudah tervalidasi di Windows dan Android; setelah dijadikan default,
-jalur Lua tidak lagi berbagi ruang alamat dengan host (selain engine wasmtime
-sendiri).
+atau proses terpisah lebih kuat. Engine WASM + `lua_runtime.wasm` (CP-063)
+sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
+`lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
+selain engine wasmtime sendiri.
+
+### 4.2 Registry (Fase 2, rencana)
+
+- Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
+  registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
+- Indeks `registry.json` dan setiap paket `.berp` memiliki signature
+  terpisah dengan domain separation; hash SHA-256 + ukuran ikut diverifikasi.
+- Metadata (`pluginId`, versi, izin, URL, hash) diautentikasi oleh signature
+  indeks; manifest paket harus cocok dengan entri.
+- `sequence` monoton mencegah replay indeks lama; status `yanked`/`revoked`
+  disebarkan lewat indeks bertanda tangan.
+- Cache diverifikasi ulang saat dimuat. Tanpa jaringan, revocation terbaru
+  tidak diketahui — batasan yang ditampilkan di UI.
+- Detail lengkap: `REGISTRY.md` §5–§10.
 
 ## 5. Status verifikasi
 
@@ -84,5 +106,8 @@ sendiri).
   isolasi didokumentasikan di §4.1.
 - Engine Lua WASM: integration emulator Android (eksekusi + timeout epoch) dan
   kontrak 10 kasus vs `lua_dart` + 5 kasus DSL vs Lua vs WASM (CP-063/CP-065).
-- Sisa: keamanan regex terukur (F14-T04), CSPRNG operasi acak (F14-T05),
-  audit offline (F14-T06).
+- F14 selesai: ReDoS (F14-T04), CSPRNG (F14-T05), dan audit offline
+  (F14-T06) sudah diuji.
+- Sisa untuk registry publik: F16-T07 (audit/fuzzing parser indeks/paket dan
+  runtime WASM) serta test signature/rollback F16-T01..T04. Belum ada kode
+  registry.

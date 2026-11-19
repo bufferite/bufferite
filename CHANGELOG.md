@@ -3,6 +3,18 @@
 Semua perubahan penting didokumentasikan di sini.
 Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 
+## [Unreleased]
+
+### Ditambahkan
+- Spesifikasi registry plugin v1 (`REGISTRY.md`): skema `registry.json`,
+  signature Ed25519, konsen jaringan, cache, update/rollback, revocation,
+  dan acceptance criteria F16.
+
+### Diubah
+- Sinkronisasi dokumen dengan kondisi 1.0: `lua_dart` default, engine WASM
+  opt-in, status implementasi sideload/bootstrap/isolate, dan penghapusan
+  referensi `wasm_run`.
+
 ## [1.0.0] - 2026-11-19
 
 Rilis MVP Bufferite.

@@ -25,7 +25,7 @@ Status: Final (MVP)
 | Operation Contract | Recipe Model | Buffer Model | Error     |
 +-------------------------------------------------------------+
 | Runtime Layer                                                |
-| DSL Engine | Lua via WASM Runtime | WASM Runtime | Sandbox    |
+| DSL Engine | Lua native/WASM Runtime | WASM Runtime | Sandbox      |
 +-------------------------------------------------------------+
 | Data Layer                                                   |
 | Recipe Store (SQLite) | Plugin Store | Settings | Asset Core |
@@ -39,7 +39,8 @@ lib/
   core/
     engine/          (recipe engine, pipeline executor)
     plugin/          (loader, manifest, registry, verifier)
-    runtime/         (dsl, lua_wasm, wasm, sandbox)
+    runtime/         (dsl, lua native, lua wasm, wasm, sandbox)
+    registry/        (rencana F16: client, signature, trust store)
     storage/         (sqlite, settings)
     ui/              (tema, komponen shared)
     error/
@@ -57,7 +58,7 @@ lib/
 Input Buffer -> Pipeline Executor -> [Operation 1] -> [Operation 2] -> ...
 -> Output Buffer
 - Setiap Operation dieksekusi sesuai runtime tier-nya (dsl/lua/wasm).
-- Eksekusi berjalan di isolate; UI menerima stream hasil (preview live).
+- Pipeline berjalan di worker isolate; UI menerima stream hasil (preview live).
 - Error per step dibungkus (pluginId, stepId) dan tidak menghentikan UI.
 - Step dengan enabled=false dilewati.
 - Step dengan operasi "unsupported" dilewati dengan peringatan.
@@ -66,8 +67,10 @@ Input Buffer -> Pipeline Executor -> [Operation 1] -> [Operation 2] -> ...
 1. App start -> cek apakah core.berp sudah terinstal.
 2. Jika belum -> verifikasi SHA-256 core.berp dari aset -> instal otomatis.
 3. Muat manifest core.berp -> daftarkan operasi ke Operation Picker.
-4. Runtime Lua: verifikasi SHA-256 lua_runtime.wasm sebelum instantiasi.
-5. Siap dipakai; katalog plugin dan sideload tersedia di Plugin Manager.
+4. Runtime Lua: default `lua_dart` (native). Jika engine WASM dipilih,
+   verifikasi SHA-256 `lua_runtime.wasm` sebelum instantiasi.
+5. Siap dipakai; katalog plugin (rencana Fase 2) dan sideload tersedia di
+   Plugin Manager.
 6. Jika core.berp gagal verifikasi -> tampilkan error jelas; aplikasi tetap
    terbuka dengan empty state yang mengarahkan ke reinstalasi/sideload.
 
@@ -105,10 +108,9 @@ Implementasi engine MVP:
   Recipe di layer feature. Jembatan `Recipe.toPipelineSteps()` ada di
   `lib/features/recipe/recipe_pipeline.dart`.
 - Event live membawa output tiap step; error dibungkus `pluginId`/`stepId`.
-  Kebijakan default tetap stop sambil menunggu D06.
-- Eksekusi masih berjalan di isolate pemanggil. Host isolate pekerja
-  (request/response/progress) menyusul setelah runtime plugin F05 tersedia
-  (F03-T04).
+  Kebijakan default `stop` (D06); lanjut dengan output terakhir hanya opt-in.
+- Pipeline berjalan di host isolate pekerja (request/response/progress,
+  cancel/timeout) sejak CP-054.
 
 Implementasi plugin MVP:
 - Manifest v1: `lib/core/plugin/plugin_manifest.dart`; semver tanpa
@@ -121,8 +123,11 @@ Implementasi plugin MVP:
   `installed_plugin.dart`; registrasi operasi manifest:
   `manifest_registrar.dart`; siklus enable/disable/hapus:
   `plugin_lifecycle.dart`.
-- Belum diimplementasikan: alur sideload UI (F04-T05), bootstrap aset
-  `core.berp` (F04-T08), dan `PluginManagerService`/provider (F04-T10).
+- Sideload UI (F04-T05), bootstrap aset `core.berp` (F04-T08), dan
+  `PluginManagerService`/provider (F04-T10) sudah tersedia.
+- Registry daring (F16) belum diimplementasikan; spesifikasi di
+  `REGISTRY.md`. Rencana modul: `lib/core/registry/` + UI di
+  `lib/features/plugins/registry/`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
@@ -146,6 +151,8 @@ Implementasi storage MVP:
 ## 8. Keamanan & Sandbox
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
 - Paket .berp diverifikasi SHA-256 sebelum instalasi.
+- Registry resmi menambahkan signature Ed25519 untuk indeks dan paket
+  (rencana F16; `REGISTRY.md` §5); public key di-pin di aplikasi.
 - Izin: cpu (default), net, file:read, file:write; dialog eksplisit untuk
   selain cpu.
 - Batas waktu dan memori per eksekusi.
@@ -172,19 +179,25 @@ Implementasi storage MVP:
   sudah tersedia dan tervalidasi di Windows/Android, dengan cache runtime +
   worker persisten (F05-T08/CP-064). Tier plugin `wasm` memakai ABI command
   WASI v1 (`WasmPluginRuntime`): input via stdin, args JSON di argv, output
-  stdout, tanpa preopen/socket (F05-T06/CP-066). Libwasmtime baru dikemas di
+  stdout, tanpa preopen/socket (F05-T06/CP-065). Libwasmtime baru dikemas di
   varian debug Android, jadi tier `wasm`/`LuaEngine.wasm` di release 1.0
   menunggu library ikut dirilis.
 - Format paket: .berp.
 - Sideload didukung di MVP.
-- Signature opsional di MVP, wajib untuk registry resmi di Fase 2.
+- Signature: sideload cukup SHA-256; registry resmi wajib signature Ed25519
+  untuk indeks + paket (Fase 2, `REGISTRY.md`).
+- Registry read-only: satu registry resmi, trust anchor kunci di aplikasi,
+  tanpa sinkronisasi latar belakang (D12/D13 terbuka).
 - Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di worker
   isolate persisten; `wasi_config` (stdout/stderr file, stdin bytes) + epoch
   untuk timeout. Engine + modul dikompilasi sekali per plugin.
 
 ## 11. Pertanyaan Terbuka
-- Ukuran maksimum core.berp dan strategi lazy load operasi.
-- Streaming untuk file besar (Fase 2).
+- Streaming untuk file besar (F16-T05).
+- Hosting/URL registry (D12) dan custody kunci Ed25519 (D13); detail di
+  `REGISTRY.md` §12.
+- Ukuran `core.berp` sudah diputuskan (D03: 2 MiB, pecah per kategori bila
+  melewati).
 
 ## 12. Dependency Inti & Alasan
 
@@ -209,5 +222,7 @@ Catatan:
 - `cupertino_icons` dari template Flutter dihapus karena belum dipakai.
 - Dependency transitif tidak dicatat di sini; yang dicatat adalah dependency
   langsung di `pubspec.yaml`.
-- Penambahan dependency untuk Fase 2 (mis. signature Ed25519) harus melalui
-  review keamanan dan pembaruan tabel ini.
+- Penambahan dependency untuk Fase 2 (signature Ed25519) harus melalui
+  review keamanan dan pembaruan tabel ini. Kandidat: `package:cryptography`
+  (pure Dart, mendukung Ed25519); `pointycastle` 4.0.0 belum menyediakan
+  Ed25519. Belum ditambahkan ke `pubspec.yaml`.
