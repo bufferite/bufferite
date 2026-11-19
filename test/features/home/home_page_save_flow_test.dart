@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../../core/support/async_pump.dart';
 import '../../core/support/fake_operations.dart';
 
 const String _recipeId = '11111111-1111-4111-8111-111111111111';
@@ -47,19 +48,6 @@ OperationRegistry _registry() {
 
 void main() {
   sqfliteFfiInit();
-
-  /// Memberi kesempatan event loop nyata agar operasi sqflite selesai.
-  Future<void> pumpUntil(WidgetTester tester, bool Function() done) async {
-    for (var attempt = 0; attempt < 60; attempt++) {
-      if (done()) {
-        return;
-      }
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 50)),
-      );
-      await tester.pump();
-    }
-  }
 
   testWidgets('menyimpan recipe memperbarui daftar Home', (tester) async {
     final database = AppDatabase(

@@ -126,6 +126,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             now: now,
             onTap: () => _openEditor(recipe),
             onDuplicate: () => _duplicateRecipe(recipe),
+            onDelete: () => _requestDelete(recipe),
           ),
         );
       },
@@ -163,6 +164,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             _invalidate();
           }
         });
+  }
+
+  Future<void> _requestDelete(Recipe recipe) async {
+    if (await _confirmDelete(recipe)) {
+      await _deleteRecipe(recipe);
+    }
   }
 
   Future<bool> _confirmDelete(Recipe recipe) async {
@@ -234,12 +241,14 @@ class _RecipeTile extends StatelessWidget {
     required this.now,
     required this.onTap,
     required this.onDuplicate,
+    required this.onDelete,
   });
 
   final Recipe recipe;
   final DateTime now;
   final VoidCallback onTap;
   final VoidCallback onDuplicate;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -264,12 +273,18 @@ class _RecipeTile extends StatelessWidget {
           onSelected: (value) {
             if (value == 'duplicate') {
               onDuplicate();
+            } else if (value == 'delete') {
+              onDelete();
             }
           },
           itemBuilder: (context) => <PopupMenuEntry<String>>[
             PopupMenuItem<String>(
               value: 'duplicate',
               child: Text(context.tr('home.duplicate')),
+            ),
+            PopupMenuItem<String>(
+              value: 'delete',
+              child: Text(context.tr('common.delete')),
             ),
           ],
         ),

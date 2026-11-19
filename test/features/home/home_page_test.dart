@@ -131,12 +131,31 @@ void main() {
     expect(find.text('Alpha'), findsOneWidget);
   });
 
-  testWidgets('menu tile menyediakan aksi Duplikat', (tester) async {
+  testWidgets('menu tile menyediakan aksi Duplikat dan Hapus', (tester) async {
     await tester.pumpWidget(_host(<Recipe>[_recipe(id: 'a', name: 'Alpha')]));
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
     expect(find.text('Duplikat'), findsOneWidget);
+    expect(find.text('Hapus'), findsOneWidget);
+  });
+
+  testWidgets('menu hapus menampilkan konfirmasi; Batal menutup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(<Recipe>[_recipe(id: 'a', name: 'Alpha')]));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hapus'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hapus recipe?'), findsOneWidget);
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hapus recipe?'), findsNothing);
+    expect(find.text('Alpha'), findsOneWidget);
   });
 }
