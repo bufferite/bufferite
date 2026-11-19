@@ -37,7 +37,7 @@ Status yang dipakai:
 | Task berikutnya | Finalisasi D12/D13, lalu F16-T01 + F16-T03 |
 | Blocker aktif | D12/D13 (hosting & custody kunci) — tidak menghambat spesifikasi |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (536 test, 2026-11-19) |
+| Test suite | Lulus (537 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -1583,6 +1583,29 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   spesifik tetap memakai teks manifest/domain; label runtime
   (`dsl`/`lua`/`wasm`) belum diterjemahkan.
 - Commit: `899e2f8`
+
+### CP-072 - 2026-11-19 - Perbaikan daftar Home setelah simpan recipe
+
+- Status: Selesai
+- Perubahan:
+  - Home kini menunggu hasil route Recipe Editor dan meng-invalidate
+    `recentRecipesProvider` serta seluruh instance `recipeSearchProvider`
+    ketika editor mengembalikan recipe tersimpan.
+  - Sebelumnya recipe benar-benar tersimpan ke SQLite dan toast "Recipe
+    disimpan" muncul, tetapi daftar Home memakai cache provider lama
+    sehingga recipe baru/perubahan tidak terlihat sampai aplikasi dibuka
+    ulang.
+  - Ditambahkan widget test end-to-end dengan SQLite FFI: buka recipe,
+    ubah nama, tekan Simpan, lalu pastikan daftar Home menampilkan nama
+    baru tanpa nama lama.
+- File: `lib/features/home/home_page.dart`,
+  `test/features/home/home_page_save_flow_test.dart`.
+- Verifikasi: `flutter analyze` → 0 issue; `flutter test` → 537 lulus
+  (termasuk test regresi simpan recipe).
+- Catatan/risiko: pencarian yang sedang aktif juga ikut di-refresh karena
+  invalidasi berlaku untuk semua instance family; tidak ada perubahan
+  pada skema database atau format recipe.
+- Commit: `6ebef6a`
 
 ## 7. Template Checkpoint Baru
 

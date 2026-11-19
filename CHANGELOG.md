@@ -30,6 +30,11 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - `StepCard`: nama operasi ditampilkan (bukan ID), badge tier/status
   memakai wrap agar aman di panel sempit.
 
+### Diperbaiki
+- Daftar recipe di Home tidak diperbarui setelah menyimpan dari Recipe
+  Editor; provider daftar/pencarian kini di-invalidate saat editor
+  mengembalikan recipe tersimpan.
+
 ## [1.0.0] - 2026-11-19
 
 Rilis MVP Bufferite.
