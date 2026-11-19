@@ -263,6 +263,9 @@ Catatan progres: lihat [progress.md](progress.md).
   - ABI input/output, tanpa host function net/fs kecuali izin.
   - Acceptance: test modul WASM contoh berjalan dan akses terlarang
     diblokir.
+  - Progres: engine WASM (wasmtime) + `WasmLuaRuntime` sudah tersedia dan
+    tervalidasi di Windows + Android (CP-063); yang tersisa adalah ABI modul
+    plugin tier `wasm` (1.1).
 - [ ] **F05-T07 (P0)** Penegakan izin di semua runtime.
   - Pemeriksaan sebelum side effect; pesan error jelas.
   - Acceptance: test matrix runtime × izin.
@@ -271,12 +274,16 @@ Catatan progres: lihat [progress.md](progress.md).
 - [ ] **F05-T09 (P0)** Contract test lintas runtime.
   - Operasi yang sama (contoh) dijalankan di DSL, Lua, dan WASM dengan
     hasil setara.
+  - Progres: kontrak `lua_dart` vs Lua WASM (10 kasus) sudah ada di
+    `test/core/runtime/lua_engine_contract_test.dart`.
 
 > Catatan 2026-11-19: F05-T06..T09 dan F14-T03 **ditunda ke 1.1**
 > (fallback D07). Scope 1.0 = DSL + Lua (`lua_dart`, isolate + sandbox) +
 > 38 operasi core. Rencana engine WASM ada di `WASM_ENGINE_PLAN.md`.
-> Progres 2026-11-19: Dart FFI wasmtime + `WasmLuaRuntime` sudah jalan di
-> Windows (CP-062); sisa integrasi Android/cross-compile.
+> Progres 2026-11-19: Dart FFI wasmtime + `WasmLuaRuntime` jalan di Windows
+> (CP-062); cross-compile Android + validasi emulator + `PluginRuntimeLoader`
+> untuk tier `dsl`/`lua` selesai (CP-063). Engine `lua` masih default
+> `native` sampai ABI/cache WASM siap.
 
 ## F06 — Storage
 

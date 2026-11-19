@@ -9,10 +9,14 @@ import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/manifest_registrar.dart';
 import '../../core/plugin/operation.dart';
 import '../../core/plugin/operation_registry.dart';
+import '../../core/plugin/plugin_manifest.dart';
 import '../../core/plugin/plugin_package.dart';
 import '../../core/plugin/plugin_package_store.dart';
+import '../../core/runtime/plugin_runtime.dart';
+import '../../core/runtime/sandbox.dart';
 import '../../core/storage/storage_providers.dart';
 import '../operations/operation_providers.dart';
+import '../settings/settings_provider.dart';
 import 'plugin_repository.dart';
 
 typedef PluginPackageWriter = Future<String> Function(PluginPackage package);
@@ -28,12 +32,14 @@ final class PluginManagerService {
     required OperationRegistry registry,
     required PluginPackageWriter writePackage,
     Operation? Function(String operationId)? executorFor,
+    PluginRuntimeLoader? runtimeLoader,
   }) {
     return PluginManagerService._(
       repository,
       registry,
       writePackage,
       executorFor,
+      runtimeLoader,
     );
   }
 
@@ -42,12 +48,14 @@ final class PluginManagerService {
     this._registry,
     this._writePackage,
     this._executorFor,
+    this._runtimeLoader,
   );
 
   final PluginRepository _repository;
   final OperationRegistry _registry;
   final PluginPackageWriter _writePackage;
   final Operation? Function(String operationId)? _executorFor;
+  final PluginRuntimeLoader? _runtimeLoader;
 
   OperationRegistry get registry => _registry;
 
@@ -95,10 +103,24 @@ final class PluginManagerService {
 
   /// Daftarkan satu plugin (aktif atau nonaktif) ke registry.
   void register(InstalledPlugin plugin) {
+    final operations = <String, ManifestOperation>{
+      for (final operation in plugin.manifest.operations)
+        operation.id: operation,
+    };
     ManifestRegistrar(_registry).register(
       plugin.manifest,
       enabled: plugin.enabled,
-      executorFor: _executorFor,
+      executorFor: (operationId) {
+        final core = _executorFor?.call(operationId);
+        if (core != null) {
+          return core;
+        }
+        final operation = operations[operationId];
+        if (operation == null || _runtimeLoader == null) {
+          return null;
+        }
+        return _runtimeLoader.operationFor(plugin, operation);
+      },
     );
   }
 
@@ -147,5 +169,10 @@ final pluginManagerServiceProvider = Provider<PluginManagerService>((ref) {
       ).install(package);
     },
     executorFor: (operationId) => coreOperationsById[operationId],
+    runtimeLoader: PluginRuntimeLoader(
+      sandboxConfig: () =>
+          ref.read(settingsProvider).value?.sandboxConfig ??
+          SandboxConfig.defaults,
+    ),
   );
 });

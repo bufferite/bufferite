@@ -1,7 +1,7 @@
 # progress.md — Bufferite Progress Checkpoints
 
 Versi: 1.0
-Terakhir diperbarui: 2026-11-15
+Terakhir diperbarui: 2026-11-19
 Sumber daftar task: [TODO.md](TODO.md)
 
 ---
@@ -35,9 +35,9 @@ Status yang dipakai:
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
 | Task berikutnya | — (scope 1.0 dibekukan; `F05-T06..T09` + `F14-T03` ke 1.1) |
-| Blocker aktif | F05-T06..T09 (engine WASM: rencana di WASM_ENGINE_PLAN.md), F14-T03 (runtime WASM belum ada) |
+| Blocker aktif | F05-T06 (ABI plugin WASM belum ditetapkan), F05-T08 (cache kompilasi modul), F14-T03 |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (414 test, 2026-11-19) |
+| Test suite | Lulus (452 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -1355,6 +1355,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   timeout/pembatalan lintas isolate.
 - Commit: `9c2773c`
 
+### CP-063 — 2026-11-19 — Engine WASM di Android + integrasi runtime plugin
+
+- Status: Selesai
+- Perubahan: wasmtime C API dikompilasi silang ke Android (arm64-v8a,
+  x86_64) dan di-strip (`tool/build_wasmtime_android.ps1`);
+  `assets/lua_runtime.wasm` dibundel dengan pin SHA-256 + pemuat
+  `loadLuaWasmModule`; `PluginRuntimeLoader`/`SandboxOperation` memberi
+  executor nyata untuk tier `dsl`/`lua` (verifikasi hash entrypoint) dan
+  disambungkan ke `PluginManagerService`; contract test `lua_dart` vs Lua WASM
+  (10 kasus) ditambahkan.
+- File: `lib/core/runtime/plugin_runtime.dart`,
+  `lib/core/runtime/lua_runtime_asset.dart`, `pubspec.yaml`,
+  `tool/build_wasmtime_android.ps1`,
+  `integration_test/wasm_lua_runtime_test.dart`,
+  `test/core/runtime/plugin_runtime_test.dart`,
+  `test/core/runtime/lua_engine_contract_test.dart`.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 452 lulus;
+  `flutter test integration_test/wasm_lua_runtime_test.dart -d 127.0.0.1:7555`
+  2 lulus (eksekusi + timeout epoch di emulator x86_64).
+- Catatan/risiko: JIT cranelift berjalan di emulator Android, arm64 belum
+  diuji di perangkat fisik. `libwasmtime.so` tidak di-commit (jniLibs di
+  `.gitignore`) agar repo tidak membengkak; jalankan skrip build sebelum APK
+  yang memakai engine WASM. Engine lua masih default `native` (D02); tier
+  `wasm` tetap tanpa executor sampai ABI-nya ditetapkan. Kompilasi modul WASM
+  masih per eksekusi (cache menunggu F05-T08).
+- Commit: `PENDING`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1389,7 +1416,7 @@ bagian D.
 | 2026-11-11 | F04-T08 | Bootstrap `core.berp` membutuhkan aset dan runtime F13/F05 | First-run belum bisa memasang operasi core | Selesai (`bb450fc`, `90dafd7`) |
 | 2026-11-11 | D07 | Target rilis MVP belum ditetapkan | Prioritas task belum berbatas waktu | Selesai (2026-12-31) |
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
-| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Terbuka (engine wasmtime) |
+| 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Sebagian (wasmtime jalan di Windows + Android; ABI plugin WASM belum ada) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

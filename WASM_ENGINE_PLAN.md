@@ -35,10 +35,15 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
    - Dokumentasikan perintah build (wasi-sdk 34 + patch `setsignal`,
      `l_tmpnam`, stub `system`/`tmpfile`).
 2. **Build wasmtime C API**
-   - Windows: **selesai** — `wasmtime.dll` 48.0.9 (14,9 MB) +
-     harness C; `print`/`pcall` lulus.
-   - Android: NDK 28.2 + Rust targets (arm64-v8a, armeabi-v7a, x86_64).
-3. **Dart FFI** — **selesai (Windows)**
+   - Windows: **selesai** — `wasmtime.dll` 48.0.9 (14,9 MB) + harness C;
+     `print`/`pcall` lulus.
+   - Android: **selesai (CP-063)** — NDK 28.2 + Rust targets
+     `aarch64-linux-android` dan `x86_64-linux-android` (API 24).
+     Hasil di-strip: `arm64-v8a` 11,4 MB, `x86_64` 14,8 MB. Skrip:
+     `tool/build_wasmtime_android.ps1` → `android/app/src/main/jniLibs/`
+     (di-`.gitignore`, tidak di-commit). `armeabi-v7a` dilewati: cranelift
+     tidak mendukung ARM 32-bit.
+3. **Dart FFI** — **selesai (Windows + Android)**
    - `wasmtime_ffi.dart` (binding), `wasmtime_engine.dart` (engine/modul/
      WASI/epoch), `wasm_lua_runtime.dart` (`SandboxRuntime` + isolate).
    - Skrip transform dipakai bersama (`lua_program.dart`) agar semantik
@@ -51,11 +56,19 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
    - Timeout/pembatalan: isolate utama memanggil
      `wasmtime_engine_increment_epoch` pada alamat engine; deadline store = 1.
    - Verifikasi: 7 test engine + 12 test runtime (transform, args, unicode,
-     sandbox, error, timeout, cancel) lulus di Windows.
+     sandbox, error, timeout, cancel) lulus di Windows; integration test
+     eksekusi + timeout lulus di emulator Android x86_64 (JIT cranelift
+     berjalan).
 4. **Integrasi**
-   - Pilih runtime per tier: `lua`/`wasm` memakai engine WASM; DSL tetap Dart.
-   - Test: transform, sandbox, timeout, hash mismatch, Android.
-   - Perbarui D02, PLUGINS/ARCHITECTURE, THIRD_PARTY_LICENSES.
+   - `PluginRuntimeLoader` + `SandboxOperation`: executor nyata untuk tier
+     `dsl`/`lua` dan verifikasi hash entrypoint. `LuaEngine.native` tetap
+     default 1.0; `LuaEngine.wasm` siap dipakai setelah cache modul
+     (F05-T08). Tier `wasm` masih tanpa executor sampai ABI-nya ditetapkan.
+   - Aset `assets/lua_runtime.wasm` dibundel; `loadLuaWasmModule` memeriksa
+     pin SHA-256 sebelum modul dipakai.
+   - Test: transform, sandbox, timeout, hash mismatch, kontrak
+     `lua_dart` vs Lua WASM, Android.
+   - Sisa: perbarui D02, PLUGINS/ARCHITECTURE, THIRD_PARTY_LICENSES.
 
 ## Risiko
 

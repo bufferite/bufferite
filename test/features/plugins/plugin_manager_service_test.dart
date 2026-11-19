@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:bufferite/core/engine/buffer.dart';
 import 'package:bufferite/core/plugin/installed_plugin.dart';
 import 'package:bufferite/core/plugin/operation.dart';
 import 'package:bufferite/core/plugin/operation_param.dart';
 import 'package:bufferite/core/plugin/operation_registry.dart';
 import 'package:bufferite/core/plugin/plugin_package.dart';
+import 'package:bufferite/core/runtime/plugin_runtime.dart';
+import 'package:bufferite/core/runtime/sandbox.dart';
 import 'package:bufferite/core/storage/app_database.dart';
 import 'package:bufferite/features/plugins/plugin_manager_service.dart';
 import 'package:bufferite/features/plugins/plugin_repository.dart';
@@ -150,6 +155,33 @@ void main() {
     await coreService.install(package(), source: PluginSource.core);
 
     expect(registry.byId('test.operation')!.executor, isNotNull);
+  });
+
+  test('runtimeLoader menghasilkan executor plugin yang bisa dieksekusi',
+      () async {
+    final pluginService = PluginManagerService(
+      repository: repository,
+      registry: registry,
+      writePackage: (package) async => '/plugins/com.test.pack',
+      runtimeLoader: PluginRuntimeLoader(
+        sandboxConfig: () => SandboxConfig.defaults,
+        readEntrypoint: (path) async => Uint8List.fromList(
+          utf8.encode(
+            'function transform(input) return string.upper(input) end',
+          ),
+        ),
+      ),
+    );
+
+    await pluginService.install(package(), source: PluginSource.sideload);
+
+    final executor = registry.byId('test.operation')!.executor;
+    expect(executor, isNotNull);
+    final output = await executor!.execute(
+      const TextBuffer('bufferite'),
+      const <String, Object?>{},
+    );
+    expect(output.asText(), 'BUFFERITE');
   });
 }
 
