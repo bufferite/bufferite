@@ -207,9 +207,11 @@
     "memoryLabel": "Memory limit (MiB)",
     "saveLimits": "Save sandbox limits",
     "privacyLogs": "Privacy & Logs",
-    "optIn": "Share execution logs",
-    "optInSubtitle": "Off by default. Logs are never sent without permission.",
+    "optIn": "Enable execution logs",
+    "optInSubtitle": "Off by default. Logs stay on this device and exclude input/output.",
     "clearLogs": "Clear logs",
+    "diagnostics": "Diagnostics",
+    "diagnosticsSubtitle": "View recent execution history and error codes.",
     "about": "About",
     "version": "Version {version} · MIT License",
     "privacy": "Privacy",
@@ -230,6 +232,26 @@
     "resetBody": "All recipes, plugins, and settings will be deleted. This action cannot be undone.",
     "resetDone": "Data reset",
     "resetFailed": "Failed to reset data: {error}"
+  },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "refresh": "Refresh",
+    "clear": "Clear logs",
+    "clearTitle": "Clear diagnostic logs?",
+    "clearBody": "All local execution history will be deleted. Recipes and plugins are not affected.",
+    "cleared": "Diagnostic logs cleared",
+    "clearFailed": "Failed to clear logs: {error}",
+    "disabled": "Execution logging is off. Enable it in Settings > Privacy & Logs.",
+    "privacyNote": "Logs are stored locally only and never contain input, output, or step arguments.",
+    "loadFailed": "Failed to load logs",
+    "emptyTitle": "No execution logs yet",
+    "emptyBody": "Run a recipe preview after enabling logging to see history here.",
+    "errorCodes": "Error codes: {codes}",
+    "outcome": {
+      "success": "Success",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    }
   },
   "operationCategory": {
     "encodeDecode": "Encode/Decode",

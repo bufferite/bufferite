@@ -207,9 +207,11 @@
     "memoryLabel": "Batas memori (MiB)",
     "saveLimits": "Simpan batas sandbox",
     "privacyLogs": "Privasi & Log",
-    "optIn": "Ikut serta kirim log eksekusi",
-    "optInSubtitle": "Default mati. Log tidak pernah dikirim tanpa izin.",
+    "optIn": "Aktifkan log eksekusi",
+    "optInSubtitle": "Default mati. Log hanya disimpan lokal, tanpa input/output.",
     "clearLogs": "Hapus log",
+    "diagnostics": "Diagnostik",
+    "diagnosticsSubtitle": "Lihat riwayat eksekusi dan kode error terakhir.",
     "about": "Tentang",
     "version": "Versi {version} · Lisensi MIT",
     "privacy": "Privasi",
@@ -230,6 +232,26 @@
     "resetBody": "Semua recipe, plugin, dan pengaturan akan dihapus. Tindakan ini tidak dapat dibatalkan.",
     "resetDone": "Data direset",
     "resetFailed": "Gagal reset data: {error}"
+  },
+  "diagnostics": {
+    "title": "Diagnostik",
+    "refresh": "Muat ulang",
+    "clear": "Hapus log",
+    "clearTitle": "Hapus log diagnostik?",
+    "clearBody": "Semua riwayat eksekusi lokal akan dihapus. Recipe dan plugin tidak terpengaruh.",
+    "cleared": "Log diagnostik dihapus",
+    "clearFailed": "Gagal menghapus log: {error}",
+    "disabled": "Log eksekusi sedang nonaktif. Aktifkan lewat Settings > Privasi & Log.",
+    "privacyNote": "Log hanya disimpan lokal dan tidak pernah berisi input, output, atau argumen step.",
+    "loadFailed": "Gagal memuat log",
+    "emptyTitle": "Belum ada log eksekusi",
+    "emptyBody": "Jalankan preview recipe setelah mengaktifkan log untuk melihat riwayat di sini.",
+    "errorCodes": "Kode error: {codes}",
+    "outcome": {
+      "success": "Berhasil",
+      "failed": "Gagal",
+      "cancelled": "Dibatalkan"
+    }
   },
   "operationCategory": {
     "encodeDecode": "Encode/Decode",

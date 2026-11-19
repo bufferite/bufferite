@@ -1,12 +1,19 @@
+import 'dart:io';
+
+import 'package:bufferite/core/diagnostics/diagnostics_providers.dart';
+import 'package:bufferite/core/diagnostics/execution_log_store.dart';
 import 'package:bufferite/core/i18n/language_provider.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
 import 'package:bufferite/core/ui/theme_provider.dart';
+import 'package:bufferite/features/settings/diagnostics_page.dart';
 import 'package:bufferite/features/settings/settings_page.dart';
 import 'package:bufferite/features/settings/settings_provider.dart';
 import 'package:bufferite/features/settings/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../core/support/async_pump.dart';
 
 class FakeThemeController extends ThemeModeController {
   @override
@@ -61,6 +68,7 @@ class FakeSettingsController extends SettingsController {
 
 late FakeSettingsController settingsController;
 late FakeLanguageController languageController;
+late Directory diagnosticsTemp;
 
 Widget _host() {
   return ProviderScope(
@@ -74,6 +82,12 @@ Widget _host() {
         settingsController = FakeSettingsController();
         return settingsController;
       }),
+      executionLogServiceProvider.overrideWithValue(
+        ExecutionLogService(
+          store: ExecutionLogStore(directory: () async => diagnosticsTemp),
+          isEnabled: () async => false,
+        ),
+      ),
     ],
     child: MaterialApp(theme: AppTheme.light(), home: const SettingsPage()),
   );
@@ -89,6 +103,18 @@ Future<void> _pump(WidgetTester tester) async {
 }
 
 void main() {
+  setUp(() async {
+    diagnosticsTemp = await Directory.systemTemp.createTemp(
+      'bufferite_settings_',
+    );
+  });
+
+  tearDown(() async {
+    if (diagnosticsTemp.existsSync()) {
+      await diagnosticsTemp.delete(recursive: true);
+    }
+  });
+
   testWidgets('menampilkan pilihan tema, bahasa, dan sandbox', (tester) async {
     await _pump(tester);
 
@@ -155,9 +181,24 @@ void main() {
   testWidgets('toggle log memanggil setter', (tester) async {
     await _pump(tester);
 
-    await tester.tap(find.text('Ikut serta kirim log eksekusi'));
+    await tester.tap(find.text('Aktifkan log eksekusi'));
     await tester.pumpAndSettle();
 
     expect(settingsController.optInLogging, isTrue);
+  });
+
+  testWidgets('membuka layar diagnostik', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('Diagnostik'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await pumpUntil(
+      tester,
+      () => find.byType(CircularProgressIndicator).evaluate().isEmpty,
+    );
+
+    expect(find.byType(DiagnosticsPage), findsOneWidget);
+    expect(find.text('Belum ada log eksekusi'), findsOneWidget);
   });
 }

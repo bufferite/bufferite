@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/diagnostics/diagnostics_providers.dart';
+import '../../core/diagnostics/execution_log.dart';
 import '../../core/engine/buffer.dart';
 import '../../core/engine/pipeline.dart';
 import '../../core/engine/pipeline_isolate.dart';
@@ -461,11 +463,40 @@ class _RecipeEditorPageState extends ConsumerState<RecipeEditorPage> {
     final executor = IsolatePipelineExecutor(
       registry: ref.read(operationRegistryProvider),
     );
+    final stopwatch = Stopwatch()..start();
     final result = await executor.execute(
       steps: draft.toPipelineSteps(),
       input: draft.input,
       cancellation: token,
     );
+    stopwatch.stop();
+    if (mounted) {
+      final outcome = result.cancelled
+          ? ExecutionOutcome.cancelled
+          : result.isSuccess
+          ? ExecutionOutcome.success
+          : ExecutionOutcome.failed;
+      unawaited(
+        ref
+            .read(executionLogServiceProvider)
+            .record(
+              ExecutionLogEntry(
+                timestamp: DateTime.now(),
+                recipeId: widget.recipe?.id,
+                recipeName: draft.name,
+                operationIds: <String>[
+                  for (final step in draft.steps)
+                    if (step.enabled) step.operationId,
+                ],
+                durationMs: stopwatch.elapsedMilliseconds,
+                outcome: outcome,
+                errorCodes: <String>{
+                  for (final error in result.errors) error.code,
+                }.toList(growable: false),
+              ),
+            ),
+      );
+    }
     if (token.isCancelled || !mounted) {
       return;
     }

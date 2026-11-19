@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../core/bootstrap/bootstrap_provider.dart';
 import '../../core/bootstrap/core_bootstrap_service.dart';
+import '../../core/diagnostics/diagnostics_providers.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/language_provider.dart';
 import '../../core/i18n/localized_error.dart';
@@ -18,6 +19,7 @@ import '../../core/ui/theme_provider.dart';
 import '../operations/operation_providers.dart';
 import '../plugins/plugin_manager_service.dart';
 import '../plugins/plugin_providers.dart';
+import 'diagnostics_page.dart';
 import 'settings_provider.dart';
 import 'settings_repository.dart';
 
@@ -149,6 +151,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             onChanged: (value) =>
                 ref.read(settingsProvider.notifier).setOptInLogging(value),
           ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: Text(context.tr('settings.diagnostics')),
+            subtitle: Text(context.tr('settings.diagnosticsSubtitle')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const DiagnosticsPage(),
+              ),
+            ),
+          ),
           OutlinedButton.icon(
             onPressed: _clearLogs,
             icon: const Icon(Icons.delete_outline),
@@ -227,11 +241,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _clearLogs() async {
     try {
-      final support = await getApplicationSupportDirectory();
-      final logs = Directory('${support.path}/logs');
-      if (logs.existsSync()) {
-        logs.deleteSync(recursive: true);
-      }
+      await ref.read(executionLogServiceProvider).clear();
       if (mounted) {
         showAppToast(
           context,
