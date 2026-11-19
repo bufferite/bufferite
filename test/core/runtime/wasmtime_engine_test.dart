@@ -54,6 +54,30 @@ void main() {
     }
   }, skip: skip);
 
+  test('output melebihi batas ditolak sebelum dibaca', () async {
+    final engine = WasmtimeEngine(libraryPath: _dllRelative);
+    final module = engine.compile(await _moduleBytes());
+    try {
+      expect(
+        () => engine.run(module, <String>[
+          'lua',
+          '-e',
+          'print(string.rep("x", 4096))',
+        ], maxOutputBytes: 1024),
+        throwsA(
+          isA<WasmtimeException>().having(
+            (error) => error.message,
+            'message',
+            contains('stdout'),
+          ),
+        ),
+      );
+    } finally {
+      module.close();
+      engine.close();
+    }
+  }, skip: skip);
+
   test('pcall menangkap error Lua', () async {
     final engine = WasmtimeEngine(libraryPath: _dllRelative);
     final module = engine.compile(await _moduleBytes());
@@ -95,8 +119,7 @@ void main() {
     final engine = WasmtimeEngine(libraryPath: _dllRelative);
     final module = engine.compile(await _moduleBytes());
     final payload = 'baris ✓ 你好\n' * 2000;
-    final script =
-        'local s = ${luaStringLiteral(payload)}\nprint(#s)';
+    final script = 'local s = ${luaStringLiteral(payload)}\nprint(#s)';
     try {
       final result = engine.run(module, <String>['lua', '-e', script]);
       expect(result.isSuccess, isTrue, reason: result.failureMessage);

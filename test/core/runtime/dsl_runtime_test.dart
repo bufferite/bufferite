@@ -277,5 +277,42 @@ void main() {
         ),
       );
     });
+
+    test('rename menolak JSON terlalu dalam tanpa stack overflow', () async {
+      final runtime = DslRuntime.parse(
+        _program('{"op": "rename", "mapping": {"a": "b"}}'),
+      );
+      const depth = dslMaxJsonDepth + 1;
+      final deep = '{"a":${'[' * depth}0${']' * depth}}';
+
+      await expectLater(
+        runtime.execute(
+          TextBuffer(deep),
+          const <String, Object?>{},
+          _context(),
+        ),
+        throwsA(
+          isA<AppError>().having(
+            (error) => error.code,
+            'code',
+            'operation.invalid_input',
+          ),
+        ),
+      );
+    });
+
+    test('rename tidak menghitung kurung di dalam string', () async {
+      final runtime = DslRuntime.parse(
+        _program('{"op": "rename", "mapping": {"a": "b"}}'),
+      );
+      final value = List<String>.filled(1000, '[').join();
+      final output = await runtime.execute(
+        TextBuffer(jsonEncode(<String, Object?>{'a': value})),
+        const <String, Object?>{},
+        _context(),
+      );
+
+      expect(jsonDecode(output.asText()), <String, Object?>{'b': value});
+    });
   });
 }

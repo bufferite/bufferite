@@ -116,6 +116,20 @@ void main() {
     );
   }, skip: skip);
 
+  test('sandbox menghapus package, require, debug, dan file loader', () async {
+    expect(
+      await run(
+        'function transform() '
+            'return tostring(package) .. "," .. tostring(require) .. "," .. '
+            'tostring(debug) .. "," .. tostring(dofile) .. "," .. '
+            'tostring(loadfile) .. "," .. tostring(os.getenv) .. "," .. '
+            'tostring(os.tmpname) end',
+        'x',
+      ),
+      'nil,nil,nil,nil,nil,nil,nil',
+    );
+  }, skip: skip);
+
   test('akses terlarang menghasilkan error terstruktur', () async {
     await expectLater(
       run(
@@ -281,9 +295,7 @@ void main() {
         SandboxContext(
           pluginId: 'com.example.lua',
           operationId: 'lua.transform',
-          config: SandboxConfig(
-            stepTimeout: const Duration(milliseconds: 300),
-          ),
+          config: SandboxConfig(stepTimeout: const Duration(milliseconds: 300)),
         ),
       ),
       throwsA(

@@ -12,6 +12,13 @@ const int dslSchemaVersion = 1;
 /// Batas jumlah step per program DSL.
 const int dslMaxSteps = 200;
 
+/// Kedalaman maksimum JSON untuk step `rename`.
+///
+/// `jsonDecode` memakai parser iteratif, tetapi `_renameNode` dan `jsonEncode`
+/// rekursif. Input kecil dengan ribuan level dapat memicu `StackOverflowError`
+/// yang tidak tertangkap, jadi kedalaman dibatasi sebelum decode.
+const int dslMaxJsonDepth = 128;
+
 /// Program DSL hasil parse `transform.json` (tier `dsl`).
 final class DslProgram {
   DslProgram(List<DslStep> steps) : steps = List<DslStep>.unmodifiable(steps);
@@ -175,6 +182,9 @@ final class DslRuntime implements SandboxRuntime {
   }
 
   String _applyRename(String text, DslRenameStep step) {
+    if (_exceedsJsonDepth(text, dslMaxJsonDepth)) {
+      throw _invalidInput('JSON melebihi kedalaman $dslMaxJsonDepth.');
+    }
     final Object? decoded;
     try {
       decoded = jsonDecode(text);
@@ -447,6 +457,40 @@ String _formatNumber(double value) {
       .toStringAsFixed(6)
       .replaceFirst(RegExp(r'0+$'), '')
       .replaceFirst(RegExp(r'\.$'), '');
+}
+
+/// Deteksi kedalaman objek/array JSON di luar string sebelum decode.
+///
+/// Pemindaian ini hanya pembatas awal; validitas JSON tetap diperiksa oleh
+/// `jsonDecode`. Escape `\"` dan `\\` di dalam string dilewati agar kurung
+/// dalam teks tidak dihitung.
+bool _exceedsJsonDepth(String text, int maxDepth) {
+  var depth = 0;
+  var inString = false;
+  var escaped = false;
+  for (var i = 0; i < text.length; i++) {
+    final unit = text.codeUnitAt(i);
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (unit == 0x5C) {
+        escaped = true;
+      } else if (unit == 0x22) {
+        inString = false;
+      }
+      continue;
+    }
+    if (unit == 0x22) {
+      inString = true;
+    } else if (unit == 0x7B || unit == 0x5B) {
+      if (++depth > maxDepth) {
+        return true;
+      }
+    } else if ((unit == 0x7D || unit == 0x5D) && depth > 0) {
+      depth--;
+    }
+  }
+  return false;
 }
 
 AppError _invalid(String message) {

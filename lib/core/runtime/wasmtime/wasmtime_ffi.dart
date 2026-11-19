@@ -114,6 +114,7 @@ typedef StoreLimiterNative =
       Int64,
     );
 typedef WasiConfigNewNative = Pointer<WasiConfigOpaque> Function();
+typedef WasiConfigDeleteNative = Void Function(Pointer<WasiConfigOpaque>);
 typedef WasiSetArgvNative =
     Uint8 Function(
       Pointer<WasiConfigOpaque>,
@@ -251,6 +252,7 @@ final class WasmtimeFfi {
   )
   storeLimiter;
   late final Pointer<WasiConfigOpaque> Function() wasiConfigNew;
+  late final void Function(Pointer<WasiConfigOpaque>) wasiConfigDelete;
   late final int Function(
     Pointer<WasiConfigOpaque>,
     int,
@@ -381,6 +383,10 @@ final class WasmtimeFfi {
     wasiConfigNew = _library.lookupFunction<WasiConfigNewNative, WasiConfigNewDart>(
       'wasi_config_new',
     );
+    wasiConfigDelete = _library.lookupFunction<
+      WasiConfigDeleteNative,
+      WasiConfigDeleteDart
+    >('wasi_config_delete');
     wasiConfigSetArgv = _library.lookupFunction<
       WasiSetArgvNative,
       WasiSetArgvDart
@@ -495,6 +501,7 @@ typedef StoreLimiterDart =
       int,
     );
 typedef WasiConfigNewDart = Pointer<WasiConfigOpaque> Function();
+typedef WasiConfigDeleteDart = void Function(Pointer<WasiConfigOpaque>);
 typedef WasiSetArgvDart =
     int Function(Pointer<WasiConfigOpaque>, int, Pointer<Pointer<Utf8>>);
 typedef WasiSetCustomDart =

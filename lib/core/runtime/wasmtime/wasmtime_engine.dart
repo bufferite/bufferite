@@ -77,10 +77,8 @@ final class WasmtimeModule {
 /// memicu trap saat batas waktu habis (wasmtime merancang epoch sebagai
 /// interupsi lintas thread).
 final class WasmtimeEngine {
-  WasmtimeEngine({
-    WasmtimeFfi? ffi,
-    String? libraryPath,
-  }) : _ffi = ffi ?? WasmtimeFfi.open(path: libraryPath) {
+  WasmtimeEngine({WasmtimeFfi? ffi, String? libraryPath})
+    : _ffi = ffi ?? WasmtimeFfi.open(path: libraryPath) {
     final config = _ffi.configNew();
     if (config == nullptr) {
       throw WasmtimeException('Gagal membuat konfigurasi wasmtime.');
@@ -143,10 +141,14 @@ final class WasmtimeEngine {
   /// Jalankan `_start` dengan argv dan tangkap stdout/stderr.
   ///
   /// [memoryLimitBytes] berlaku per store (batas pertumbuhan memori linear).
+  /// [maxOutputBytes] membatasi stdout/stderr yang disalin kembali ke host;
+  /// `null` memakai [memoryLimitBytes]. Tanpa batas, modul dapat membanjiri
+  /// disk dan memori host melewati batas memori sandbox.
   WasmRunResult run(
     WasmtimeModule module,
     List<String> argv, {
     int memoryLimitBytes = 64 * 1024 * 1024,
+    int? maxOutputBytes,
     int epochDeadline = 1,
     Uint8List? stdinBytes,
   }) {
@@ -156,6 +158,7 @@ final class WasmtimeEngine {
     if (module.isClosed) {
       throw WasmtimeException('Modul sudah ditutup.');
     }
+    final outputLimit = maxOutputBytes ?? memoryLimitBytes;
 
     final tempDir = Directory.systemTemp.createTempSync('bufferite_wasm_');
     final stdoutFile = File('${tempDir.path}${Platform.pathSeparator}stdout');
@@ -169,6 +172,8 @@ final class WasmtimeEngine {
     Pointer<Utf8>? startName;
     Pointer<Utf8>? stdoutPath;
     Pointer<Utf8>? stderrPath;
+    Pointer<WasiConfigOpaque>? wasi;
+    var wasiOwned = false;
 
     try {
       store = _ffi.storeNew(_engine, nullptr, nullptr);
@@ -178,19 +183,23 @@ final class WasmtimeEngine {
       _ffi.storeLimiter(store, memoryLimitBytes, -1, -1, -1, -1);
       final context = _ffi.storeContext(store);
 
-      final wasi = _ffi.wasiConfigNew();
-      if (wasi == nullptr) {
+      final wasiConfig = _ffi.wasiConfigNew();
+      if (wasiConfig == nullptr) {
         throw WasmtimeException('Gagal membuat konfigurasi WASI.');
       }
+      wasi = wasiConfig;
+      wasiOwned = true;
       stdoutPath = stdoutFile.path.toNativeUtf8();
       stderrPath = stderrFile.path.toNativeUtf8();
-      if (_ffi.wasiConfigSetStdoutFile(wasi, stdoutPath) == 0) {
+      if (_ffi.wasiConfigSetStdoutFile(wasiConfig, stdoutPath) == 0) {
         throw WasmtimeException('Gagal membuka stdout WASI.');
       }
-      if (_ffi.wasiConfigSetStderrFile(wasi, stderrPath) == 0) {
+      if (_ffi.wasiConfigSetStderrFile(wasiConfig, stderrPath) == 0) {
         throw WasmtimeException('Gagal membuka stderr WASI.');
       }
-      final argvPointers = calloc<Pointer<Utf8>>(argv.isEmpty ? 1 : argv.length);
+      final argvPointers = calloc<Pointer<Utf8>>(
+        argv.isEmpty ? 1 : argv.length,
+      );
       final owned = <Pointer<Utf8>>[];
       try {
         for (var i = 0; i < argv.length; i++) {
@@ -198,7 +207,8 @@ final class WasmtimeEngine {
           owned.add(value);
           argvPointers[i] = value;
         }
-        if (_ffi.wasiConfigSetArgv(wasi, argv.length, argvPointers) == 0) {
+        if (_ffi.wasiConfigSetArgv(wasiConfig, argv.length, argvPointers) ==
+            0) {
           throw WasmtimeException('Argumen WASI bukan UTF-8 yang valid.');
         }
       } finally {
@@ -224,18 +234,21 @@ final class WasmtimeEngine {
             calloc.free(data);
           }
         }
-        _ffi.wasiConfigSetStdinBytes(wasi, vec);
+        _ffi.wasiConfigSetStdinBytes(wasiConfig, vec);
         calloc.free(vec);
       }
 
-      final wasiError = _ffi.contextSetWasi(context, wasi);
+      final wasiError = _ffi.contextSetWasi(context, wasiConfig);
+      // Store mengambil alih kepemilikan config; jangan delete di finally.
+      wasiOwned = false;
       if (wasiError != nullptr) {
         throw WasmtimeException(_readError(wasiError));
       }
 
-      // Deadline relatif terhadap epoch engine saat ini. Host menaikkan epoch
-      // untuk timeout/pembatalan; worker meneruskan deadline berikutnya agar
-      // store baru tidak langsung trap setelah satu interupsi.
+      // Deadline relatif terhadap epoch engine saat ini, jadi selalu satu
+      // tick dari epoch sekarang. Worker tidak boleh meneruskan jumlah
+      // interupsi sebelumnya: batas waktu kedua akan meleset dan hanya
+      // terhenti oleh kill grace 300 ms.
       _ffi.contextSetEpochDeadline(context, epochDeadline);
 
       linker = _ffi.linkerNew(_engine);
@@ -282,13 +295,16 @@ final class WasmtimeEngine {
       _ffi.storeDelete(store);
       store = null;
       return WasmRunResult(
-        stdout: _readFile(stdoutFile),
-        stderr: _readFile(stderrFile),
+        stdout: _readFile(stdoutFile, outputLimit, 'stdout'),
+        stderr: _readFile(stderrFile, outputLimit, 'stderr'),
         exitCode: call.exitCode,
         errorMessage: call.errorMessage,
         trapMessage: call.trapMessage,
       );
     } finally {
+      if (wasiOwned && wasi != null) {
+        _ffi.wasiConfigDelete(wasi);
+      }
       if (startName != null) {
         malloc.free(startName);
       }
@@ -419,9 +435,15 @@ final class WasmtimeEngine {
     return _decodeBytes(vec.ref.data, size);
   }
 
-  static String _readFile(File file) {
+  static String _readFile(File file, int maxBytes, String label) {
     if (!file.existsSync()) {
       return '';
+    }
+    final length = file.lengthSync();
+    if (length > maxBytes) {
+      throw WasmtimeException(
+        '$label melebihi batas keluaran $maxBytes byte ($length byte).',
+      );
     }
     return utf8.decode(file.readAsBytesSync(), allowMalformed: true);
   }

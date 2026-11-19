@@ -82,6 +82,20 @@ void main() {
     );
   });
 
+  test('sandbox menghapus package, require, debug, dan file loader', () async {
+    expect(
+      await _run(
+        'function transform() '
+            'return tostring(package) .. "," .. tostring(require) .. "," .. '
+            'tostring(debug) .. "," .. tostring(dofile) .. "," .. '
+            'tostring(loadfile) .. "," .. tostring(os.getenv) .. "," .. '
+            'tostring(os.tmpname) end',
+        'x',
+      ),
+      'nil,nil,nil,nil,nil,nil,nil',
+    );
+  });
+
   test('akses terlarang menghasilkan error terstruktur', () async {
     await expectLater(
       _run(

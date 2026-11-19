@@ -20,7 +20,7 @@ if (-not (Test-Path $clang)) {
 
 $out = Join-Path $PSScriptRoot '..\test\fixtures\wasm'
 $out = (Resolve-Path $out).Path
-$names = @('echo_upper', 'fs_probe', 'exit_error', 'spin', 'argv_probe', 'spin_if')
+$names = @('echo_upper', 'fs_probe', 'exit_error', 'spin', 'argv_probe', 'spin_if', 'stdout_flood')
 
 foreach ($name in $names) {
   & $clang '--target=wasm32-wasip1' "--sysroot=$sysroot" '-Os' `

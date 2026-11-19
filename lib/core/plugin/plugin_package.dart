@@ -56,6 +56,12 @@ final class PluginPackage {
       );
     }
 
+    // `ZipDecoder` membaca isi symlink saat decode (sebelum batas entri dapat
+    // diperiksa) dan membangun satu objek per entri. Pindai central directory
+    // lebih dulu tanpa menyentuh isi entri agar zip bomb dan jumlah entri
+    // raksasa ditolak sebelum alokasi/dekompresi.
+    _scanArchive(bytes, limits);
+
     final Archive archive;
     try {
       archive = ZipDecoder().decodeBytes(
@@ -227,6 +233,84 @@ final class PluginPackage {
       for (final entry in _files.entries)
         entry.key: Uint8List.fromList(entry.value),
     };
+  }
+}
+
+/// Memindai central directory zip tanpa membaca isi entri.
+///
+/// `ZipDecoder.decodeBytes` membaca target symlink secara eager dan membuat
+/// objek untuk setiap entri sebelum [PluginPackage.decode] dapat memeriksa
+/// batas. Pemindaian ini menolak symlink, jumlah entri, serta ukuran entri
+/// deklarasi lebih dulu sehingga paket berbahaya tidak pernah didekompresi.
+void _scanArchive(Uint8List bytes, PluginPackageLimits limits) {
+  final directory = ZipDirectory();
+  var entries = 0;
+  var declaredTotal = 0;
+  try {
+    for (final header in directory.headers(
+      InputMemoryStream(bytes),
+      verify: true,
+      files: false,
+    )) {
+      entries++;
+      if (entries > limits.maxEntries) {
+        throw _packageError(
+          'plugin.package_too_many_entries',
+          'Paket memiliki terlalu banyak entri.',
+          <String, Object?>{'entries': entries, 'limit': limits.maxEntries},
+        );
+      }
+
+      final name = header.filename;
+      final mode = header.externalFileAttributes;
+      final entryMode = mode >> 16;
+      final madeByUnix = header.versionMadeBy >> 8 == 3;
+      if (madeByUnix && entryMode & 0xf000 == 0xa000) {
+        throw _packageError(
+          'plugin.package_symlink',
+          'Paket tidak boleh memuat symbolic link: $name',
+          <String, Object?>{'path': name},
+        );
+      }
+
+      // Sama dengan klasifikasi direktori di `ZipDecoder`.
+      final isDirectory =
+          name.endsWith('/') ||
+          name.endsWith('\\') ||
+          (header.versionMadeBy >> 8 == 0 && mode & 0x10 != 0) ||
+          (madeByUnix && entryMode & 0xf000 == 0x4000);
+      if (isDirectory) {
+        continue;
+      }
+
+      final size = header.uncompressedSize;
+      if (size < 0 || size > limits.maxEntryBytes) {
+        throw _packageError(
+          'plugin.package_entry_too_large',
+          'Entri $name melebihi batas ukuran.',
+          <String, Object?>{'path': name, 'size': size},
+        );
+      }
+      declaredTotal += size;
+      if (declaredTotal > limits.maxTotalBytes) {
+        throw _packageError(
+          'plugin.package_too_large',
+          'Total isi paket melebihi batas ${limits.maxTotalBytes} byte.',
+          <String, Object?>{
+            'total': declaredTotal,
+            'limit': limits.maxTotalBytes,
+          },
+        );
+      }
+    }
+  } on AppError {
+    rethrow;
+  } on Object catch (error) {
+    throw _packageError(
+      'plugin.package_invalid',
+      'Paket .berp bukan zip yang valid.',
+      <String, Object?>{'error': error.toString()},
+    );
   }
 }
 

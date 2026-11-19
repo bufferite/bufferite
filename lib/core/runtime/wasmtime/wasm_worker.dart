@@ -14,11 +14,8 @@ import 'wasmtime_ffi.dart';
 /// pembatalan menaikkan epoch engine dari isolate utama sehingga loop berhenti
 /// lewat trap tanpa mematikan worker.
 final class WasmWorker {
-  WasmWorker({
-    required this.moduleBytes,
-    this.libraryPath,
-    this.label = 'WASM',
-  }) : assert(moduleBytes.isNotEmpty, 'Modul WASM tidak boleh kosong.');
+  WasmWorker({required this.moduleBytes, this.libraryPath, this.label = 'WASM'})
+    : assert(moduleBytes.isNotEmpty, 'Modul WASM tidak boleh kosong.');
 
   final Uint8List moduleBytes;
 
@@ -36,15 +33,55 @@ final class WasmWorker {
   SendPort? _commands;
   int? _engineAddress;
   WasmtimeFfi? _watchdog;
+  Future<void> _tail = Future<void>.value();
+  var _closed = false;
 
-  /// Jumlah `incrementEpoch` yang sudah dilakukan pada engine saat ini.
-  int _interrupts = 0;
-
+  /// Jalankan modul. Eksekusi pada worker yang sama diserialisasi.
+  ///
+  /// Runtime cache boleh meminjamkan runtime yang sama ke beberapa pipeline
+  /// sekaligus. Tanpa antrean, timeout/pembatalan satu eksekusi menaikkan epoch
+  /// atau mematikan isolate saat eksekusi lain sedang berjalan. Batas waktu
+  /// baru mulai dihitung setelah giliran eksekusi dimulai.
   Future<WasmRunResult> run({
     required List<String> argv,
     Uint8List? stdin,
     required SandboxContext context,
+  }) {
+    final previous = _tail;
+    final gate = Completer<void>();
+    _tail = gate.future;
+    return _runAfter(
+      previous,
+      gate,
+      argv: argv,
+      stdin: stdin,
+      context: context,
+    );
+  }
+
+  Future<WasmRunResult> _runAfter(
+    Future<void> previous,
+    Completer<void> gate, {
+    required List<String> argv,
+    Uint8List? stdin,
+    required SandboxContext context,
   }) async {
+    await previous;
+    try {
+      return await _run(argv: argv, stdin: stdin, context: context);
+    } finally {
+      gate.complete();
+    }
+  }
+
+  Future<WasmRunResult> _run({
+    required List<String> argv,
+    Uint8List? stdin,
+    required SandboxContext context,
+  }) async {
+    if (_closed) {
+      throw _engineError(context, 'Worker WASM sudah ditutup.');
+    }
     try {
       await _ensureStarted();
     } on Object catch (error) {
@@ -88,7 +125,6 @@ final class WasmWorker {
       try {
         _watchdog ??= WasmtimeFfi.open(path: libraryPath);
         WasmtimeEngine.incrementEpochAt(_watchdog!, address);
-        _interrupts++;
       } on Object {
         // Bila engine tak bisa dijangkau, grace timer mematikan worker.
       }
@@ -129,7 +165,9 @@ final class WasmWorker {
       'argv': argv,
       'stdin': stdin,
       'memoryLimit': context.config.memoryLimitBytes,
-      'deadline': _interrupts + 1,
+      // Deadline wasmtime relatif terhadap epoch saat ini. Selalu satu tick:
+      // interupsi sebelumnya sudah menaikkan epoch engine.
+      'deadline': 1,
       'reply': reply.sendPort,
     });
 
@@ -173,6 +211,10 @@ final class WasmWorker {
   }
 
   Future<void> dispose() async {
+    if (_closed) {
+      return;
+    }
+    _closed = true;
     final commands = _commands;
     final exited = _exited;
     _commands = null;
@@ -198,7 +240,6 @@ final class WasmWorker {
     _isolate = null;
     _closePorts();
     _starting = null;
-    _interrupts = 0;
   }
 
   Future<void> _ensureStarted() {
@@ -247,7 +288,6 @@ final class WasmWorker {
           }
           _commands = port;
           _engineAddress = engine;
-          _interrupts = 0;
           if (!completer.isCompleted) {
             completer.complete();
           }
@@ -285,7 +325,6 @@ final class WasmWorker {
     _isolate = null;
     _commands = null;
     _engineAddress = null;
-    _interrupts = 0;
     isolate?.kill(priority: Isolate.immediate);
     _closePorts();
   }

@@ -35,6 +35,7 @@ Uint8List _fixture(String name) {
 SandboxContext _context({
   String operationId = 'plugin.echo',
   Duration timeout = const Duration(seconds: 10),
+  int memoryLimitBytes = 64 * 1024 * 1024,
   Set<PluginPermission> permissions = const <PluginPermission>{
     PluginPermission.cpu,
   },
@@ -43,7 +44,11 @@ SandboxContext _context({
     pluginId: 'com.example.wasmplugin',
     operationId: operationId,
     stepId: 'step-wasm',
-    config: SandboxConfig(stepTimeout: timeout, permissions: permissions),
+    config: SandboxConfig(
+      stepTimeout: timeout,
+      memoryLimitBytes: memoryLimitBytes,
+      permissions: permissions,
+    ),
   );
 }
 
@@ -209,6 +214,93 @@ void main() {
     }
   }, skip: skip);
 
+  test('timeout berulang tidak mematikan worker', () async {
+    final runtime = WasmPluginRuntime(
+      moduleBytes: _fixture('spin_if'),
+      libraryPath: _dllRelative,
+    );
+    try {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        final error = await _expectError(
+          () => runtime.execute(
+            const TextBuffer('x'),
+            const <String, Object?>{},
+            _context(
+              operationId: 'spin',
+              timeout: const Duration(milliseconds: 250),
+            ),
+          ),
+        );
+        expect(error.code, 'runtime.timeout');
+      }
+
+      final output = await runtime.execute(
+        const TextBuffer('lagi'),
+        const <String, Object?>{},
+        _context(operationId: 'echo'),
+      );
+      expect(output.asText(), 'lagi');
+    } finally {
+      await runtime.dispose();
+    }
+  }, skip: skip);
+
+  test('eksekusi paralel diserialisasi dan tidak saling merusak', () async {
+    final runtime = WasmPluginRuntime(
+      moduleBytes: _fixture('spin_if'),
+      libraryPath: _dllRelative,
+    );
+    try {
+      final spin = _expectError(
+        () => runtime.execute(
+          const TextBuffer('x'),
+          const <String, Object?>{},
+          _context(
+            operationId: 'spin',
+            timeout: const Duration(milliseconds: 250),
+          ),
+        ),
+      );
+      final echo = runtime.execute(
+        const TextBuffer('paralel'),
+        const <String, Object?>{},
+        _context(operationId: 'echo'),
+      );
+
+      expect((await spin).code, 'runtime.timeout');
+      expect((await echo).asText(), 'paralel');
+    } finally {
+      await runtime.dispose();
+    }
+  }, skip: skip);
+
+  test('stdout melebihi batas memori ditolak dan worker pulih', () async {
+    final runtime = WasmPluginRuntime(
+      moduleBytes: _fixture('stdout_flood'),
+      libraryPath: _dllRelative,
+    );
+    try {
+      final error = await _expectError(
+        () => runtime.execute(
+          const TextBuffer('x'),
+          const <String, Object?>{},
+          _context(memoryLimitBytes: 256 * 1024),
+        ),
+      );
+      expect(error.code, 'runtime.wasm_error');
+      expect(error.message, contains('stdout'));
+
+      final output = await runtime.execute(
+        const TextBuffer('x'),
+        const <String, Object?>{},
+        _context(memoryLimitBytes: 2 * 1024 * 1024),
+      );
+      expect(output.asText().length, 32 * 1024 * 16);
+    } finally {
+      await runtime.dispose();
+    }
+  }, skip: skip);
+
   test('FileBuffer harus dimaterialisasi', () async {
     final runtime = WasmPluginRuntime(
       moduleBytes: _fixture('echo_upper'),
@@ -228,36 +320,40 @@ void main() {
     }
   }, skip: skip);
 
-  test('loader menghasilkan executor tier wasm dari entrypoint .wasm', () async {
-    final manifest = PluginManifest.fromJson(
-      validManifestJson(tier: 'wasm', entrypoint: 'main.wasm'),
-    );
-    final plugin = InstalledPlugin(
-      manifest: manifest,
-      source: PluginSource.sideload,
-      installedAt: DateTime.utc(2026, 1, 1),
-      installPath: '/plugins/com.test.pack/1.0.0',
-    );
-    final loader = PluginRuntimeLoader(
-      sandboxConfig: () => SandboxConfig.defaults,
-      wasmtimeLibraryPath: _dllRelative,
-      readEntrypoint: (_) async => _fixture('echo_upper'),
-    );
-    try {
-      final operation = loader.operationFor(
-        plugin,
-        plugin.manifest.operations.single,
+  test(
+    'loader menghasilkan executor tier wasm dari entrypoint .wasm',
+    () async {
+      final manifest = PluginManifest.fromJson(
+        validManifestJson(tier: 'wasm', entrypoint: 'main.wasm'),
       );
-      expect(operation, isNotNull);
-      final output = await operation!.execute(
-        const TextBuffer('loader'),
-        const <String, Object?>{},
+      final plugin = InstalledPlugin(
+        manifest: manifest,
+        source: PluginSource.sideload,
+        installedAt: DateTime.utc(2026, 1, 1),
+        installPath: '/plugins/com.test.pack/1.0.0',
       );
-      expect(output.asText(), 'LOADER');
-    } finally {
-      await loader.dispose();
-    }
-  }, skip: skip);
+      final loader = PluginRuntimeLoader(
+        sandboxConfig: () => SandboxConfig.defaults,
+        wasmtimeLibraryPath: _dllRelative,
+        readEntrypoint: (_) async => _fixture('echo_upper'),
+      );
+      try {
+        final operation = loader.operationFor(
+          plugin,
+          plugin.manifest.operations.single,
+        );
+        expect(operation, isNotNull);
+        final output = await operation!.execute(
+          const TextBuffer('loader'),
+          const <String, Object?>{},
+        );
+        expect(output.asText(), 'LOADER');
+      } finally {
+        await loader.dispose();
+      }
+    },
+    skip: skip,
+  );
 
   test('runtime yang sudah dilepas menolak eksekusi', () async {
     final runtime = WasmPluginRuntime(
