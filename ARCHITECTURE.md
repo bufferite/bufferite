@@ -170,16 +170,19 @@ Implementasi storage MVP:
   Catatan 1.0: Lua memakai `lua_dart` (FFI native) dengan capability sandbox
   sebagai default; engine Lua WASM (wasmtime C API + `lua_runtime.wasm`)
   sudah tersedia dan tervalidasi di Windows/Android, dengan cache runtime +
-  worker persisten (F05-T08/CP-064). Tier plugin `wasm` menunggu ABI (1.1).
+  worker persisten (F05-T08/CP-064). Tier plugin `wasm` memakai ABI command
+  WASI v1 (`WasmPluginRuntime`): input via stdin, args JSON di argv, output
+  stdout, tanpa preopen/socket (F05-T06/CP-066). Libwasmtime baru dikemas di
+  varian debug Android, jadi tier `wasm`/`LuaEngine.wasm` di release 1.0
+  menunggu library ikut dirilis.
 - Format paket: .berp.
 - Sideload didukung di MVP.
 - Signature opsional di MVP, wajib untuk registry resmi di Fase 2.
-- Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di isolate;
-  `wasi_config` + epoch untuk timeout, stdout lewat file sementara.
+- Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di worker
+  isolate persisten; `wasi_config` (stdout/stderr file, stdin bytes) + epoch
+  untuk timeout. Engine + modul dikompilasi sekali per plugin.
 
 ## 11. Pertanyaan Terbuka
-- ABI modul untuk plugin tier `wasm` (input/output, host function).
-- Strategi cache modul/runtime untuk banyak plugin (F05-T08).
 - Ukuran maksimum core.berp dan strategi lazy load operasi.
 - Streaming untuk file besar (Fase 2).
 

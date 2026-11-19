@@ -259,16 +259,28 @@ Catatan progres: lihat [progress.md](progress.md).
   - Verifikasi: `LuaRuntime` menjalankan `transform(input, args)`; `io` dan
     `os.execute` nil; akses `io.open` → `runtime.lua_error`; integration test
     emulator lulus.
-- [ ] **F05-T06 (P0)** Runtime WASM untuk plugin tier `wasm`.
-  - ABI input/output, tanpa host function net/fs kecuali izin.
-  - Acceptance: test modul WASM contoh berjalan dan akses terlarang
-    diblokir.
-  - Progres: engine WASM (wasmtime) + `WasmLuaRuntime` sudah tersedia dan
-    tervalidasi di Windows + Android (CP-063); yang tersisa adalah ABI modul
-    plugin tier `wasm` (1.1).
-- [ ] **F05-T07 (P0)** Penegakan izin di semua runtime.
-  - Pemeriksaan sebelum side effect; pesan error jelas.
-  - Acceptance: test matrix runtime × izin.
+- [x] **F05-T06 (P0)** Runtime WASM untuk plugin tier `wasm`.
+  - ABI command WASI v1: `_start`; argv `[modul, id operasi, args JSON]`;
+    input via stdin; output via stdout; exit 0 = sukses.
+  - Tanpa host function net/fs: linker WASI tanpa preopen direktori/socket.
+  - Verifikasi: `WasmPluginRuntime` + `WasmWorker` (engine/modul sekali,
+    store baru per eksekusi); fixture `test/fixtures/wasm/*.wasm` (dibangun
+    `tool/build_wasm_fixtures.ps1`); 10 test (echo, argv, exit error, fs
+    diblokir, import host ditolak, timeout pulih, dispose, loader) + 1
+    integration emulator Android; `flutter test` 512 lulus.
+- [x] **F05-T07 (P0)** Penegakan izin di semua runtime.
+  - Setiap runtime memanggil `requirePermission(cpu)` sebelum eksekusi;
+    `PermissionGuard` menolak `net`/`file:*` dengan pesan berisi wire name,
+    `pluginId`, dan `details.permission`.
+  - Sandbox Lua WASM disamakan dengan `lua_dart`: io/package/debug/dofile/
+    loadfile dan `os.execute/getenv/exit/remove/rename/setlocale/tmpname`
+    dihapus; `load` hanya chunk teks.
+  - Verifikasi: `test/core/runtime/permission_matrix_test.dart` (32 lulus);
+    probe dengan izin maksimum tetap diblokir.
+- [x] **F05-T09 (P0)** Contract test lintas runtime.
+  - `lua_engine_contract_test.dart`: 10 kasus `lua_dart` vs Lua WASM + 5
+    kasus DSL vs Lua native vs Lua WASM (map, map-first, regex, ignore-case,
+    rename JSON).
 - [x] **F05-T08 (P1)** Cache dan disposal runtime.
   - Satu runtime per plugin, LRU maksimal 4, idle 5 menit; entri yang sedang
     dipakai tidak dibuang. Plugin nonaktif/dihapus langsung mengevict cache.
@@ -277,19 +289,11 @@ Catatan progres: lihat [progress.md](progress.md).
   - Verifikasi: `test/core/runtime/runtime_cache_test.dart` (7 lulus), worker
     reuse + pulih setelah timeout (Windows & emulator Android), `flutter test`
     465 lulus; `flutter analyze` 0 issue.
-- [ ] **F05-T09 (P0)** Contract test lintas runtime.
-  - Operasi yang sama (contoh) dijalankan di DSL, Lua, dan WASM dengan
-    hasil setara.
-  - Progres: kontrak `lua_dart` vs Lua WASM (10 kasus) sudah ada di
-    `test/core/runtime/lua_engine_contract_test.dart`.
-
-> Catatan 2026-11-19: F05-T06..T09 dan F14-T03 **ditunda ke 1.1**
-> (fallback D07). Scope 1.0 = DSL + Lua (`lua_dart`, isolate + sandbox) +
-> 38 operasi core. Rencana engine WASM ada di `WASM_ENGINE_PLAN.md`.
-> Progres 2026-11-19: Dart FFI wasmtime + `WasmLuaRuntime` jalan di Windows
-> (CP-062); cross-compile Android + validasi emulator + `PluginRuntimeLoader`
-> untuk tier `dsl`/`lua` selesai (CP-063). Engine `lua` masih default
-> `native` sampai ABI/cache WASM siap.
+> Catatan 2026-11-19: F05-T06..T09 dan F14-T03 **selesai** (CP-065).
+> Scope 1.0 = DSL + Lua (`lua_dart`, isolate + sandbox) + 38 operasi core;
+> engine `lua` default tetap `native`. Tier `wasm` dan `LuaEngine.wasm` aktif
+> bila libwasmtime tersedia (Android: varian debug; release 1.0 belum memuat
+> library). Rencana engine WASM ada di `WASM_ENGINE_PLAN.md`.
 
 ## F06 — Storage
 
@@ -461,8 +465,12 @@ Catatan progres: lihat [progress.md](progress.md).
   mitigasi).
 - [x] **F14-T02 (P0)** Test adversarial paket & filesystem.
   - Zip-slip, zip bomb, symlink, path absolut, ukuran berlebih.
-- [ ] **F14-T03 (P0)** Test bypass izin.
+- [x] **F14-T03 (P0)** Test bypass izin.
   - Net/fs dari DSL, Lua, dan WASM tanpa consent harus gagal.
+  - Verifikasi: `permission_matrix_test.dart` — DSL menolak op host + file
+    buffer; Lua native/WASM memblokir io/os/dofile/loadfile/require/package/
+    debug walau izin `net`/`file:*` diberikan; tier `wasm` fixture `fs_probe`
+    → `blocked` dan import host ditolak (CP-065).
 - [x] **F14-T04 (P0)** Keamanan regex.
   - Timeout/batas panjang untuk mencegah ReDoS di DSL dan utility.
 - [x] **F14-T05 (P0)** CSPRNG untuk operasi acak.

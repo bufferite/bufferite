@@ -41,10 +41,13 @@ Versi: 1.0 · Fase: MVP
 - **Isolate Dart bukan batas keamanan.** Lua 1.0 memakai `lua_dart` (native
   FFI, Lua 5.5.1) di proses aplikasi: tidak ada isolasi memori seperti WASM.
 - Sandbox Lua bersifat *capability*: `io`, `dofile`, `loadfile`, `package`,
-  `require`, `debug`, serta `os.execute/getenv/exit/remove/tmpname` tidak
-  tersedia; tidak ada host function net/fs; memori dibatasi 64 MiB.
-- Tier WASM + matriks izin lintas runtime (F05-T06..T09, F14-T03) ditunda ke
-  1.1; rencana engine ada di `WASM_ENGINE_PLAN.md`.
+  `require`, `debug`, serta `os.execute/getenv/exit/remove/rename/setlocale/
+  tmpname` tidak tersedia; `load` hanya menerima chunk teks (bytecode ditolak);
+  tidak ada host function net/fs; memori dibatasi 64 MiB.
+- Tier WASM memakai ABI command WASI v1 (`WasmPluginRuntime`): input via stdin,
+  args JSON di argv, output stdout; linker WASI tanpa preopen direktori dan
+  tanpa socket. Matriks izin lintas runtime ada di
+  `test/core/runtime/permission_matrix_test.dart` (F05-T06/T07/T09, F14-T03).
 - Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop), izin
   INTERNET tidak diminta, dan storage scoped.
 
@@ -57,6 +60,7 @@ Versi: 1.0 · Fase: MVP
 | Waktu / DoS | Timeout + interrupt + kill isolate |
 | UI responsif | Ya (isolate kerja) |
 | Isolasi memori / kontainmen bug native | **Tidak** (native in-process; engine WASM tersedia sebagai opsi, bukan default 1.0) |
+| Tier `wasm` | Isolasi memori WASM; tanpa host function net/fs (WASI tanpa preopen/socket) |
 | Plugin tepercaya | Hanya hash paket; sideload `unverified` = tidak tepercaya |
 | Sandbox OS | Android/iOS/desktop (UID, scoped storage, tanpa INTERNET) |
 
@@ -72,9 +76,13 @@ sendiri).
 
 - Suspected: `test/core/plugin_package_test.dart`,
   `test/core/plugin_integrity_test.dart`, `test/core/plugin_permission_test.dart`.
-- Terbuka: test bypass izin runtime WASM (F14-T03), keamanan regex terukur
-  (F14-T04), CSPRNG operasi acak (F14-T05), audit offline (F14-T06).
+- Matriks bypass izin DSL/Lua native/Lua WASM: `permission_matrix_test.dart`
+  (32 test; F05-T07/F14-T03). Tier `wasm`: `wasm_plugin_runtime_test.dart`
+  (fs host diblokir, import host ditolak, exit error, timeout pulih) +
+  integration emulator Android.
 - Lua 1.0: 12 test sandbox/timeout + integration emulator (CP-057); batas
   isolasi didokumentasikan di §4.1.
 - Engine Lua WASM: integration emulator Android (eksekusi + timeout epoch) dan
-  kontrak 10 kasus vs `lua_dart` (CP-063).
+  kontrak 10 kasus vs `lua_dart` + 5 kasus DSL vs Lua vs WASM (CP-063/CP-065).
+- Sisa: keamanan regex terukur (F14-T04), CSPRNG operasi acak (F14-T05),
+  audit offline (F14-T06).

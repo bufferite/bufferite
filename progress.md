@@ -29,15 +29,15 @@ Status yang dipakai:
 |---|---|
 | Fase aktif | Fase 1 — MVP |
 | Milestone aktif | M5 — Rilis MVP |
-| Task MVP selesai | 127 / 131 |
+| Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 0 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | — |
-| Task berikutnya | — (scope 1.0 dibekukan; `F05-T06/T07/T09` + `F14-T03` ke 1.1) |
-| Blocker aktif | F05-T06 (ABI plugin WASM belum ditetapkan), F14-T03 |
+| Task berikutnya | Rilis 1.0: jalankan `RELEASE_CHECKLIST.md`, tag lokal `v1.0.0` |
+| Blocker aktif | — (libwasmtime Android release masih di luar 1.0; tier `wasm` butuh build yang menyertakan engine) |
 | Analyze | Lulus (0 issue, 2026-11-19) |
-| Test suite | Lulus (465 test, 2026-11-19) |
+| Test suite | Lulus (512 test, 2026-11-19) |
 
 ## 3. Progres per Feature
 
@@ -50,7 +50,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F02 — Model & Validasi Recipe | 6 | 6 | Selesai |
 | F03 — Recipe Engine & Pipeline Executor | 8 | 8 | Selesai |
 | F04 — Sistem Plugin | 11 | 11 | Selesai |
-| F05 — Runtime & Sandbox | 9 | 6 | Sebagian (ABI tier WASM 1.1) |
+| F05 — Runtime & Sandbox | 9 | 9 | Selesai |
 | F06 — Storage | 7 | 7 | Selesai |
 | F07 — UI Foundation & Design System | 10 | 10 | Selesai |
 | F08 — Fitur Home | 6 | 6 | Selesai |
@@ -59,7 +59,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F11 — Fitur Plugin Manager | 9 | 9 | Selesai |
 | F12 — Fitur Settings | 6 | 6 | Selesai |
 | F13 — core.berp: Tooling & Operasi | 11 | 11 | Selesai |
-| F14 — Keamanan & Kualitas | 9 | 8 | Sebagian (T03 butuh runtime) |
+| F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **126** | **Berjalan** |
 | F16 — Backlog Fase 2 | 8 | 0 | Belum |
@@ -207,6 +207,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-19 | F05-T05 | Host API `transform(input, args)` + stdlib terbatas; akses terlarang → error terstruktur | `lib/core/runtime/lua_runtime.dart` | `flutter test` → `runtime.lua_error` untuk `io.open` | `aa6cc4a` |
 | 2026-11-19 | F05-T04 | Lua di isolate + timeout/interrupt (grace 300 ms) | `lib/core/runtime/lua_runtime.dart`, `test/core/runtime/lua_runtime_test.dart` | `flutter test` → 414 lulus; loop tak berujung → `runtime.timeout`; ticker UI jalan | `ef086f6` |
 | 2026-11-19 | F05-T08 | Cache runtime per plugin (LRU 4, idle 5 mnt) + worker WASM persisten | `lib/core/runtime/runtime_cache.dart`, `wasm_lua_runtime.dart`, `plugin_runtime.dart` | `flutter test` → 465 lulus; integration emulator 2 lulus | `1ebcac2` |
+| 2026-11-19 | F05-T06/T07/T09 + F14-T03 | ABI plugin WASM (stdin/argv/stdout), penegakan izin semua runtime, matriks bypass + kontrak DSL/Lua/WASM | `wasm_plugin_runtime.dart`, `wasm_worker.dart`, `permission_matrix_test.dart`, `test/fixtures/wasm/` | `flutter test` → 512 lulus; integration emulator 3 lulus | `cdc2cde` |
 | 2026-11-14 | F15-T01 | Metadata aplikasi + application id `dev.bufferite.app` | `android/app/build.gradle.kts`, `AndroidManifest.xml`, `MainActivity.kt` | `flutter analyze` 0 issue | `31e1930` |
 | 2026-11-14 | F15-T02 | minSdk 21 + tanpa INTERNET di manifest utama | `android/app/build.gradle.kts`, `AndroidManifest.xml` | Review konfigurasi | `98524ad` |
 | 2026-11-14 | F15-T03 | Teks privasi offline + lisensi pihak ketiga | `PRIVACY.md`, `THIRD_PARTY_LICENSES.md` | Review dokumen | `660c0eb` |
@@ -1411,6 +1412,35 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   Worker WASM tetap satu isolate per plugin; batas memori tetap per store.
 - Commit: `1ebcac2`
 
+### CP-065 — 2026-11-19 — F05-T06/T07/T09 + F14-T03 (izin & ABI WASM)
+
+- Status: Selesai
+- Perubahan:
+  - Tier `wasm`: `WasmPluginRuntime` dengan ABI command WASI v1 (`_start`;
+    argv `[modul, id operasi, args JSON]`; input stdin; output stdout; exit 0
+    sukses). Engine + modul dikompilasi sekali lewat `WasmWorker` yang dipakai
+    bersama `WasmLuaRuntime`; stdin memakai `wasi_config_set_stdin_bytes`.
+  - `PluginRuntimeLoader` menghasilkan executor tier `wasm` dan tidak lagi
+    men-decode entrypoint `.wasm` sebagai UTF-8.
+  - Penegakan izin: `requirePermission(cpu)` di DSL/Lua/Lua WASM; prelude WASM
+    menghapus `os.rename`/`os.setlocale` dan membatasi `load` ke chunk teks
+    (paritas `lua_dart`).
+  - Contract test DSL vs Lua native vs Lua WASM (5 kasus) + matriks izin
+    32 test (izin maksimum tetap diblokir).
+  - Fixture WASM: `test/fixtures/wasm/` + `tool/build_wasm_fixtures.ps1`.
+- File: `lib/core/runtime/wasm_plugin_runtime.dart`,
+  `lib/core/runtime/wasmtime/wasm_worker.dart`,
+  `lib/core/runtime/wasmtime/wasmtime_ffi.dart`,
+  `lib/core/runtime/wasmtime/wasmtime_engine.dart`,
+  `lib/core/runtime/{dsl,lua,wasm_lua}_runtime.dart`, `lua_program.dart`,
+  `plugin_runtime.dart`, test + fixture terkait.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 512 lulus; integration
+  emulator Android 3 lulus (Lua WASM + plugin WASM).
+- Catatan/risiko: libwasmtime Android hanya di varian debug; tier `wasm` di
+  release 1.0 akan gagal dengan `runtime.wasm_error` sampai library dirilis.
+  ABI v1 tidak menyediakan host function net/fs.
+- Commit: `cdc2cde`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1461,4 +1491,4 @@ bagian D.
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
 | 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 selesai (CP-064) |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |
-| 2026-11-19 | D11 | Engine Lua WASM (wasmtime) jadi opsi tier `lua`; default 1.0 tetap `lua_dart` | Kompilasi modul per eksekusi belum di-cache | `LuaEngine.wasm` dipakai setelah F05-T08 |
+| 2026-11-19 | D11 | Engine Lua WASM (wasmtime) jadi opsi tier `lua`; default 1.0 tetap `lua_dart` | Engine WASM tersedia + cache worker (F05-T08) | `LuaEngine.wasm` siap; tier `wasm` ABI v1 selesai (CP-065) |

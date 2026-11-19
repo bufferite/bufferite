@@ -1,8 +1,10 @@
 # Rencana Port Engine WASM (F05 lanjutan)
 
-Status: **spike selesai (2026-11-19)**. Aset Lua→WASM terbukti valid; engine
-host yang dipilih berubah dari WAMR ke **wasmtime C API** karena WAMR belum
-mendukung encoding EH yang dipakai Lua. 1.0 tetap memakai `lua_dart`.
+Status: **selesai untuk 1.0/1.1 awal (2026-11-19)**. Aset Lua→WASM terbukti
+valid; engine host yang dipilih berubah dari WAMR ke **wasmtime C API** karena
+WAMR belum mendukung encoding EH yang dipakai Lua. Engine Lua default 1.0 tetap
+`lua_dart`; engine WASI tersedia sebagai opsi dan tier plugin `wasm` memakai
+ABI command WASI v1.
 
 ## Hasil spike
 
@@ -55,24 +57,32 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
      outside an isolate"). Rencana berikutnya: `NativeCallable.listener`
      atau pipe.
    - Timeout/pembatalan: isolate utama memanggil
-     `wasmtime_engine_increment_epoch` pada alamat engine; deadline store = 1.
+     `wasmtime_engine_increment_epoch` pada alamat engine; deadline store
+     dihitung per eksekusi (`interrupts + 1`) agar store berikutnya tidak
+     langsung trap setelah satu interupsi.
+   - Stdin WASI memakai `wasi_config_set_stdin_bytes` (Vec dialokasikan lewat
+     `wasm_byte_vec_new`, ownership diserahkan ke config).
    - Verifikasi: 7 test engine + 12 test runtime (transform, args, unicode,
      sandbox, error, timeout, cancel) lulus di Windows; integration test
      eksekusi + timeout lulus di emulator Android x86_64 (JIT cranelift
      berjalan).
 4. **Integrasi**
    - `PluginRuntimeLoader` + `SandboxOperation`: executor nyata untuk tier
-     `dsl`/`lua` dan verifikasi hash entrypoint. `LuaEngine.native` tetap
-     default 1.0; `LuaEngine.wasm` siap dipakai. Tier `wasm` masih tanpa
-     executor sampai ABI-nya ditetapkan.
+     `dsl`/`lua`/`wasm` dan verifikasi hash entrypoint. `LuaEngine.native`
+     tetap default 1.0; `LuaEngine.wasm` siap dipakai.
    - Cache runtime per plugin (LRU 4, idle 5 menit) + worker WASM persisten:
      engine/modul dikompilasi sekali, store WASI baru tiap eksekusi, dispose
-     saat idle/disable/hapus (F05-T08/CP-064).
+     saat idle/disable/hapus (F05-T08/CP-064). Worker dipakai bersama oleh
+     `WasmLuaRuntime` dan `WasmPluginRuntime` (`wasmtime/wasm_worker.dart`).
    - Aset `assets/lua_runtime.wasm` dibundel; `loadLuaWasmModule` memeriksa
      pin SHA-256 sebelum modul dipakai.
+   - Tier `wasm`: ABI command WASI v1 (`WasmPluginRuntime`) — `_start`,
+     argv `[modul, id operasi, args JSON]`, input via stdin, output via
+     stdout, exit code 0 = sukses. Linker WASI tanpa preopen/socket; fixture
+     di `test/fixtures/wasm/` (dibangun `tool/build_wasm_fixtures.ps1`).
    - Test: transform, sandbox, timeout, hash mismatch, kontrak
-     `lua_dart` vs Lua WASM, Android.
-   - Sisa: perbarui D02, PLUGINS/ARCHITECTURE, THIRD_PARTY_LICENSES.
+     `lua_dart` vs Lua WASM, kontrak DSL vs Lua vs WASM, matriks izin,
+     eksekusi/tier wasm, Android (Lua + plugin WASM).
 
 ## Risiko
 
@@ -81,3 +91,7 @@ Kesimpulan: aset Lua valid (Node + wasmtime). WAMR tidak bisa menjadi host;
 - Output WASI harus lewat file sementara (callback lintas thread tidak bisa
   memakai `NativeCallable.isolateLocal`); berpotensi lambat untuk output besar.
 - Fallback D07 (1.0 DSL+Lua FFI) tetap berlaku bila port tidak selesai.
+- Libwasmtime hanya di varian debug Android; build release 1.0 belum bisa
+  mengeksekusi tier `wasm`/`LuaEngine.wasm` sampai library ikut dikemas.
+- Input plugin `wasm` lewat stdin (bukan argv) agar tidak kena batas command
+  line; output tetap ditangkap lewat file sementara.

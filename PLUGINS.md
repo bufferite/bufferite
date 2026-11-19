@@ -81,12 +81,15 @@ Tier 1 — DSL deklaratif
 Tier 2 — Lua (source murni, dieksekusi via runtime Lua)
 - Plugin berupa source Lua murni (.lua) yang dapat dibaca dan direview.
 - Jalur utama plugin komunitas karena transparan dan mudah di-diff.
-- 1.0 memakai `lua_dart` (Lua 5.5.1 via FFI native) dengan capability
-  sandbox + batas memori + timeout; isolasi WASM ditunda ke 1.1
+- 1.0 default memakai `lua_dart` (Lua 5.5.1 via FFI native) dengan capability
+  sandbox + batas memori + timeout. Engine WASI (`LuaEngine.wasm`,
+  `lua_runtime.wasm` + wasmtime) tersedia sebagai opsi; engine/modul
+  dikompilasi sekali per plugin lewat worker persisten + cache runtime
   (`WASM_ENGINE_PLAN.md`).
 - Source Lua TIDAK dikompilasi menjadi WASM; source tetap murni.
-- Sandbox: stdlib terbatas (tanpa os, io, package, debug), batas waktu dan
-  memori, tanpa akses jaringan kecuali izin "net".
+- Sandbox: stdlib terbatas (tanpa io/package/debug, `os` yang menyentuh host,
+  `load` hanya chunk teks), batas waktu dan memori. Tidak ada host function
+  net/fs pada 1.0; izin "net"/"file:*" tidak menambah capability runtime.
 - Cocok untuk transformer/converter ringan-menengah.
 
 Tier 3 — WASM
@@ -96,8 +99,15 @@ Tier 3 — WASM
 - Analisis tetap mungkin via WAT/decompile, tetapi tidak se-transparan Lua.
 - Wajib SHA-256 untuk semua; signature (Ed25519) opsional di MVP, wajib
   untuk registry resmi di Fase 2.
-- Status 1.0: engine WASM (wasmtime) sudah tersedia, tetapi ABI modul plugin
-  tier `wasm` belum ditetapkan; operasi tier ini belum punya executor (1.1).
+- Status 1.0: engine WASM (wasmtime) + ABI command WASI v1 sudah tersedia
+  (`WasmPluginRuntime`). Libwasmtime hanya dikemas di varian debug Android;
+  build release 1.0 belum memuatnya sehingga tier `wasm` memerlukan build
+  yang menyertakan engine.
+- ABI v1: modul mengekspor `_start`; `argv[0]` nama modul, `argv[1]` id
+  operasi, `argv[2]` args JSON; input teks lewat stdin (UTF-8); output teks
+  lewat stdout (satu newline akhir dihapus); exit code 0 = sukses, selain itu
+  stderr menjadi pesan error. Tidak ada preopen direktori, socket, atau host
+  function lain.
 
 ## 4. Model Izin (Capabilities)
 Izin yang dikenal: "cpu", "net", "file:read", "file:write".
@@ -108,7 +118,10 @@ Izin yang dikenal: "cpu", "net", "file:read", "file:write".
 - "file:read"/"file:write" memerlukan dialog serupa; akses dibatasi ke
   file yang dipilih pengguna (scoped), bukan seluruh filesystem.
 - Tanpa izin yang sesuai, panggilan terkait diblokir dan menghasilkan error
-  yang jelas (bukan crash).
+  yang jelas (bukan crash). Setiap runtime memanggil `requirePermission(cpu)`
+  sebelum eksekusi; DSL/Lua/WASM tidak menyediakan host function net/fs pada
+  1.0 sehingga permintaan `net`/`file:*` tidak pernah menjadi capability nyata
+  (diuji di `test/core/runtime/permission_matrix_test.dart`).
 - Izin tercantum di manifest dan ditampilkan di UI sebelum instalasi.
 
 ## 5. Manifest Plugin (plugin.manifest.json)
