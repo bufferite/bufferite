@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../error/app_error.dart';
+import 'plugin_manifest.dart';
 import 'plugin_package.dart';
 import 'plugin_path.dart';
 
@@ -97,6 +98,46 @@ final class PluginPackageStore {
     final ver = _validateSegment(version, field: 'version');
     final target = Directory('${root.path}/$id/$ver');
     return target.existsSync() ? target.path : null;
+  }
+
+  /// Baca manifest versi lama yang masih disimpan, atau `null` bila tidak ada.
+  Future<PluginManifest?> readManifest(String pluginId, String version) async {
+    final path = installPath(pluginId, version);
+    if (path == null) {
+      return null;
+    }
+    final manifest = File('$path/${PluginPackage.manifestPath}');
+    if (!manifest.existsSync()) {
+      return null;
+    }
+    return PluginManifest.fromJsonString(await manifest.readAsString());
+  }
+
+  /// Hapus satu versi tanpa menyentuh versi lain.
+  Future<void> removeVersion(String pluginId, String version) async {
+    final path = installPath(pluginId, version);
+    if (path == null) {
+      return;
+    }
+    await Directory(path).delete(recursive: true);
+  }
+
+  /// Sisakan hanya [keep] versi; dipakai setelah update/rollback sukses.
+  Future<void> retainVersions(String pluginId, Set<String> keep) async {
+    final id = _validateSegment(pluginId, field: 'pluginId');
+    final pluginDir = Directory('${root.path}/$id');
+    if (!pluginDir.existsSync()) {
+      return;
+    }
+    await for (final entity in pluginDir.list()) {
+      if (entity is! Directory) {
+        continue;
+      }
+      final version = entity.path.split(RegExp(r'[\\/]')).last;
+      if (!keep.contains(version)) {
+        await entity.delete(recursive: true);
+      }
+    }
   }
 
   /// pluginId reverse-DNS dan versi semver sudah tervalidasi parser; cek ini

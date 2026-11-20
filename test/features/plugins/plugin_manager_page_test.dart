@@ -1,12 +1,17 @@
 import 'package:bufferite/core/plugin/installed_plugin.dart';
+import 'package:bufferite/core/plugin/operation.dart';
 import 'package:bufferite/core/plugin/plugin_manifest.dart';
 import 'package:bufferite/core/plugin/plugin_package.dart';
+import 'package:bufferite/core/plugin/plugin_permission.dart';
 import 'package:bufferite/core/plugin/semantic_version.dart';
+import 'package:bufferite/core/registry/registry_index.dart';
+import 'package:bufferite/core/registry/registry_plugin_status.dart';
 import 'package:bufferite/core/ui/app_theme.dart';
 import 'package:bufferite/features/plugins/plugin_actions.dart';
 import 'package:bufferite/features/plugins/plugin_manager_page.dart';
 import 'package:bufferite/features/plugins/plugin_providers.dart';
 import 'package:bufferite/features/plugins/plugin_sideload.dart';
+import 'package:bufferite/features/plugins/registry/registry_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +29,40 @@ InstalledPlugin _plugin({
     installedAt: DateTime.utc(2026, 1, 1),
     enabled: enabled,
     verified: verified,
+  );
+}
+
+RegistryEntry _entry({
+  String version = '1.1.0',
+  RegistryEntryStatus status = RegistryEntryStatus.active,
+}) {
+  return RegistryEntry(
+    pluginId: 'com.test.pack',
+    version: SemanticVersion.parse(version),
+    name: 'Test Pack',
+    summary: 'Ringkasan.',
+    tier: RuntimeTier.lua,
+    minAppVersion: SemanticVersion.parse('1.0.0'),
+    permissions: const <PluginPermission>{PluginPermission.cpu},
+    sizeBytes: 1024,
+    sha256: List<String>.filled(64, 'a').join(),
+    downloadUrl: 'packages/com.test.pack/$version/pack.berp',
+    publishedAt: DateTime.utc(2026, 11, 20),
+    status: status,
+  );
+}
+
+PluginRegistryStatus _status({
+  RegistryEntry? update,
+  RegistryEntryStatus? installedStatus,
+}) {
+  return PluginRegistryStatus(
+    installedVersion: SemanticVersion.parse('1.0.0'),
+    installedRelease: installedStatus == null
+        ? _entry(version: '1.0.0')
+        : _entry(version: '1.0.0', status: installedStatus),
+    latestRelease: update,
+    update: update,
   );
 }
 
@@ -69,11 +108,14 @@ Widget _host(
   List<InstalledPlugin> plugins, {
   bool withActions = false,
   bool withSideload = false,
+  Map<String, PluginRegistryStatus>? registryStatuses,
 }) {
   return ProviderScope(
     overrides: [
       installedPluginsProvider.overrideWith((ref) => plugins),
       appVersionProvider.overrideWithValue(SemanticVersion.parse('1.0.0')),
+      if (registryStatuses != null)
+        registryPluginStatusesProvider.overrideWithValue(registryStatuses),
       if (withActions)
         pluginActionsProvider.overrideWith((ref) {
           capturedActions = FakePluginActions(ref);
@@ -120,6 +162,39 @@ void main() {
     await tester.pump();
 
     expect(find.text('unverified'), findsOneWidget);
+  });
+
+  testWidgets('badge update tampil saat registry punya rilis lebih baru', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        <InstalledPlugin>[_plugin()],
+        registryStatuses: <String, PluginRegistryStatus>{
+          'com.test.pack': _status(update: _entry()),
+        },
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Update v1.1.0 tersedia'), findsOneWidget);
+  });
+
+  testWidgets('banner darurat tampil untuk plugin revoked', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        <InstalledPlugin>[_plugin(enabled: false)],
+        registryStatuses: <String, PluginRegistryStatus>{
+          'com.test.pack': _status(
+            installedStatus: RegistryEntryStatus.revoked,
+          ),
+        },
+      ),
+    );
+    await tester.pump();
+
+    expect(find.textContaining('dinonaktifkan'), findsOneWidget);
+    expect(find.text('revoked'), findsOneWidget);
   });
 
   testWidgets('tap plugin membuka detail manifest', (tester) async {

@@ -117,6 +117,27 @@ final class PluginRuntimeLoader {
   /// Lepas semua runtime (shutdown/test).
   Future<void> dispose() => cache.dispose();
 
+  /// Muat dan validasi entrypoint tanpa mengeksekusinya.
+  ///
+  /// Dipakai sebelum mengaktifkan versi update. Tier Lua native juga
+  /// dikompilasi agar syntax error terdeteksi sebelum metadata diganti.
+  Future<void> validate(InstalledPlugin plugin) async {
+    final installPath = plugin.installPath;
+    if (installPath == null) {
+      return;
+    }
+    final runtime = await _loadRuntime(plugin, installPath);
+    try {
+      if (runtime is LuaRuntime) {
+        await LuaRuntime.validateSource(runtime.source);
+      }
+    } finally {
+      if (runtime case final DisposableSandboxRuntime disposable) {
+        await disposable.dispose();
+      }
+    }
+  }
+
   /// Executor untuk [operation], atau `null` bila tier belum didukung/belum
   /// terpasang.
   Operation? operationFor(InstalledPlugin plugin, ManifestOperation operation) {

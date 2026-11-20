@@ -35,6 +35,9 @@ enum RegistryEntryStatus {
   yanked,
   revoked;
 
+  /// Boleh dipilih untuk instalasi/downgrade; `yanked`/`revoked` ditolak.
+  bool get selectable => this == active || this == deprecated;
+
   static RegistryEntryStatus parse(Object? value) {
     for (final status in values) {
       if (status.name == value) {

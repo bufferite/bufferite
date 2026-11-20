@@ -7,6 +7,7 @@ import '../../core/i18n/localized_error.dart';
 import '../../core/plugin/installed_plugin.dart';
 import '../../core/plugin/plugin_permission.dart';
 import '../../core/plugin/semantic_version.dart';
+import '../../core/registry/registry_plugin_status.dart';
 import '../../core/ui/components/app_badge.dart';
 import '../../core/ui/components/app_toast.dart';
 import '../../core/ui/components/empty_state.dart';
@@ -17,6 +18,7 @@ import 'plugin_detail_page.dart';
 import 'plugin_providers.dart';
 import 'plugin_sideload.dart';
 import 'registry/registry_catalog_screen.dart';
+import 'registry/registry_providers.dart';
 
 /// Daftar plugin terpasang sesuai `DESIGN.md` §6.5.
 class PluginManagerPage extends ConsumerWidget {
@@ -26,6 +28,7 @@ class PluginManagerPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appVersion = ref.watch(appVersionProvider);
     final plugins = ref.watch(installedPluginsProvider);
+    final registryStatuses = ref.watch(registryPluginStatusesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -63,20 +66,41 @@ class PluginManagerPage extends ConsumerWidget {
           title: context.tr('plugins.loadFailed'),
           description: context.trErrorObject(error),
         ),
-        data: (items) => items.isEmpty
-            ? EmptyState(
-                icon: Icons.extension_outlined,
-                title: context.tr('plugins.emptyTitle'),
-                description: context.tr('plugins.emptyDescription'),
+        data: (items) {
+          if (items.isEmpty) {
+            return EmptyState(
+              icon: Icons.extension_outlined,
+              title: context.tr('plugins.emptyTitle'),
+              description: context.tr('plugins.emptyDescription'),
+            );
+          }
+          final revoked = items
+              .where(
+                (plugin) =>
+                    registryStatuses[plugin.pluginId]?.isRevoked == true,
               )
-            : ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                itemCount: items.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (context, index) =>
-                    _tile(context, ref, items[index], appVersion),
+              .length;
+          return Column(
+            children: <Widget>[
+              if (revoked > 0) _revokedBanner(context, revoked),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (context, index) => _tile(
+                    context,
+                    ref,
+                    items[index],
+                    appVersion,
+                    registryStatuses[items[index].pluginId],
+                  ),
+                ),
               ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -86,9 +110,13 @@ class PluginManagerPage extends ConsumerWidget {
     WidgetRef ref,
     InstalledPlugin plugin,
     SemanticVersion appVersion,
+    PluginRegistryStatus? registryStatus,
   ) {
     final manifest = plugin.manifest;
     final status = plugin.statusFor(appVersion);
+    final registryBadge = registryStatus == null
+        ? null
+        : _registryBadge(context, registryStatus);
     return Card(
       child: ListTile(
         title: Text(manifest.name),
@@ -145,10 +173,45 @@ class PluginManagerPage extends ConsumerWidget {
               children: <Widget>[
                 AppBadge(label: manifest.tier.name),
                 _statusBadge(context, status),
+                ?registryBadge,
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _revokedBanner(BuildContext context, int count) {
+    final theme = Theme.of(context);
+    final tone = theme.colorScheme.error;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        0,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        border: Border.all(color: tone.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.gpp_bad_outlined, size: 18, color: tone),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              context.tr(
+                'plugins.revokedBanner',
+                args: <String, Object?>{'count': count},
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -171,6 +234,40 @@ class PluginManagerPage extends ConsumerWidget {
         tone: AppBadgeTone.danger,
       ),
     };
+  }
+
+  /// Badge registry: revocation lebih penting daripada tawaran update.
+  Widget? _registryBadge(BuildContext context, PluginRegistryStatus status) {
+    if (status.isRevoked) {
+      return AppBadge(
+        label: context.tr('plugins.status.revoked'),
+        tone: AppBadgeTone.danger,
+      );
+    }
+    final update = status.update;
+    if (update != null) {
+      return AppBadge(
+        label: context.tr(
+          'plugins.updateAvailable',
+          args: <String, Object?>{'version': update.version},
+        ),
+        tone: AppBadgeTone.accent,
+        icon: Icons.system_update,
+      );
+    }
+    if (status.isYanked) {
+      return AppBadge(
+        label: context.tr('plugins.status.yanked'),
+        tone: AppBadgeTone.warning,
+      );
+    }
+    if (status.isDeprecated) {
+      return AppBadge(
+        label: context.tr('plugins.status.deprecated'),
+        tone: AppBadgeTone.warning,
+      );
+    }
+    return null;
   }
 
   Future<void> _toggleEnabled(

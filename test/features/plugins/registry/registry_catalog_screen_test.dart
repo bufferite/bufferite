@@ -24,6 +24,7 @@ RegistryEntry _entry({
   String pluginId = 'com.test.alpha',
   String name = 'Alpha',
   String summary = 'Alat alpha untuk teks.',
+  String version = '1.2.0',
   RegistryEntryStatus status = RegistryEntryStatus.active,
   SemanticVersion? minAppVersion,
   Set<PluginPermission> permissions = const <PluginPermission>{
@@ -32,7 +33,7 @@ RegistryEntry _entry({
 }) {
   return RegistryEntry(
     pluginId: pluginId,
-    version: SemanticVersion.parse('1.2.0'),
+    version: SemanticVersion.parse(version),
     name: name,
     summary: summary,
     description: 'Deskripsi $name.',
@@ -43,10 +44,29 @@ RegistryEntry _entry({
     permissions: permissions,
     sizeBytes: 2048,
     sha256: List<String>.filled(64, 'a').join(),
-    downloadUrl: 'packages/$pluginId/1.2.0/pack.berp',
+    downloadUrl: 'packages/$pluginId/$version/pack.berp',
     publishedAt: DateTime.utc(2026, 11, 20, 10),
     status: status,
     tags: const <String>['teks'],
+  );
+}
+
+InstalledPlugin _installed({
+  String pluginId = 'com.test.alpha',
+  String version = '1.0.0',
+  Set<PluginPermission> permissions = const <PluginPermission>{
+    PluginPermission.cpu,
+  },
+}) {
+  final json = validManifestJson(pluginId: pluginId, version: version);
+  json['permissions'] = permissions
+      .map((permission) => permission.wireName)
+      .toList();
+  return InstalledPlugin(
+    manifest: PluginManifest.fromJson(json),
+    source: PluginSource.sideload,
+    installedAt: DateTime.utc(2026, 11, 20),
+    verified: true,
   );
 }
 
@@ -108,6 +128,7 @@ class _FakeInstallService extends RegistryInstallService {
   _FakeInstallService(super.ref);
 
   int calls = 0;
+  RegistryEntry? lastEntry;
 
   @override
   Future<InstalledPlugin> install({
@@ -115,6 +136,7 @@ class _FakeInstallService extends RegistryInstallService {
     required RegistrySnapshot snapshot,
   }) async {
     calls++;
+    lastEntry = entry;
     return InstalledPlugin(
       manifest: PluginManifest.fromJson(
         validManifestJson(
@@ -138,6 +160,7 @@ void main() {
     Widget home, {
     required RegistrySnapshot snapshot,
     bool consent = true,
+    List<InstalledPlugin> installed = const <InstalledPlugin>[],
   }) {
     return ProviderScope(
       overrides: [
@@ -147,9 +170,7 @@ void main() {
           );
           return settingsController;
         }),
-        installedPluginsProvider.overrideWith(
-          (ref) async => <InstalledPlugin>[],
-        ),
+        installedPluginsProvider.overrideWith((ref) async => installed),
         appVersionProvider.overrideWithValue(SemanticVersion.parse('1.0.0')),
         registryCatalogProvider.overrideWith(() {
           catalogController = _FakeCatalogController(snapshot);
@@ -226,9 +247,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Akses katalog plugin?'), findsOneWidget);
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Izinkan akses'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Izinkan akses'));
     await tester.pumpAndSettle();
 
     expect(settingsController.consent, isTrue);
@@ -290,5 +309,116 @@ void main() {
       find.widgetWithText(FilledButton, 'Instal'),
     );
     expect(button.onPressed, isNull);
+  });
+
+  testWidgets('update hanya meminta izin yang bertambah', (tester) async {
+    final entry = _entry(
+      version: '2.0.0',
+      permissions: const <PluginPermission>{
+        PluginPermission.cpu,
+        PluginPermission.net,
+      },
+    );
+    final snapshot = _snapshot(
+      entries: <RegistryEntry>[
+        entry,
+        _entry(version: '1.0.0'),
+      ],
+    );
+    tester.view.physicalSize = const Size(1200, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      host(
+        RegistryDetailScreen(entry: entry, snapshot: snapshot),
+        snapshot: snapshot,
+        installed: <InstalledPlugin>[_installed()],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Perbarui'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Instal').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Plugin meminta akses internet'), findsOneWidget);
+    await tester.tap(find.text('Setujui'));
+    await tester.pumpAndSettle();
+
+    expect(installService.calls, 1);
+    expect(installService.lastEntry!.version.toString(), '2.0.0');
+  });
+
+  testWidgets('update tanpa izin baru tidak menampilkan dialog izin', (
+    tester,
+  ) async {
+    final entry = _entry(version: '2.0.0');
+    final snapshot = _snapshot(
+      entries: <RegistryEntry>[
+        entry,
+        _entry(version: '1.0.0'),
+      ],
+    );
+    tester.view.physicalSize = const Size(1200, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      host(
+        RegistryDetailScreen(entry: entry, snapshot: snapshot),
+        snapshot: snapshot,
+        installed: <InstalledPlugin>[_installed()],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Perbarui'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Instal').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Plugin meminta izin'), findsNothing);
+    expect(installService.calls, 1);
+  });
+
+  testWidgets('downgrade eksplisit lewat pemilih versi meminta konfirmasi', (
+    tester,
+  ) async {
+    final latest = _entry(version: '2.0.0');
+    final older = _entry(version: '1.0.0');
+    final snapshot = _snapshot(entries: <RegistryEntry>[latest, older]);
+    tester.view.physicalSize = const Size(1200, 5000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      host(
+        RegistryDetailScreen(entry: latest, snapshot: snapshot),
+        snapshot: snapshot,
+        installed: <InstalledPlugin>[_installed(version: '2.0.0')],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('v1.0.0 · aktif').last);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Versi terpasang (v2.0.0) lebih baru.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Downgrade'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Downgrade plugin?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Downgrade').last);
+    await tester.pumpAndSettle();
+
+    expect(installService.calls, 1);
+    expect(installService.lastEntry!.version.toString(), '1.0.0');
   });
 }

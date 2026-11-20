@@ -156,11 +156,21 @@
     "installed": "{name} installed",
     "installFailed": "Failed to install plugin: {error}",
     "pickFileTitle": "Choose plugin package",
+    "updateAvailable": "Update v{version} available",
+    "revokedBanner": "{count} plugins were disabled because their release was revoked. Open a plugin's details to roll back or remove it.",
+    "rollbackTitle": "Roll back plugin?",
+    "rollbackBody": "{name} will be restored from v{installed} to v{version}. This downgrade only uses a version still stored on the device.",
+    "rollbackConfirm": "Roll back",
+    "rollbackSuccess": "Plugin restored to v{version}.",
+    "rollbackFailed": "Rollback failed: {error}",
     "status": {
       "active": "active",
       "disabled": "disabled",
       "unverified": "unverified",
-      "incompatible": "incompatible"
+      "incompatible": "incompatible",
+      "deprecated": "deprecated",
+      "yanked": "yanked",
+      "revoked": "revoked"
     },
     "detail": {
       "manifest": "Manifest",
@@ -175,7 +185,10 @@
       "integrity": "Integrity",
       "unsigned": "unsigned",
       "unknown": "unknown",
-      "notFound": "not found"
+      "notFound": "not found",
+      "rollback": "Rollback",
+      "rollbackHint": "Version v{version} is still stored and can be restored.",
+      "rollbackAction": "Roll back to v{version}"
     }
   },
   "permissions": {
@@ -574,7 +587,10 @@
       "package_empty": "The .berp package is empty.",
       "package_invalid": "The .berp package is not a valid zip file.",
       "manifest_missing": "The package has no plugin.manifest.json at its root.",
-      "entrypoint_missing": "Entrypoint {entrypoint} does not exist inside the package."
+      "entrypoint_missing": "Entrypoint {entrypoint} does not exist inside the package.",
+      "update_failed": "Plugin update failed; the previous version was restored.",
+      "rollback_unavailable": "The previous version is not available on this device.",
+      "rollback_failed": "Plugin rollback failed; the active version was not changed."
     }
   },
   "registry": {
@@ -597,6 +613,8 @@
     "sourceLine": "Source: {url} · sequence {sequence}",
     "verifiedBadge": "signature verified",
     "installedVersion": "Installed v{version}",
+    "updateBadge": "Update v{version}",
+    "revokedBadge": "installed revoked",
     "status": {
       "active": "active",
       "deprecated": "deprecated",
@@ -618,18 +636,25 @@
       "verification": "Verification",
       "indexSignature": "The index signature is verified when the catalog loads.",
       "packageSignature": "The package hash and signature are verified before installation.",
+      "selectVersion": "Version",
       "install": "Install",
       "update": "Update",
+      "downgrade": "Downgrade",
       "installed": "Installed",
       "installing": "Downloading and verifying...",
       "incompatible": "Requires Bufferite {version} or newer.",
       "unavailable": "This release cannot be installed.",
       "newerInstalled": "The installed version (v{version}) is newer than this release.",
+      "deprecatedHint": "This release is deprecated. Pick the latest version when available.",
+      "downgradeHint": "The installed version (v{version}) is newer. Downgrading only happens when you explicitly select this version.",
       "installTitle": "Install plugin from the registry?",
       "installBody": "{name} v{version}\n{id}\nSize: {size}\nSource: {source}\nPermissions: {permissions}",
       "updateTitle": "Update plugin?",
       "updateBody": "{name} will be updated from v{installed} to v{version}.",
+      "downgradeTitle": "Downgrade plugin?",
+      "downgradeBody": "{name} will be restored from v{installed} to v{version}. This older release was selected explicitly and is still verified.",
       "installSuccess": "{name} installed and verified.",
+      "updateSuccess": "{name} updated to v{version}.",
       "installFailed": "Failed to install plugin: {error}"
     },
     "errors": {

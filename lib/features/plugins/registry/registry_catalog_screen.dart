@@ -5,6 +5,7 @@ import '../../../core/i18n/app_localizations.dart';
 import '../../../core/plugin/installed_plugin.dart';
 import '../../../core/registry/registry_client.dart';
 import '../../../core/registry/registry_index.dart';
+import '../../../core/registry/registry_plugin_status.dart';
 import '../../../core/ui/components/app_badge.dart';
 import '../../../core/ui/components/empty_state.dart';
 import '../../../core/ui/design_tokens.dart';
@@ -59,8 +60,7 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
       ),
       body: Column(
         children: <Widget>[
-          if (catalog.isLoading || _refreshing)
-            const LinearProgressIndicator(),
+          if (catalog.isLoading || _refreshing) const LinearProgressIndicator(),
           Expanded(
             child: catalog.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -96,6 +96,7 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
               const <InstalledPlugin>[])
         plugin.pluginId: plugin,
     };
+    final registryStatuses = ref.watch(registryPluginStatusesProvider);
     final palette = Theme.of(context).brightness == Brightness.dark
         ? AppPalette.dark
         : AppPalette.light;
@@ -202,6 +203,7 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
                     entries[index],
                     snapshot,
                     installed[entries[index].pluginId],
+                    registryStatuses[entries[index].pluginId],
                   ),
                 ),
         ),
@@ -213,7 +215,9 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
     RegistryEntry entry,
     RegistrySnapshot snapshot,
     InstalledPlugin? installed,
+    PluginRegistryStatus? registryStatus,
   ) {
+    final update = registryStatus?.update;
     return Card(
       child: ListTile(
         leading: const CircleAvatar(child: Icon(Icons.extension_outlined)),
@@ -242,6 +246,20 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
                       args: <String, Object?>{'version': installed.version},
                     ),
                     tone: AppBadgeTone.success,
+                  ),
+                if (registryStatus?.isRevoked == true)
+                  AppBadge(
+                    label: context.tr('registry.revokedBadge'),
+                    tone: AppBadgeTone.danger,
+                  )
+                else if (update != null)
+                  AppBadge(
+                    label: context.tr(
+                      'registry.updateBadge',
+                      args: <String, Object?>{'version': update.version},
+                    ),
+                    tone: AppBadgeTone.accent,
+                    icon: Icons.system_update,
                   ),
               ],
             ),
@@ -360,13 +378,22 @@ class _RegistryCatalogScreenState extends ConsumerState<RegistryCatalogScreen> {
     final latest = <String, RegistryEntry>{};
     for (final entry in index.plugins) {
       final current = latest[entry.pluginId];
-      if (current == null || entry.version.compareTo(current.version) > 0) {
+      if (current == null || _preferEntry(entry, current)) {
         latest[entry.pluginId] = entry;
       }
     }
     final entries = latest.values.toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return entries;
+  }
+
+  /// Rilis yang boleh dipasang menang atas rilis yanked/revoked; sesama
+  /// kandidat diurutkan berdasarkan versi.
+  bool _preferEntry(RegistryEntry candidate, RegistryEntry current) {
+    if (candidate.status.selectable != current.status.selectable) {
+      return candidate.status.selectable;
+    }
+    return candidate.version.compareTo(current.version) > 0;
   }
 
   String _dateLabel(DateTime value) {

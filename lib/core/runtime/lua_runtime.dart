@@ -22,6 +22,33 @@ final class LuaRuntime implements SandboxRuntime {
 
   final String source;
 
+  /// Kompilasi sumber tanpa mengeksekusi `transform`.
+  ///
+  /// Dipakai saat update plugin untuk memastikan versi baru bisa dimuat
+  /// sebelum metadata aktif diganti (lihat `REGISTRY.md` §8).
+  static Future<void> validateSource(String source) {
+    return Isolate.run(() async {
+      await LuaState.loadRuntime();
+      final state = LuaState.newState(memoryLimit: 16 << 20);
+      try {
+        state.openLibs(sandbox: true);
+        final status = state.loadString(
+          source,
+          chunkName: 'bufferite_transform',
+        );
+        if (status != ThreadStatus.luaOk) {
+          throw AppError(
+            category: ErrorCategory.runtime,
+            code: 'runtime.lua_error',
+            message: state.toStr(-1) ?? 'Sumber Lua plugin tidak valid.',
+          );
+        }
+      } finally {
+        state.close();
+      }
+    });
+  }
+
   @override
   Future<Buffer> execute(
     Buffer input,

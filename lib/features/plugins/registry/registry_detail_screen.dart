@@ -8,6 +8,7 @@ import '../../../core/plugin/installed_plugin.dart';
 import '../../../core/plugin/plugin_permission.dart';
 import '../../../core/registry/registry_client.dart';
 import '../../../core/registry/registry_index.dart';
+import '../../../core/registry/registry_plugin_status.dart';
 import '../../../core/ui/components/app_badge.dart';
 import '../../../core/ui/components/app_toast.dart';
 import '../../../core/ui/components/permission_dialog.dart';
@@ -34,26 +35,31 @@ class RegistryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
+  late RegistryEntry _entry;
   bool _installing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _entry = widget.entry;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final entry = widget.entry;
+    final entry = _entry;
     final appVersion = ref.watch(appVersionProvider);
     final installed = _installedPlugin(
       ref.watch(installedPluginsProvider).asData?.value ??
           const <InstalledPlugin>[],
     );
+    final releases = _releases();
     final compatible = appVersion.isAtLeast(entry.minAppVersion);
-    final selectable =
-        entry.status == RegistryEntryStatus.active ||
-        entry.status == RegistryEntryStatus.deprecated;
+    final selectable = entry.status.selectable;
     final sameVersion = installed != null && installed.version == entry.version;
-    final newerInstalled =
+    final downgrade =
         installed != null && installed.version.compareTo(entry.version) > 0;
-    final canInstall =
-        compatible && selectable && !sameVersion && !newerInstalled;
+    final canInstall = compatible && selectable && !sameVersion;
 
     return Scaffold(
       appBar: AppBar(title: Text(entry.name)),
@@ -81,6 +87,39 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
                 ),
             ],
           ),
+          if (releases.length > 1) ...<Widget>[
+            const SizedBox(height: AppSpacing.md),
+            DropdownButtonFormField<String>(
+              initialValue: entry.version.toString(),
+              decoration: InputDecoration(
+                labelText: context.tr('registry.detail.selectVersion'),
+              ),
+              items: <DropdownMenuItem<String>>[
+                for (final release in releases)
+                  DropdownMenuItem<String>(
+                    value: release.version.toString(),
+                    enabled:
+                        release.status.selectable &&
+                        appVersion.isAtLeast(release.minAppVersion),
+                    child: Text(
+                      'v${release.version} · '
+                      '${_statusLabel(release.status)}',
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+                for (final release in releases) {
+                  if (release.version.toString() == value) {
+                    setState(() => _entry = release);
+                    return;
+                  }
+                }
+              },
+            ),
+          ],
           const SizedBox(height: AppSpacing.lg),
           Text(entry.summary, style: theme.textTheme.bodyLarge),
           if (entry.description != null) ...<Widget>[
@@ -154,11 +193,15 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
               style: TextStyle(color: theme.colorScheme.error),
             ),
           ],
-          if (newerInstalled) ...<Widget>[
+          if (entry.status == RegistryEntryStatus.deprecated) ...<Widget>[
+            const SizedBox(height: AppSpacing.md),
+            Text(context.tr('registry.detail.deprecatedHint')),
+          ],
+          if (downgrade) ...<Widget>[
             const SizedBox(height: AppSpacing.md),
             Text(
               context.tr(
-                'registry.detail.newerInstalled',
+                'registry.detail.downgradeHint',
                 args: <String, Object?>{'version': installed.version},
               ),
             ),
@@ -173,7 +216,11 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Icon(
-                    installed == null ? Icons.download : Icons.system_update,
+                    installed == null
+                        ? Icons.download
+                        : downgrade
+                        ? Icons.restore
+                        : Icons.system_update,
                   ),
             label: Text(
               _installing
@@ -182,6 +229,8 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
                   ? context.tr('registry.detail.installed')
                   : installed == null
                   ? context.tr('registry.detail.install')
+                  : downgrade
+                  ? context.tr('registry.detail.downgrade')
                   : context.tr('registry.detail.update'),
             ),
           ),
@@ -209,6 +258,25 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
         tone: AppBadgeTone.danger,
       ),
     };
+  }
+
+  String _statusLabel(RegistryEntryStatus status) {
+    return switch (status) {
+      RegistryEntryStatus.active => context.tr('registry.status.active'),
+      RegistryEntryStatus.deprecated => context.tr(
+        'registry.status.deprecated',
+      ),
+      RegistryEntryStatus.yanked => context.tr('registry.status.yanked'),
+      RegistryEntryStatus.revoked => context.tr('registry.status.revoked'),
+    };
+  }
+
+  List<RegistryEntry> _releases() {
+    final releases = registryReleasesFor(
+      widget.snapshot.index,
+      widget.entry.pluginId,
+    );
+    return releases.isEmpty ? <RegistryEntry>[widget.entry] : releases;
   }
 
   Widget _section(ThemeData theme, String title) {
@@ -271,19 +339,32 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
       ref.read(installedPluginsProvider).asData?.value ??
           const <InstalledPlugin>[],
     );
-    final entry = widget.entry;
+    final entry = _entry;
+    final downgrade =
+        installed != null && installed.version.compareTo(entry.version) > 0;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
           context.tr(
-            installed == null
+            downgrade
+                ? 'registry.detail.downgradeTitle'
+                : installed == null
                 ? 'registry.detail.installTitle'
                 : 'registry.detail.updateTitle',
           ),
         ),
         content: Text(
-          installed == null
+          downgrade
+              ? context.tr(
+                  'registry.detail.downgradeBody',
+                  args: <String, Object?>{
+                    'name': entry.name,
+                    'installed': installed.version,
+                    'version': entry.version,
+                  },
+                )
+              : installed == null
               ? context.tr(
                   'registry.detail.installBody',
                   args: <String, Object?>{
@@ -313,7 +394,11 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.tr('common.install')),
+            child: Text(
+              context.tr(
+                downgrade ? 'registry.detail.downgrade' : 'common.install',
+              ),
+            ),
           ),
         ],
       ),
@@ -322,16 +407,23 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
       return;
     }
 
+    // Update hanya meminta izin baru; pengurangan izin tidak perlu dialog.
+    final granted =
+        installed?.manifest.permissions ?? const <PluginPermission>{};
     final requested = entry.permissions
-        .where((permission) => permission != PluginPermission.cpu)
+        .where(
+          (permission) =>
+              permission != PluginPermission.cpu &&
+              !granted.contains(permission),
+        )
         .toSet();
     if (requested.isNotEmpty) {
-      final granted = await showPermissionDialog(
+      final approved = await showPermissionDialog(
         context,
         pluginName: entry.name,
         permissions: requested,
       );
-      if (!granted || !mounted) {
+      if (!approved || !mounted) {
         return;
       }
     }
@@ -344,10 +436,18 @@ class _RegistryDetailScreenState extends ConsumerState<RegistryDetailScreen> {
       if (mounted) {
         showAppToast(
           context,
-          message: context.tr(
-            'registry.detail.installSuccess',
-            args: <String, Object?>{'name': plugin.manifest.name},
-          ),
+          message: installed == null
+              ? context.tr(
+                  'registry.detail.installSuccess',
+                  args: <String, Object?>{'name': plugin.manifest.name},
+                )
+              : context.tr(
+                  'registry.detail.updateSuccess',
+                  args: <String, Object?>{
+                    'name': plugin.manifest.name,
+                    'version': plugin.manifest.version,
+                  },
+                ),
           tone: AppToastTone.success,
         );
       }

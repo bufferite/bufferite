@@ -11,6 +11,7 @@ import '../../../core/registry/registry_client.dart';
 import '../../../core/registry/registry_error.dart';
 import '../../../core/registry/registry_index.dart';
 import '../../../core/registry/registry_installer.dart';
+import '../../../core/registry/registry_plugin_status.dart';
 import '../../../core/registry/registry_signature.dart';
 import '../../../core/registry/registry_transport.dart';
 import '../../../core/storage/storage_providers.dart';
@@ -76,7 +77,11 @@ class RegistryCatalogController extends AsyncNotifier<RegistrySnapshot?> {
   @override
   Future<RegistrySnapshot?> build() async {
     final client = await ref.watch(registryClientProvider.future);
-    return client.loadCached();
+    final snapshot = await client.loadCached();
+    if (snapshot != null) {
+      await _applyRevocations(snapshot);
+    }
+    return snapshot;
   }
 
   /// Refresh jaringan. Wajib ada konsen; cache tetap dipakai bila offline.
@@ -91,7 +96,9 @@ class RegistryCatalogController extends AsyncNotifier<RegistrySnapshot?> {
 
     state = await AsyncValue.guard<RegistrySnapshot?>(() async {
       final client = await ref.read(registryClientProvider.future);
-      return client.loadWithFallback();
+      final snapshot = await client.loadWithFallback();
+      await _applyRevocations(snapshot);
+      return snapshot;
     });
   }
 
@@ -100,12 +107,71 @@ class RegistryCatalogController extends AsyncNotifier<RegistrySnapshot?> {
     await ref.read(registryCacheStoreProvider).clear();
     state = const AsyncData<RegistrySnapshot?>(null);
   }
+
+  /// Nonaktifkan plugin terpasang yang rilisnya berstatus `revoked`.
+  ///
+  /// Kegagalan di sini tidak boleh membuat katalog gagal dimuat; badge status
+  /// tetap ditampilkan oleh [registryPluginStatusesProvider].
+  Future<void> _applyRevocations(RegistrySnapshot snapshot) async {
+    try {
+      final installed = await ref.read(pluginRepositoryProvider).list();
+      var changed = false;
+      for (final plugin in installed) {
+        final status = registryStatusFor(
+          pluginId: plugin.pluginId,
+          installedVersion: plugin.version,
+          index: snapshot.index,
+          appVersion: ref.read(appVersionProvider),
+        );
+        if (plugin.enabled && status?.isRevoked == true) {
+          await ref
+              .read(pluginManagerServiceProvider)
+              .setEnabled(plugin.pluginId, false);
+          changed = true;
+        }
+      }
+      if (changed) {
+        ref.invalidate(installedPluginsProvider);
+        ref.read(operationsRevisionProvider.notifier).bump();
+      }
+    } on Object {
+      // Status revocation tetap terlihat di UI; enforcement dicoba lagi saat
+      // refresh berikutnya.
+    }
+  }
 }
 
 final registryCatalogProvider =
     AsyncNotifierProvider<RegistryCatalogController, RegistrySnapshot?>(
       RegistryCatalogController.new,
     );
+
+/// Status update/revocation plugin terpasang berdasarkan katalog terakhir.
+///
+/// Kosong bila katalog belum dimuat atau trust anchor belum tersedia; UI tidak
+/// menampilkan badge apa pun dalam kondisi itu.
+final registryPluginStatusesProvider =
+    Provider<Map<String, PluginRegistryStatus>>((ref) {
+      final snapshot = ref.watch(registryCatalogProvider).asData?.value;
+      final installed = ref.watch(installedPluginsProvider).asData?.value;
+      if (snapshot == null || installed == null) {
+        return const <String, PluginRegistryStatus>{};
+      }
+      final appVersion = ref.watch(appVersionProvider);
+      final statuses = <String, PluginRegistryStatus>{};
+      for (final plugin in installed) {
+        final status = registryStatusFor(
+          pluginId: plugin.pluginId,
+          installedVersion: plugin.version,
+          index: snapshot.index,
+          appVersion: appVersion,
+        );
+        if (status != null) {
+          statuses[plugin.pluginId] = status;
+        }
+      }
+      return statuses;
+    });
 
 /// Memasang entri registry setelah unduhan + signature diverifikasi.
 class RegistryInstallService {
@@ -127,18 +193,28 @@ class RegistryInstallService {
       indexSourceUrl: snapshot.sourceUrl,
     );
 
+    final sameVersion = existing != null && existing.version == entry.version;
+    final previous = existing?.provenance;
+    final provenance = PluginProvenance(
+      registryUrl: snapshot.sourceUrl.toString(),
+      keyId: verified.keyId,
+      sha256: verified.sha256,
+      previousVersion: sameVersion
+          ? previous?.previousVersion
+          : existing?.version.toString(),
+      previousSource: sameVersion ? previous?.previousSource : existing?.source,
+      previousVerified: sameVersion
+          ? previous?.previousVerified
+          : existing?.verified,
+    );
+
     final plugin = await _ref
         .read(pluginManagerServiceProvider)
-        .install(
+        .update(
           verified.package,
           source: PluginSource.registry,
           verified: true,
-          provenance: PluginProvenance(
-            registryUrl: snapshot.sourceUrl.toString(),
-            keyId: verified.keyId,
-            sha256: verified.sha256,
-            previousVersion: existing?.version.toString(),
-          ),
+          provenance: provenance,
         );
 
     _ref.invalidate(installedPluginsProvider);

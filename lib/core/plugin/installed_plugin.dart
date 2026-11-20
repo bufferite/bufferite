@@ -32,12 +32,16 @@ final class PluginProvenance {
     required this.keyId,
     required this.sha256,
     this.previousVersion,
+    this.previousSource,
+    this.previousVerified,
   });
 
   final String registryUrl;
   final String keyId;
   final String sha256;
   final String? previousVersion;
+  final PluginSource? previousSource;
+  final bool? previousVerified;
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
@@ -45,6 +49,8 @@ final class PluginProvenance {
       'keyId': keyId,
       'sha256': sha256,
       if (previousVersion != null) 'previousVersion': previousVersion,
+      if (previousSource != null) 'previousSource': previousSource!.name,
+      if (previousVerified != null) 'previousVerified': previousVerified,
     };
   }
 
@@ -60,10 +66,14 @@ final class PluginProvenance {
     final keyId = raw['keyId'];
     final sha256 = raw['sha256'];
     final previousVersion = raw['previousVersion'];
+    final previousSource = raw['previousSource'];
+    final previousVerified = raw['previousVerified'];
     if (registryUrl is! String ||
         keyId is! String ||
         sha256 is! String ||
-        (previousVersion != null && previousVersion is! String)) {
+        (previousVersion != null && previousVersion is! String) ||
+        (previousSource != null && previousSource is! String) ||
+        (previousVerified != null && previousVerified is! bool)) {
       throw const AppError(
         category: ErrorCategory.validation,
         code: 'plugin.installed_invalid',
@@ -75,6 +85,10 @@ final class PluginProvenance {
       keyId: keyId,
       sha256: sha256,
       previousVersion: previousVersion as String?,
+      previousSource: previousSource == null
+          ? null
+          : PluginSource.parse(previousSource),
+      previousVerified: previousVerified as bool?,
     );
   }
 }

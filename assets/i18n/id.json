@@ -156,11 +156,21 @@
     "installed": "{name} terpasang",
     "installFailed": "Gagal memasang plugin: {error}",
     "pickFileTitle": "Pilih paket plugin",
+    "updateAvailable": "Update v{version} tersedia",
+    "revokedBanner": "{count} plugin dinonaktifkan karena rilisnya dicabut. Buka detail plugin untuk rollback atau hapus.",
+    "rollbackTitle": "Rollback plugin?",
+    "rollbackBody": "{name} akan dikembalikan dari v{installed} ke v{version}. Downgrade ini hanya memakai versi yang masih tersimpan di perangkat.",
+    "rollbackConfirm": "Rollback",
+    "rollbackSuccess": "Plugin dikembalikan ke v{version}.",
+    "rollbackFailed": "Rollback gagal: {error}",
     "status": {
       "active": "aktif",
       "disabled": "nonaktif",
       "unverified": "unverified",
-      "incompatible": "inkompatibel"
+      "incompatible": "inkompatibel",
+      "deprecated": "deprecated",
+      "yanked": "yanked",
+      "revoked": "revoked"
     },
     "detail": {
       "manifest": "Manifest",
@@ -175,7 +185,10 @@
       "integrity": "Integritas",
       "unsigned": "tidak ditandatangani",
       "unknown": "tidak diketahui",
-      "notFound": "tidak ditemukan"
+      "notFound": "tidak ditemukan",
+      "rollback": "Rollback",
+      "rollbackHint": "Versi v{version} masih tersimpan dan dapat dipulihkan.",
+      "rollbackAction": "Rollback ke v{version}"
     }
   },
   "permissions": {
@@ -574,7 +587,10 @@
       "package_empty": "Paket .berp kosong.",
       "package_invalid": "Paket .berp bukan zip yang valid.",
       "manifest_missing": "Paket tidak memiliki plugin.manifest.json di root.",
-      "entrypoint_missing": "Entrypoint {entrypoint} tidak ada di dalam paket."
+      "entrypoint_missing": "Entrypoint {entrypoint} tidak ada di dalam paket.",
+      "update_failed": "Update plugin gagal; versi sebelumnya dipulihkan.",
+      "rollback_unavailable": "Versi sebelumnya tidak tersedia di perangkat.",
+      "rollback_failed": "Rollback plugin gagal; versi aktif tidak diubah."
     }
   },
   "registry": {
@@ -597,6 +613,8 @@
     "sourceLine": "Sumber: {url} · urutan {sequence}",
     "verifiedBadge": "signature terverifikasi",
     "installedVersion": "Terpasang v{version}",
+    "updateBadge": "Update v{version}",
+    "revokedBadge": "terpasang revoked",
     "status": {
       "active": "aktif",
       "deprecated": "deprecated",
@@ -618,18 +636,25 @@
       "verification": "Verifikasi",
       "indexSignature": "Signature indeks diverifikasi saat katalog dimuat.",
       "packageSignature": "Signature paket dan hash diverifikasi sebelum instalasi.",
+      "selectVersion": "Versi",
       "install": "Instal",
       "update": "Perbarui",
+      "downgrade": "Downgrade",
       "installed": "Terpasang",
       "installing": "Mengunduh dan memverifikasi...",
       "incompatible": "Butuh Bufferite {version} atau lebih baru.",
       "unavailable": "Rilis ini tidak dapat diinstal.",
       "newerInstalled": "Versi terpasang (v{version}) lebih baru dari rilis ini.",
+      "deprecatedHint": "Rilis ini deprecated. Pilih versi terbaru bila tersedia.",
+      "downgradeHint": "Versi terpasang (v{version}) lebih baru. Downgrade hanya dilakukan jika kamu memilih versi ini secara eksplisit.",
       "installTitle": "Instal plugin dari registry?",
       "installBody": "{name} v{version}\n{id}\nUkuran: {size}\nSumber: {source}\nIzin: {permissions}",
       "updateTitle": "Perbarui plugin?",
       "updateBody": "{name} akan diperbarui dari v{installed} ke v{version}.",
+      "downgradeTitle": "Downgrade plugin?",
+      "downgradeBody": "{name} akan dikembalikan dari v{installed} ke v{version}. Rilis lama ini dipilih secara eksplisit dan tetap diverifikasi.",
       "installSuccess": "{name} terpasang dan terverifikasi.",
+      "updateSuccess": "{name} diperbarui ke v{version}.",
       "installFailed": "Gagal memasang plugin: {error}"
     },
     "errors": {
