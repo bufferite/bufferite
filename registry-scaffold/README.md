@@ -36,8 +36,9 @@ COMMUNITY.md                         daftar repo komunitas, tidak dibaca app
 .github/workflows/deploy.yml         verifikasi + deploy indeks bertanda tangan
 ```
 
-Folder `packages/`, `keys/`, dan `release/` tidak menyertakan paket atau kunci
-produksi di scaffold ini. Isi saat mulai mempublikasikan plugin.
+Folder `packages/` dan `release/` tidak menyertakan paket atau indeks produksi
+di scaffold ini. `keys/` hanya berisi public key (aman di-commit); private key
+tidak pernah ada di repo.
 
 ## Setup awal
 
