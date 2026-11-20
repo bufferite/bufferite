@@ -35,9 +35,9 @@ Status yang dipakai:
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
 | Task berikutnya | Publikasi registry (operasional); F17-T01 ditunda |
-| Blocker aktif | Publikasi CI menunggu repo `bufferite/plugins`, Pages/DNS, dan secret kunci |
+| Blocker aktif | Domain `bufferite.dev` belum terdaftar; Pages/DNS dan publikasi pertama menunggu registrasi domain |
 | Analyze | Lulus (0 issue, 2026-11-20) |
-| Test suite | Lulus (648 test, 2026-11-20) |
+| Test suite | Lulus (649 test, 2026-11-20) |
 
 ## 3. Progres per Feature
 
@@ -1990,7 +1990,7 @@ bagian D.
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
 | 2026-11-20 | F16-T02/T03/T04, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | Katalog, konsen, instalasi terverifikasi (F16-T02), serta update/rollback (F16-T04) selesai; trust anchor produksi belum bisa difinalisasi | Selesai (D13: indeks offline, paket CI, trust store dibundel) |
-| 2026-11-20 | D12/publish | Repo `bufferite/bufferite` kosong sehingga workflow publish gagal di checkout tooling; Pages belum aktif | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka (push repo lokal, set `BUFFERITE_TOOL_REF`, aktifkan Pages/DNS, environment + secret `REGISTRY_PACKAGE_KEY`) |
+| 2026-11-20 | D12/publish | Repo `bufferite/bufferite` kosong sehingga workflow publish gagal di checkout tooling; Pages belum aktif | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka sebagian (repo aplikasi/registry ter-push, CI aplikasi hijau, Pages Actions aktif, environment + secret dan `BUFFERITE_TOOL_REF` terpasang; DNS menunggu registrasi `bufferite.dev`) |
 | 2026-11-20 | D14, F17-T01 | Model marketplace/rating/laporan belum diputuskan | Berpotensi menambah backend, akun, dan moderasi yang tidak diperlukan | Selesai (D14: marketplace lanjutan ditunda; kontribusi via PR GitHub, katalog read-only) |
 
 ## 9. Catatan Keputusan (diisi saat ada)

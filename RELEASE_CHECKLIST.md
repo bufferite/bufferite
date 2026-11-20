@@ -47,11 +47,11 @@ dilacak di `progress.md` §8 Blocker.
 | Trust anchor produksi dibundel | OK | `assets/registry_keys.json` + `test/core/registry/registry_trust_store_asset_test.dart` (`7df70b3`) |
 | Kunci indeks offline, kunci paket secret CI | SEBAGIAN | kunci dibuat; private key ada di `.keys/` (gitignored) dan harus dipindahkan/dipasang oleh manusia |
 | Rehearsal lokal rilis penuh | OK | paket 1.0.0/1.1.0: signature, build indeks, sequence 1→2, rebuild deterministik, immutability, tamper/replay ditolak |
-| Repo `bufferite/plugins` | BELUM | buat repo publik dan salin isi `registry-scaffold/` |
-| GitHub Pages + DNS | BELUM | Aktifkan Pages via Actions, custom domain `plugins.bufferite.dev`, CNAME ke `bufferite.github.io` |
-| Environment `registry-publish` + secret | BELUM | required reviewers; secret `REGISTRY_PACKAGE_KEY` (isi `.keys/package.json`); tanpa secret kunci indeks |
-| `BUFFERITE_TOOL_REF` | BELUM | commit SHA repo aplikasi yang sudah di-push dan memuat `tool/registry_cli.dart` |
-| Release pertama ditandatangani | BELUM | `publish.yml` → artifact → signing offline → `release/registry.json` + `.sig` → `deploy.yml` |
+| Repo `bufferite/plugins` | OK | Scaffold D13/D14 di-push ke `main` (`2c4f9c0`) |
+| GitHub Pages + DNS | SEBAGIAN | Pages via Actions aktif dan custom domain `plugins.bufferite.dev` terpasang; DNS menunggu registrasi `bufferite.dev`, lalu CNAME `plugins` → `bufferite.github.io` |
+| Environment `registry-publish` + secret | OK | Required reviewer `exphert`; secret `REGISTRY_PACKAGE_KEY` terpasang; tidak ada secret kunci indeks |
+| `BUFFERITE_TOOL_REF` | OK | `ba79cd5` (commit aplikasi yang sudah di-push dan memuat `tool/registry_cli.dart`) |
+| Release pertama ditandatangani | BELUM | `publish.yml` → artifact → signing offline → `release/registry.json` + `.sig` → `deploy.yml`; menunggu DNS aktif |
 | Uji katalog di perangkat | BELUM | buka katalog, verifikasi signature, instal/update plugin dari `plugins.bufferite.dev` |
 
 Catatan: jangan menaruh `REGISTRY_INDEX_KEY` di CI. Signing indeks selalu

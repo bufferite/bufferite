@@ -73,6 +73,8 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   satu step tidak mengganggu step lain.
 - Step DSL `rename` menolak JSON dengan kedalaman berlebih sebelum decode,
   mencegah `StackOverflowError` dari rekursi rename/encode.
+- Timestamp DOS di `core.berp` dinormalisasi setelah encoding, sehingga hash
+  artefak tidak berubah antara build Windows (UTC+7) dan CI Linux (UTC).
 
 ## [1.0.0] - 2026-11-19
 
