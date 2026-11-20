@@ -20,7 +20,7 @@ import '../../settings/settings_provider.dart';
 import '../plugin_manager_service.dart';
 import '../plugin_providers.dart';
 
-/// Aset trust store publik; belum dibundel sampai D13 selesai.
+/// Aset trust store publik; dipin di aplikasi sesuai D13.
 const String registryTrustStoreAsset = 'assets/registry_keys.json';
 
 /// Cache indeks registry di application support.

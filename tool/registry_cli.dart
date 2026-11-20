@@ -137,7 +137,9 @@ Future<int> _keygen(_Args args, StringSink out) async {
     out.writeln('Trust store ditulis: ${publicFile.path}');
   }
   out.writeln(
-    'Simpan private key offline; custody produksi mengikuti keputusan D13.',
+    usage == 'index'
+        ? 'Kunci indeks wajib disimpan offline/air-gapped (D13).'
+        : 'Simpan private key sebagai secret CI; hanya kunci indeks yang offline (D13).',
   );
   return 0;
 }
