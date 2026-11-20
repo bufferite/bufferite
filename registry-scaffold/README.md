@@ -30,6 +30,7 @@ packages/<pluginId>/<version>/*.berp  paket plugin
 keys/registry_keys.json              trust store publik (tanpa private key)
 release/registry.json                indeks bertanda tangan (hasil signing offline)
 release/registry.json.sig            signature indeks
+.gitattributes                       jaga byte artifact bertanda tangan
 COMMUNITY.md                         daftar repo komunitas, tidak dibaca app
 .github/workflows/validate.yml       validasi PR tanpa secret
 .github/workflows/publish.yml        tanda tangan paket + build indeks (artifact)

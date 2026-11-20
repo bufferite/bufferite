@@ -44,4 +44,6 @@ Alur lengkap:
 
 Jangan mengubah `registry.json` setelah ditandatangani. Jika ada perubahan
 source atau paket, ulangi build dan signing. `generatedAt` dan `sequence`
-harus berasal dari artifact build terbaru.
+harus berasal dari artifact build terbaru. File `.gitattributes` menonaktifkan
+konversi line ending untuk artifact ini agar byte yang ditandatangani tidak
+berubah saat checkout.
