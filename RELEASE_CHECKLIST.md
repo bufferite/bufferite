@@ -45,14 +45,19 @@ dilacak di `progress.md` §8 Blocker.
 |---|---|---|
 | Model distribusi tanpa marketplace lanjutan | OK | D14: PR ke `bufferite/plugins`, CI verify, review, merge; app hanya search/detail/install |
 | Trust anchor produksi dibundel | OK | `assets/registry_keys.json` + `test/core/registry/registry_trust_store_asset_test.dart` (`7df70b3`) |
-| Kunci indeks offline, kunci paket secret CI | SEBAGIAN | kunci dibuat; private key ada di `.keys/` (gitignored) dan harus dipindahkan/dipasang oleh manusia |
+| Kunci indeks offline, kunci paket secret CI | SEBAGIAN | Kunci paket sudah menjadi secret `REGISTRY_PACKAGE_KEY`; kunci indeks dipakai menandatangani rilis pertama dan masih berada di `.keys/index.json` (gitignored) — wajib segera dipindah ke media offline |
 | Rehearsal lokal rilis penuh | OK | paket 1.0.0/1.1.0: signature, build indeks, sequence 1→2, rebuild deterministik, immutability, tamper/replay ditolak |
 | Repo `bufferite/plugins` | OK | Scaffold D13/D14 di-push ke `main` (`2c4f9c0`) |
 | GitHub Pages + DNS | OK (sementara) | Pages via Actions aktif tanpa custom domain; site `https://bufferite.github.io/plugins/` (D15). Domain `plugins.bufferite.dev` menunggu registrasi, lalu CNAME `plugins` → `bufferite.github.io` |
 | Environment `registry-publish` + secret | OK | Required reviewer `exphert`; secret `REGISTRY_PACKAGE_KEY` terpasang; tidak ada secret kunci indeks |
-| `BUFFERITE_TOOL_REF` | OK | `ba79cd5` (commit aplikasi yang sudah di-push dan memuat `tool/registry_cli.dart`) |
-| Release pertama ditandatangani | BELUM | `publish.yml` → artifact → signing offline → `release/registry.json` + `.sig` → `deploy.yml`; memakai URL sementara D15 |
-| Uji katalog di perangkat | BELUM | buka katalog, verifikasi signature, instal/update plugin dari `bufferite.github.io/plugins` |
+| `BUFFERITE_TOOL_REF` | OK | `a4ba47d` (commit aplikasi yang sudah di-push dan memuat `tool/registry_cli.dart`) |
+| Release pertama ditandatangani | OK | `publish.yml` run `44744500110` → signing offline `.keys/index.json` → `release/registry.json` + `.sig` (`08b1b8e`) → `deploy.yml` run `44746692155`. Live: sequence 1, sha256 `f7968ea514cd9519138c7c2030c65d93c4a123791df7edc4128de35e88c08a95`, signature verified |
+| Smoke test client aplikasi | OK | `RegistryClient.loadWithFallback()` terhadap `https://bufferite.github.io/plugins/registry/v1/registry.json`: signature valid, `sequence=1`, `allowedHosts=[bufferite.github.io]`, cache terverifikasi |
+| Uji katalog di perangkat | DITUNDA | Uji perangkat Android fisik ditunda; tidak memblokir publikasi |
 
 Catatan: jangan menaruh `REGISTRY_INDEX_KEY` di CI. Signing indeks selalu
 dilakukan di mesin offline; lihat `registry-scaffold/release/README.md`.
+Catatan: Pages meng-cache `registry.json` selama 10 menit (`max-age=600`).
+Jika publish berikutnya dijalankan kurang dari 10 menit setelah deploy,
+tunggu cache kedaluwarsa atau jalankan ulang `workflow_dispatch` agar workflow
+membaca indeks lama yang benar; `sequence` harus selalu naik.

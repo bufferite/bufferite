@@ -27,15 +27,15 @@ Status yang dipakai:
 
 | Item | Nilai |
 |---|---|
-| Fase aktif | Fase 2 - Registry & pengerasan (selesai kode; publikasi menunggu operasional) |
-| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (selesai) |
+| Fase aktif | Fase 2 - Registry & pengerasan (kode selesai; registry live di URL sementara D15) |
+| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (selesai; release pertama live) |
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 8 / 8 |
 | Task Fase 3 | 0 / 5 (F17-T01 ditunda) |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
-| Task berikutnya | Publikasi registry via URL sementara D15; F17-T01 ditunda |
-| Blocker aktif | Domain `bufferite.dev` belum terdaftar; sementara memakai `bufferite.github.io/plugins` (D15), publikasi pertama menunggu signing indeks offline |
+| Task berikutnya | Uji katalog di perangkat fisik (ditunda); F17-T01 ditunda |
+| Blocker aktif | Domain `bufferite.dev` belum terdaftar (D15: live di `bufferite.github.io/plugins`); `.keys/index.json` masih di disk kerja dan perlu dipindah ke media offline |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (649 test, 2026-11-20) |
 
@@ -236,6 +236,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T04 | Update/rollback + notifikasi versi: deteksi rilis active, retensi dua versi, rollback otomatis/manual, pemilih versi eksplisit, badge update/revocation, enforcement revocation | `lib/core/registry/registry_plugin_status.dart`, `lib/core/plugin/{installed_plugin,plugin_package_store}.dart`, `lib/core/runtime/{lua_runtime,plugin_runtime}.dart`, `lib/features/plugins/{plugin_manager_service,plugin_manager_page,plugin_detail_page}.dart`, `lib/features/plugins/registry/**`, `assets/i18n/{id,en}.json`, test terkait | `flutter analyze` 0 issue; `flutter test` 645 lulus; uji status+update/rollback 10 lulus; widget update/downgrade/revocation lulus | `f2cb225` |
 | 2026-11-20 | F16-T03, D13 | Trust anchor produksi + custody kunci: kunci indeks offline, kunci paket secret CI, rotasi 90 hari/12 bulan, signing indeks manual + deploy terverifikasi | `assets/registry_keys.json`, `pubspec.yaml`, `registry-scaffold/{README.md,keys/**,release/**,.github/workflows/{publish,deploy}.yml}`, `REGISTRY.md`, `TODO.md`, docs terkait, `test/core/registry/registry_trust_store_asset_test.dart` | `flutter analyze` 0 issue; `flutter test` 648 lulus; trust store aset 2 kunci aktif; YAML workflow valid | `7df70b3` |
 | 2026-11-20 | D14 | Distribusi plugin lewat PR GitHub: marketplace lanjutan/akun/rating/laporan ditunda; katalog read-only + pencarian lokal | `registry-scaffold/COMMUNITY.md`, `registry-scaffold/README.md`, `registry-scaffold/.github/pull_request_template.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md` | `git diff --check`; Markdown/link check; `flutter analyze` 0 issue; `flutter test` 648 lulus | `b469fc2` |
+| 2026-11-20 | D15/publish | URL sementara `bufferite.github.io/plugins`; rilis pertama ditandatangani offline, di-deploy, dan diverifikasi lewat client aplikasi | `lib/core/registry/registry_client.dart`, `registry-scaffold/**`, `REGISTRY.md`, `PLUGINS.md`, `RELEASE_CHECKLIST.md`, `TODO.md`, `progress.md` | `flutter analyze` 0 issue; `flutter test` 649 lulus; publish run `44744500110`; deploy run `44746692155`; live sha256 `f7968ea5…`; signature valid; smoke client `sequence=1` | `a4ba47d` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1990,7 +1991,7 @@ bagian D.
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
 | 2026-11-20 | F16-T02/T03/T04, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | Katalog, konsen, instalasi terverifikasi (F16-T02), serta update/rollback (F16-T04) selesai; trust anchor produksi belum bisa difinalisasi | Selesai (D13: indeks offline, paket CI, trust store dibundel) |
-| 2026-11-20 | D12/D15/publish | `bufferite.dev` belum terdaftar sehingga DNS kanonis tidak bisa dipakai | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka sebagian (D15: repo aplikasi/registry ter-push, CI aplikasi hijau, Pages Actions aktif di `bufferite.github.io/plugins`, environment + secret dan `BUFFERITE_TOOL_REF` terpasang; publikasi pertama menunggu signing offline; domain kanonis ditunda) |
+| 2026-11-20 | D12/D15/publish | `bufferite.dev` belum terdaftar sehingga DNS kanonis tidak bisa dipakai | Registry live di URL sementara D15 dan terverifikasi end-to-end | Terbuka (rilis `sequence` 1 live; sisa: pindahkan `.keys/index.json` ke media offline, lalu kembalikan domain kanonis lewat rilis aplikasi) |
 | 2026-11-20 | D14, F17-T01 | Model marketplace/rating/laporan belum diputuskan | Berpotensi menambah backend, akun, dan moderasi yang tidak diperlukan | Selesai (D14: marketplace lanjutan ditunda; kontribusi via PR GitHub, katalog read-only) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
