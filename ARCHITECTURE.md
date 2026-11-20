@@ -40,7 +40,7 @@ lib/
     engine/          (recipe engine, pipeline executor)
     plugin/          (loader, manifest, registry, verifier)
     runtime/         (dsl, lua native, lua wasm, wasm, sandbox)
-    registry/        (model + signature + trust store; F16-T08)
+    registry/        (model, signature, client, installer, trust store; F16)
     storage/         (sqlite, settings)
     ui/              (tema, komponen shared)
     error/
@@ -69,7 +69,7 @@ Input Buffer -> Pipeline Executor -> [Operation 1] -> [Operation 2] -> ...
 3. Muat manifest core.berp -> daftarkan operasi ke Operation Picker.
 4. Runtime Lua: default `lua_dart` (native). Jika engine WASM dipilih,
    verifikasi SHA-256 `lua_runtime.wasm` sebelum instantiasi.
-5. Siap dipakai; katalog plugin (rencana Fase 2) dan sideload tersedia di
+5. Siap dipakai; katalog plugin read-only dan sideload tersedia di
    Plugin Manager.
 6. Jika core.berp gagal verifikasi -> tampilkan error jelas; aplikasi tetap
    terbuka dengan empty state yang mengarahkan ke reinstalasi/sideload.
@@ -126,13 +126,14 @@ Implementasi plugin MVP:
 - Sideload UI (F04-T05), bootstrap aset `core.berp` (F04-T08), dan
   `PluginManagerService`/provider (F04-T10) sudah tersedia.
 - Registry daring (F16): model `registry.json`, signature Ed25519, trust
-  store, tooling build/sign/verify (F16-T08), serta client read-only HTTPS +
-  cache + sequence + fallback offline (F16-T01) sudah tersedia. Hosting
-  GitHub Pages sudah diputuskan (D12). UI katalog, instalasi, dan
-  update/rollback (F16-T02/T04) belum; signing produksi dan trust anchor
-  final menunggu D13. Spesifikasi di `REGISTRY.md`; modul di
-  `lib/core/registry/`, `tool/registry_cli.dart`, dan scaffold repo di
-  `registry-scaffold/`.
+  store, tooling build/sign/verify (F16-T08), client read-only HTTPS + cache +
+  sequence + fallback offline (F16-T01), serta UI katalog + konsen +
+  instalasi terverifikasi (F16-T02) sudah tersedia. Hosting GitHub Pages
+  sudah diputuskan (D12). Update/rollback (F16-T04) belum; signing produksi
+  dan trust anchor final menunggu D13, sehingga tanpa aset trust store
+  katalog gagal tertutup. Spesifikasi di `REGISTRY.md`; modul di
+  `lib/core/registry/`, `lib/features/plugins/registry/`,
+  `tool/registry_cli.dart`, dan scaffold repo di `registry-scaffold/`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
@@ -148,8 +149,8 @@ Implementasi storage MVP:
   Data JSON menjadi sumber kebenaran; kolom terpisah dipakai untuk query dan
   status.
 - `SettingsRepository` memakai default aman: tema system, bahasa Indonesia,
-  timeout 2 detik, memori 64 MiB, log opt-in false; nilai rusak jatuh ke
-  default per-key.
+  timeout 2 detik, memori 64 MiB, log opt-in false, konsen registry false;
+  nilai rusak jatuh ke default per-key.
 - `PluginPackageStore` (`lib/core/plugin/plugin_package_store.dart`) menulis
   paket ke `<root>/<pluginId>/<version>` lewat direktori staging + rename
   atomik; staging dibersihkan saat gagal dan uninstall.
@@ -158,7 +159,10 @@ Implementasi storage MVP:
 - Runtime WASM di-pin SHA-256; mismatch = tolak eksekusi.
 - Paket .berp diverifikasi SHA-256 sebelum instalasi.
 - Registry resmi menambahkan signature Ed25519 untuk indeks dan paket
-  (rencana F16; `REGISTRY.md` §5); public key di-pin di aplikasi.
+  (`REGISTRY.md` §5); public key di-pin di aplikasi. Paket diverifikasi
+  sebelum `.berp` dibuka, dan provenance disimpan di metadata plugin.
+- Izin Android `INTERNET` ada di manifest sejak Fase 2; aplikasi tidak
+  melakukan request sebelum konsen dan konsen dapat dicabut di Settings.
 - Izin: cpu (default), net, file:read, file:write; dialog eksplisit untuk
   selain cpu.
 - Batas waktu dan memori per eksekusi.
@@ -202,7 +206,8 @@ Implementasi storage MVP:
 - Signature: sideload cukup SHA-256; registry resmi wajib signature Ed25519
   untuk indeks + paket (Fase 2, `REGISTRY.md`).
 - Registry read-only: satu registry resmi, trust anchor kunci di aplikasi,
-  tanpa sinkronisasi latar belakang (D13 terbuka; D12 selesai).
+  tanpa sinkronisasi latar belakang (D13 terbuka; D12 selesai). UI katalog,
+  konsen, dan instalasi memakai `RegistryInstaller` + `PluginManagerService`.
 - Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di worker
   isolate persisten; `wasi_config` (stdout/stderr file, stdin bytes) + epoch
   untuk timeout. Engine + modul dikompilasi sekali per plugin.

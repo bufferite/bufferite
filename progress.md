@@ -28,16 +28,16 @@ Status yang dipakai:
 | Item | Nilai |
 |---|---|
 | Fase aktif | Fase 2 - Registry & pengerasan (berjalan) |
-| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (client selesai, UI menyusul) |
+| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (katalog + instalasi selesai, update/rollback menyusul) |
 | Task MVP selesai | 131 / 131 |
-| Task Fase 2 | 5 / 8 |
+| Task Fase 2 | 6 / 8 |
 | Task Fase 3 | 0 / 5 |
 | Keputusan terbuka | 1 (D13) |
 | Task sedang berjalan | - |
-| Task berikutnya | F16-T02 (UI katalog) |
-| Blocker aktif | D13 (custody kunci) - tidak menghambat UI; trust anchor final menunggu |
+| Task berikutnya | F16-T04 (update/rollback); finalisasi F16-T03 menunggu D13 |
+| Blocker aktif | D13 (custody kunci) - trust anchor final dan signing produksi; publish CI menunggu repo tooling + Pages/DNS/secret |
 | Analyze | Lulus (0 issue, 2026-11-20) |
-| Test suite | Lulus (613 test, 2026-11-20) |
+| Test suite | Lulus (629 test, 2026-11-20) |
 
 ## 3. Progres per Feature
 
@@ -62,7 +62,7 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F14 — Keamanan & Kualitas | 9 | 9 | Selesai |
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
-| F16 — Backlog Fase 2 | 8 | 5 | Berjalan |
+| F16 — Backlog Fase 2 | 8 | 6 | Berjalan |
 | F17 — Backlog Fase 3 | 5 | 0 | Belum |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
 | D — Keputusan Manusia | 13 | 12 | 1 terbuka (D13) |
@@ -232,6 +232,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T08 | Tooling registry: `keygen`/`validate`/`sign`/`build-index`/`verify`, model `registry.json`, Ed25519 + trust store, indeks deterministik, atomic write, review checklist | `lib/core/registry/**`, `tool/registry_cli.dart`, `tool/registry/registry_builder.dart`, `test/core/registry/**`, `test/tool/registry_*_test.dart` | `flutter analyze` 0 issue; `flutter test` 600 lulus; uji registry 25 lulus; alur CLI end-to-end | `ba5c187`, `f73301a` |
 | 2026-11-20 | D12 | Hosting registry v1: GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`, workflow PR/publish, deploy atomik | `registry-scaffold/**`, `REGISTRY.md`, `TODO.md`, docs terkait | JSON source valid; workflow YAML valid; `build-index` source kosong → sequence 1; `git diff --check` | `0c52889` |
 | 2026-11-20 | F16-T01 | Client registry read-only: transport HTTPS + redirect, cache file atomik, replay guard, fallback offline, verifikasi signature dengan trust store injeksi | `lib/core/registry/registry_{client,cache,cache_store,transport,error}.dart`, `test/core/registry/registry_client_test.dart`, `test/core/offline_audit_test.dart` | `flutter analyze` 0 issue; `flutter test` 613 lulus; uji registry + offline audit 28 lulus | `f61ac2e` |
+| 2026-11-20 | F16-T02 | UI katalog + konsen jaringan + instalasi terverifikasi: pencarian/detail, banner cache/offline, cabut konsen & hapus cache di Settings, verifikasi paket + provenance, izin Android `INTERNET` | `lib/core/registry/registry_installer.dart`, `lib/features/plugins/registry/**`, `installed_plugin.dart`, `plugin_manager_service.dart`, `settings_*`, `assets/i18n/{id,en}.json`, `test/core/registry/registry_installer_test.dart`, `test/features/plugins/registry/**` | `flutter analyze` 0 issue; `flutter test` 629 lulus; uji installer 7 lulus; widget katalog/detail 5 lulus | `f61eb55` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1814,6 +1815,43 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   `plugins.bufferite.dev` harus aktif sebelum UI dirilis.
 - Commit: `f61ac2e` (follow-up cache rename)
 
+### CP-080 - 2026-11-20 - F16-T02 UI katalog + instalasi terverifikasi
+
+- Status: Selesai
+- Perubahan:
+  - `registry_installer.dart`: unduh paket + signature, batas ukuran,
+    verifikasi SHA-256 dan Ed25519 dengan domain separation, lalu cocokkan
+    `pluginId`/`version`/`tier`/izin dengan entri indeks sebelum `.berp`
+    dibuka.
+  - UI registry: katalog dengan pencarian + filter versi terbaru, detail
+    rilis (verifikasi, izin, ukuran, sumber, status), banner cache/offline,
+    refresh, dan dialog izin untuk `net`/`file:*` sebelum instalasi/update.
+  - Konsen jaringan disimpan sebagai `registry.consent`, dapat dicabut, dan
+    cache katalog dapat dihapus dari Settings tanpa menyentuh plugin.
+  - `InstalledPlugin` menyimpan provenance registry (`registryUrl`, `keyId`,
+    `sha256`, `previousVersion`) di metadata JSON; `PluginManagerService`
+    memasang sebagai `PluginSource.registry` dengan `verified: true`.
+  - Izin Android `INTERNET` ditambahkan; request tetap hanya terjadi setelah
+    konsen. Katalog gagal tertutup dengan `registry.trust_store_missing`
+    selama `assets/registry_keys.json` belum ada (D13).
+  - String registry ID/EN ditambahkan; dialog placeholder katalog lama
+    dihapus.
+- File: `lib/core/registry/registry_installer.dart`,
+  `lib/features/plugins/registry/**`, `lib/core/plugin/installed_plugin.dart`,
+  `lib/core/registry/registry_index.dart`,
+  `lib/features/plugins/plugin_manager_{page,service}.dart`,
+  `lib/features/settings/{settings_page,settings_provider,settings_repository}.dart`,
+  `assets/i18n/{id,en}.json`, `android/app/src/main/AndroidManifest.xml`,
+  test terkait.
+- Verifikasi: `flutter analyze` 0 issue; `flutter test` 629 lulus; uji
+  installer 7 lulus; widget katalog/detail/konsen 5 lulus; `git diff --check`
+  bersih.
+- Catatan/risiko: trust anchor produksi dan signing final masih menunggu
+  D13; belum ada build fisik Android untuk F16-T02. Publish registry masih
+  menunggu repo tooling terisi, Pages/DNS, environment `registry-publish`,
+  dan secret kunci.
+- Commit: `f61eb55`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1850,7 +1888,8 @@ bagian D.
 | 2026-11-19 | F05-T04 | Runtime Lua kini memakai `lua_dart` (FFI) dengan sandbox + batas memori | Jalur WASM tidak didukung wasmtime 14 | Selesai (CP-056) |
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
-| 2026-11-20 | F16-T02/T03, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | UI katalog dan client (F16-T01) bisa dibangun dengan trust store injeksi/dev; trust anchor final dan signing produksi belum bisa difinalisasi | Terbuka (spesifikasi `REGISTRY.md` §12) |
+| 2026-11-20 | F16-T02/T03, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | Katalog, konsen, dan instalasi terverifikasi (F16-T02) selesai dengan trust store injeksi; trust anchor final dan signing produksi belum bisa difinalisasi | Terbuka (spesifikasi `REGISTRY.md` §12) |
+| 2026-11-20 | D12/publish | Repo `bufferite/bufferite` kosong sehingga workflow publish gagal di checkout tooling; Pages belum aktif dan `keys/registry_keys.json` belum ada | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka (push repo lokal, set `BUFFERITE_TOOL_REF`, aktifkan Pages/DNS, environment + secret kunci) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 

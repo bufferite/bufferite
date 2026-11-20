@@ -1,9 +1,10 @@
 # registry.md — Spesifikasi Registry Plugin Bufferite
 
 Versi dokumen: 1.0 (draf)
-Status: **Sebagian** — tooling registry, hosting, model/signature core, dan
-client read-only tersedia (F16-T08/D12/F16-T01); UI, instalasi, dan
-update/rollback (F16-T02/T04) belum.
+Status: **Sebagian** — tooling registry, hosting, model/signature core, client
+read-only, serta UI katalog + instalasi terverifikasi (F16-T02) tersedia.
+Update/rollback (F16-T04), trust anchor produksi (D13), dan publikasi CI
+belum.
 Berlaku untuk: registry resmi read-only Bufferite
 Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 [PRIVACY.md](PRIVACY.md)
@@ -14,10 +15,11 @@ Registry adalah katalog plugin `.berp` yang dapat dilihat dan diinstal dari
 dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
 
-Per 2026-11-20, tooling registry (F16-T08), hosting (D12), dan client
-read-only (F16-T01) sudah tersedia. Verifier signature dan trust store core
-juga tersedia; trust anchor final dan signing produksi menunggu D13. UI
-katalog, instalasi, dan update/rollback (F16-T02/T04) belum diimplementasikan.
+Per 2026-11-20, tooling registry (F16-T08), hosting (D12), client read-only
+(F16-T01), dan UI katalog + instalasi terverifikasi (F16-T02) sudah tersedia.
+Verifier signature dan trust store core juga tersedia; trust anchor final dan
+signing produksi menunggu D13. Update/rollback (F16-T04) belum
+diimplementasikan.
 
 Ruang lingkup v1:
 
@@ -210,7 +212,7 @@ pesan tersebut.
 
 ### 5.3 Trust store
 
-Public key di-pin di aplikasi (rencana: `assets/registry_keys.json`):
+Public key di-pin di aplikasi melalui `assets/registry_keys.json`:
 
 ```json
 {
@@ -236,6 +238,9 @@ Public key di-pin di aplikasi (rencana: `assets/registry_keys.json`):
   aplikasi berikutnya.
 - Rekomendasi: kunci indeks disimpan offline (air-gapped/HSM); kunci paket
   boleh berbeda dan dipakai CI. Keduanya di-pin.
+- Aset ini belum dibundel sampai D13 selesai. Bila aset tidak ada, katalog
+  menampilkan `registry.trust_store_missing` dan tidak melakukan fallback
+  trust-all.
 
 ### 5.4 Urutan verifikasi
 
@@ -272,7 +277,9 @@ Untuk paket, verifikasi dilakukan **sebelum** paket dibuka/diekstrak:
 - **Verifikasi cache:** signature diverifikasi ulang setiap kali cache
   dimuat, bukan hanya saat unduhan pertama.
 - **Hapus cache:** tersedia di Settings; tidak menghapus plugin terpasang.
-- **Izin platform:** `INTERNET` baru ditambahkan saat fitur ini dirilis.
+- **Izin platform:** `INTERNET` ada di manifest aplikasi sejak F16-T02.
+  Izin Android bersifat install-time, sehingga pembatasan akses dilakukan di
+  aplikasi: tidak ada request sebelum konsen, dan konsen dapat dicabut.
   Rilis 1.0 tidak memintanya (lihat `PRIVACY.md`).
 
 ## 7. Alur Instalasi
@@ -295,6 +302,12 @@ Untuk paket, verifikasi dilakukan **sebelum** paket dibuka/diekstrak:
 
 Jika langkah 8 gagal, versi lama (jika ada) tetap aktif dan file sementara
 dibersihkan.
+
+Implementasi F16-T02: `RegistryInstaller` menjalankan langkah 5-7,
+`RegistryInstallService` menjalankan langkah 8-9, dan UI memakai
+`RegistryCatalogScreen`/`RegistryDetailScreen`. Dialog izin memakai komponen
+`showPermissionDialog` yang sama dengan sideload; izin non-`cpu` diminta ulang
+saat update.
 
 ## 8. Update, Rollback, dan Provenance
 
@@ -352,10 +365,11 @@ Ancaman utama dan mitigasi:
 Kode error (prefix `registry.`):
 
 `offline`, `consent_required`, `http`, `too_large`, `schema`,
-`signature_invalid`, `key_unknown`, `key_revoked`, `replay`,
-`entry_invalid`, `app_too_old`, `download_failed`, `hash_mismatch`,
-`package_signature_invalid`, `manifest_mismatch`, `downgrade`,
-`install_failed`, `cache_corrupt`, `cache_io`.
+`signature_invalid`, `key_unknown`, `key_revoked`, `key_invalid`,
+`trust_store_missing`, `replay`, `entry_invalid`, `app_too_old`,
+`download_failed`, `hash_mismatch`, `package_signature_invalid`,
+`manifest_mismatch`, `downgrade`, `install_failed`, `cache_corrupt`,
+`cache_io`.
 
 Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 (F16-T06).
@@ -366,7 +380,7 @@ Pesan pengguna berbahasa Indonesia; detail teknis masuk layar diagnostik
 
 Selesai 2026-11-20 (CP-079): client read-only dengan transport HTTPS,
 cache file, replay guard, fallback offline, dan verifikasi signature memakai
-trust store yang diinjeksi. UI katalog belum ada (F16-T02).
+trust store yang diinjeksi. UI katalog ditambahkan di F16-T02 (CP-080).
 
 - [x] Model + parser `registry.json` v1 dengan validasi §4 dan batas ukuran.
 - [x] URL awal `https://plugins.bufferite.dev/registry/v1/registry.json` (D12).
@@ -386,12 +400,18 @@ trust store yang diinjeksi. UI katalog belum ada (F16-T02).
 
 ### F16-T02 — UI katalog
 
-- Layar katalog: daftar, pencarian, detail, status verifikasi, izin, ukuran,
-  sumber, versi, dan status.
-- Dialog konsen jaringan pertama + pengaturan cabut konsen.
-- Cache/offline banner dan tombol perbarui.
-- Dialog izin untuk `net`/`file:*` dan izin baru saat update.
-- Instalasi end-to-end memakai T01/T03.
+Selesai 2026-11-20 (CP-080): katalog read-only dengan pencarian, detail,
+konsen jaringan, banner cache/offline, dan instalasi terverifikasi. Trust
+anchor produksi tetap menunggu D13; tanpa aset kunci katalog gagal tertutup.
+
+- [x] Layar katalog: daftar, pencarian, detail, status verifikasi, izin,
+      ukuran, sumber, versi, dan status.
+- [x] Dialog konsen jaringan pertama + pengaturan cabut konsen.
+- [x] Cache/offline banner dan tombol perbarui.
+- [x] Dialog izin untuk `net`/`file:*` dan izin baru saat update.
+- [x] Instalasi end-to-end memakai T01/T03.
+- [x] Test installer (sukses, ukuran, hash, signature, manifest, host,
+      too_large) dan widget katalog/detail/konsen.
 
 ### F16-T04 — Update & rollback
 
@@ -426,7 +446,7 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 | D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20) |
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/HSM; kunci paket di CI; rotasi 90 hari | Terbuka |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
-| — | TTL cache indeks | 24 jam | Usulan |
+| — | TTL cache indeks | 24 jam | Diterima — F16-T01/T02 |
 | — | Jumlah versi lama disimpan | 1 versi sebelumnya | Usulan |
 | — | Registry pihak ketiga | Tidak ada di v1 | Usulan |
 | — | Ikon plugin dari jaringan | Ditunda | Usulan |
@@ -437,13 +457,18 @@ Keputusan D12/D13 dicatat juga di `TODO.md` bagian D dan `progress.md` §8.
 Catatan D12: scaffold repo ada di `registry-scaffold/`. Workflow validasi PR
 berjalan tanpa secret; workflow publish memakai environment `registry-publish`
 dengan required reviewers. Branch bukan kanal publikasi; hanya `registry.json`
-bertanda tangan hasil deploy dari `main` yang dibaca aplikasi.
+bertanda tangan hasil deploy dari `main` yang dibaca aplikasi. Publish belum
+berjalan karena repo `bufferite/bufferite` belum terisi, Pages/DNS belum
+aktif, dan secret kunci belum dipasang.
 
 Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi untuk
 dev/CI. Kunci produksi wajib disimpan offline/HSM, tidak masuk repo, dan
 prosedur rotasi/revocation belum final sampai D13 diputuskan. Scaffold publish
 memakai secret environment untuk kedua kunci sebagai bootstrap; sebelum
 registry dibuka publik, signing indeks wajib dipindahkan ke offline/HSM.
+F16-T02 sudah memakai trust store ini; selama `assets/registry_keys.json`
+belum ada, katalog menampilkan `registry.trust_store_missing` dan tidak
+melakukan trust-all.
 
 ## 13. Implementasi & Tooling
 
@@ -458,11 +483,13 @@ lib/core/registry/
   registry_cache_store.dart  cache file atomik di app support      (F16-T01)
   registry_transport.dart    transport HTTPS + redirect           (F16-T01)
   registry_error.dart        error jaringan/cache                 (F16-T01)
-  registry_installer.dart    unduh, verifikasi, instal, provenance (F16-T02/T04, tertunda)
+  registry_installer.dart    unduh, verifikasi, cocokkan manifest, provenance (F16-T02)
 lib/features/plugins/registry/
-  registry_providers.dart             (F16-T02, tertunda)
-  registry_catalog_screen.dart        (F16-T02, tertunda)
-  registry_detail_screen.dart         (F16-T02, tertunda)
+  registry_providers.dart             client/install/provider + konsen  (F16-T02)
+  registry_catalog_screen.dart        daftar, cari, refresh, banner       (F16-T02)
+  registry_detail_screen.dart         detail + dialog izin + instalasi    (F16-T02)
+  registry_consent.dart               dialog & persistensi konsen         (F16-T02)
+  registry_error_text.dart            pesan error registry ID/EN          (F16-T02)
 tool/
   registry_cli.dart          entry point CLI                     (F16-T08)
   registry/
@@ -471,9 +498,9 @@ registry-scaffold/
   .github/workflows/         validate PR + publish Pages       (D12)
 ```
 
-Tooling F16-T08, hosting D12, dan client F16-T01 selesai 2026-11-20. UI
-katalog dan instalasi (F16-T02/T04) bisa dimulai, tetapi signing produksi dan
-trust anchor final tetap menunggu D13.
+Tooling F16-T08, hosting D12, client F16-T01, dan UI katalog/instalasi
+F16-T02 selesai 2026-11-20. Update/rollback (F16-T04) belum; signing produksi
+dan trust anchor final tetap menunggu D13.
 
 ### 13.2 CLI registry
 

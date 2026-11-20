@@ -12,14 +12,16 @@ Bufferite dirancang **offline-first**. Data Anda tidak keluar dari perangkat.
 ## Jaringan
 
 - Rilis 1.0 tidak memakai jaringan untuk memproses data atau menyimpan
-  recipe, dan manifest aplikasi tidak meminta izin INTERNET.
-- Katalog plugin (Fase 2, spesifikasi `REGISTRY.md`) hanya mengakses
-  jaringan setelah Anda membuka katalog dan menyetujui peringatan.
+  recipe. Build Fase 2 meminta izin Android `INTERNET` di manifest agar
+  katalog plugin dapat diunduh; izin ini bersifat install-time.
+- Meskipun izin ada, aplikasi tidak melakukan request jaringan sampai Anda
+  membuka katalog dan menyetujui peringatan. Konsen disimpan lokal dan dapat
+  dicabut di Settings.
 - Saat aktif, aplikasi hanya melakukan `GET` untuk indeks dan paket yang
-  Anda pilih. Buffer, recipe, dan file tidak pernah diunggah.
+  Anda pilih. Buffer, recipe, dan file tidak pernah diunggah. Tidak ada
+  sinkronisasi atau auto-update di latar belakang.
 - Tidak ada cookie, akun, token, atau telemetri. Cache katalog disimpan
-  lokal dan dapat dihapus dari Settings; konsen dapat dicabut.
-- Izin INTERNET baru ditambahkan ke manifest saat fitur registry dirilis.
+  lokal dan dapat dihapus dari Settings tanpa menghapus plugin terpasang.
 
 ## Log
 

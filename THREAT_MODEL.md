@@ -1,6 +1,6 @@
 # Bufferite — Threat Model (F14-T01)
 
-Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
+Versi: 1.2 · Fase: MVP selesai + Fase 2 (katalog + instalasi registry selesai)
 
 ## 1. Aset yang dilindungi
 
@@ -58,8 +58,9 @@ Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
   tanpa socket. Matriks izin lintas runtime ada di
   `test/core/runtime/permission_matrix_test.dart` (F05-T06/T07/T09, F14-T03).
 - Perlindungan data mengandalkan sandbox OS (Android/iOS/desktop), storage
-  scoped, dan tidak adanya izin INTERNET pada rilis 1.0. Registry Fase 2 akan
-  menambahkan INTERNET hanya setelah konsen pengguna.
+  scoped, dan tidak adanya izin INTERNET pada rilis 1.0. Build Fase 2
+  meminta INTERNET, tetapi aplikasi tidak melakukan request sebelum konsen
+  pengguna dan konsen dapat dicabut.
 
 ### 4.1 Batas isolasi Lua 1.0
 
@@ -71,8 +72,8 @@ Versi: 1.1 · Fase: MVP selesai + rencana Fase 2 (registry)
 | UI responsif | Ya (isolate kerja) |
 | Isolasi memori / kontainmen bug native | **Tidak** (native in-process; engine WASM tersedia sebagai opsi, bukan default 1.0) |
 | Tier `wasm` | Isolasi memori WASM; tanpa host function net/fs (WASI tanpa preopen/socket) |
-| Plugin tepercaya | Registry resmi: hash + signature Ed25519 (tooling F16-T08; client F16-T03); sideload `unverified` = tidak tepercaya |
-| Sandbox OS | Android/iOS/desktop (UID, scoped storage); tanpa INTERNET di 1.0 |
+| Plugin tepercaya | Registry resmi: hash + signature Ed25519 (tooling F16-T08; client/installer F16-T02); sideload `unverified` = tidak tepercaya |
+| Sandbox OS | Android/iOS/desktop (UID, scoped storage); izin INTERNET ada di build Fase 2, request hanya setelah konsen |
 
 Konsekuensi: plugin Lua yang jahat tidak bisa memanggil file/net lewat API
 Lua, tetapi **bug native** (Lua/binding/libc) berpotensi keluar dari sandbox
@@ -82,18 +83,25 @@ sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
 `lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
 selain engine wasmtime sendiri.
 
-### 4.2 Registry (Fase 2; tooling, hosting, dan client selesai; UI rencana)
+### 4.2 Registry (Fase 2; tooling, hosting, client, dan UI instalasi selesai)
 
 - Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
   registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
 - Indeks `registry.json` dan setiap paket `.berp` memiliki signature
   terpisah dengan domain separation; hash SHA-256 + ukuran ikut diverifikasi.
 - Metadata (`pluginId`, versi, izin, URL, hash) diautentikasi oleh signature
-  indeks; manifest paket harus cocok dengan entri.
+  indeks; manifest paket harus cocok dengan entri sebelum `.berp` dibuka.
 - `sequence` monoton mencegah replay indeks lama; status `yanked`/`revoked`
   disebarkan lewat indeks bertanda tangan.
 - Cache diverifikasi ulang saat dimuat. Tanpa jaringan, revocation terbaru
   tidak diketahui — batasan yang ditampilkan di UI.
+- UI katalog hanya memicu request setelah konsen tersimpan; konsen dapat
+  dicabut dan cache dapat dihapus tanpa menyentuh plugin terpasang. Tidak ada
+  instalasi diam-diam; dialog konfirmasi dan izin selalu ditampilkan.
+- Provenance (`registryUrl`, `keyId`, `sha256`, `previousVersion`) disimpan
+  lokal untuk audit dan rollback; provenance bukan pengganti verifikasi.
+- Tanpa `assets/registry_keys.json`, katalog gagal tertutup dengan
+  `registry.trust_store_missing` sampai D13 selesai.
 - Hosting v1 memakai GitHub Pages (D12). Scaffold publish menyimpan kunci
   indeks di secret environment sebagai bootstrap; ini memperluas permukaan
   serangan CI sampai D13 memindahkan signing indeks ke offline/HSM. Kompromi
@@ -143,6 +151,10 @@ selain engine wasmtime sendiri.
   `build-index`, `verify`, model `registry.json`, signature Ed25519, dan trust
   store tersedia; test vector RFC 8032, domain separation, key unknown/revoked,
   determinisme indeks, dan batas ukuran lulus.
-- Sisa untuk registry publik: UI katalog, instalasi, update/rollback
-  (F16-T02/T04), serta keputusan D13. Hosting/URL (D12) dan client read-only
-  (F16-T01) sudah selesai; UI belum ada di aplikasi.
+- F16-T02 selesai (2026-11-20, CP-080): katalog, konsen, dan instalasi
+  terverifikasi; `flutter analyze` 0 issue dan 629 test lulus, termasuk
+  installer (hash/signature/manifest/host/ukuran) dan widget katalog/detail.
+  Tanpa trust anchor produksi, katalog gagal tertutup.
+- Sisa untuk registry publik: update/rollback (F16-T04), trust anchor
+  produksi + signing (D13), dan publikasi CI/Pages. Hosting/URL (D12), client
+  read-only (F16-T01), dan UI instalasi (F16-T02) sudah selesai.

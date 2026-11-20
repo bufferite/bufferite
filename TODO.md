@@ -397,8 +397,8 @@ Catatan progres: lihat [progress.md](progress.md).
   dialog izin → hasil.
 - [x] **F11-T05 (P0)** Integrasi dialog izin untuk `net`, `file:read`,
   `file:write`.
-- [x] **F11-T06 (P1)** Tombol katalog + peringatan akses jaringan;
-  tampilkan "belum tersedia" sampai registry Fase 2.
+- [x] **F11-T06 (P1)** Tombol katalog + peringatan akses jaringan; sejak
+  F16-T02 membuka katalog resmi (dialog placeholder diganti navigasi).
 - [x] **F11-T07 (P0)** State kegagalan bootstrap `core.berp` + aksi
   reinstalasi, app tetap bisa dibuka.
 - [x] **F11-T08 (P0)** Empty state Plugin Manager.
@@ -507,7 +507,7 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T08 + T01 (selesai) → T02 + sisa T03 → T04; D12 sudah
+Urutan yang disarankan: T08 + T01 + T02 (selesai) → sisa T03 → T04; D12 sudah
 selesai, D13 tetap diperlukan untuk signing produksi. T07 adalah gate sebelum
 registry dibuka publik.
 
@@ -515,8 +515,20 @@ registry dibuka publik.
   - `lib/core/registry/registry_client.dart`: transport HTTPS, cache file,
     replay guard, fallback offline, verifikasi signature dengan trust store
     injeksi. Test di `test/core/registry/registry_client_test.dart`.
-- [ ] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
+- [x] **F16-T02** UI katalog plugin + peringatan akses jaringan + cache.
+  - Katalog read-only dengan pencarian, detail rilis, status verifikasi,
+    ukuran, sumber, izin, dan status; konsen jaringan tersimpan di Settings
+    dan dapat dicabut; banner cache/offline + refresh.
+  - Instalasi end-to-end: unduh paket + signature, verifikasi ukuran/hash/
+    signature, cocokkan manifest, pasang lewat `PluginManagerService`, dan
+    simpan provenance (`registryUrl`, `keyId`, `sha256`, `previousVersion`).
+  - `assets/registry_keys.json` belum dibundel; sampai D13 selesai katalog
+    menampilkan `registry.trust_store_missing`, bukan trust-all.
+  - Test: installer (sukses, ukuran, hash, signature, manifest, host,
+    too_large) dan widget katalog/detail/konsen. Lihat `REGISTRY.md` §11.
 - [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
+  - Verifier, trust store, dan signature paket sudah dipakai client/installer;
+    trust anchor produksi dan signing final menunggu D13.
 - [ ] **F16-T04** Plugin update/rollback + notifikasi versi.
 - [x] **F16-T05** Streaming file besar tanpa OOM.
 - [x] **F16-T06** Log eksekusi opt-in + layar diagnostik.
