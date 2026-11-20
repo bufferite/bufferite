@@ -507,7 +507,7 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T08 + T01 + T02 (selesai) → sisa T03 → T04; D12 sudah
+Urutan yang disarankan: T08 + T01 + T02 + T04 (selesai) → sisa T03; D12 sudah
 selesai, D13 tetap diperlukan untuk signing produksi. T07 adalah gate sebelum
 registry dibuka publik.
 
@@ -529,7 +529,19 @@ registry dibuka publik.
 - [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
   - Verifier, trust store, dan signature paket sudah dipakai client/installer;
     trust anchor produksi dan signing final menunggu D13.
-- [ ] **F16-T04** Plugin update/rollback + notifikasi versi.
+- [x] **F16-T04** Plugin update/rollback + notifikasi versi.
+  - `registry_plugin_status.dart`: rilis `active` tertinggi yang memenuhi
+    `minAppVersion`, status terpasang `deprecated`/`yanked`/`revoked`, dan
+    badge update/revocation di Plugin Manager + katalog.
+  - `PluginManagerService.update` mempertahankan status enable/disable,
+    menyimpan maksimal dua versi, dan rollback otomatis bila registrasi/load
+    gagal; `rollback` manual memakai manifest versi sebelumnya.
+  - Detail katalog punya pemilih versi eksplisit untuk downgrade; `yanked`/
+    `revoked` tidak dapat dipilih. Update hanya meminta izin yang bertambah.
+  - Revocation dari cache/refresh menonaktifkan operasi plugin terpasang
+    tanpa menghapus data pengguna.
+  - Test: update sukses, permission escalation, rollback otomatis/manual,
+    downgrade, retensi dua versi, dan status revocation.
 - [x] **F16-T05** Streaming file besar tanpa OOM.
 - [x] **F16-T06** Log eksekusi opt-in + layar diagnostik.
 - [x] **F16-T07** Audit/fuzzing sandbox dan runtime WASM.

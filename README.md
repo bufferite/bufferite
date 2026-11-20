@@ -73,9 +73,9 @@ MIT untuk inti dan core.berp (lihat [LICENSE](LICENSE)). Plugin komunitas
 mengikuti lisensi masing-masing.
 
 ## Status
-MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 629 lulus,
+MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 645 lulus,
 `flutter analyze` 0 issue. Fase 2 berjalan: tooling registry, scaffold GitHub
-Pages (D12), client read-only, dan UI katalog + instalasi terverifikasi
-(F16-T02) selesai; update/rollback menyusul, signing produksi menunggu D13;
-streaming file besar dan diagnostik selesai. Lihat `ROADMAP.md` dan
-`progress.md` untuk detail.
+Pages (D12), client read-only, UI katalog + instalasi terverifikasi (F16-T02),
+serta update/rollback + badge versi (F16-T04) selesai; signing produksi
+menunggu D13; streaming file besar dan diagnostik selesai. Lihat `ROADMAP.md`
+dan `progress.md` untuk detail.

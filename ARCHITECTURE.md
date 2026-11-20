@@ -127,11 +127,11 @@ Implementasi plugin MVP:
   `PluginManagerService`/provider (F04-T10) sudah tersedia.
 - Registry daring (F16): model `registry.json`, signature Ed25519, trust
   store, tooling build/sign/verify (F16-T08), client read-only HTTPS + cache +
-  sequence + fallback offline (F16-T01), serta UI katalog + konsen +
-  instalasi terverifikasi (F16-T02) sudah tersedia. Hosting GitHub Pages
-  sudah diputuskan (D12). Update/rollback (F16-T04) belum; signing produksi
-  dan trust anchor final menunggu D13, sehingga tanpa aset trust store
-  katalog gagal tertutup. Spesifikasi di `REGISTRY.md`; modul di
+  sequence + fallback offline (F16-T01), UI katalog + konsen + instalasi
+  terverifikasi (F16-T02), serta update/rollback + badge versi (F16-T04) sudah
+  tersedia. Hosting GitHub Pages sudah diputuskan (D12). Signing produksi dan
+  trust anchor final menunggu D13, sehingga tanpa aset trust store katalog
+  gagal tertutup. Spesifikasi di `REGISTRY.md`; modul di
   `lib/core/registry/`, `lib/features/plugins/registry/`,
   `tool/registry_cli.dart`, dan scaffold repo di `registry-scaffold/`.
 

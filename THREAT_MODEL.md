@@ -155,6 +155,10 @@ selain engine wasmtime sendiri.
   terverifikasi; `flutter analyze` 0 issue dan 629 test lulus, termasuk
   installer (hash/signature/manifest/host/ukuran) dan widget katalog/detail.
   Tanpa trust anchor produksi, katalog gagal tertutup.
-- Sisa untuk registry publik: update/rollback (F16-T04), trust anchor
-  produksi + signing (D13), dan publikasi CI/Pages. Hosting/URL (D12), client
-  read-only (F16-T01), dan UI instalasi (F16-T02) sudah selesai.
+- F16-T04 selesai (2026-11-20, CP-081): update/rollback dengan retensi dua
+  versi, rollback otomatis saat aktivasi gagal, rollback manual, pemilih versi
+  eksplisit, dan revocation yang menonaktifkan plugin tanpa menghapus data.
+  `flutter analyze` 0 issue dan 645 test lulus.
+- Sisa untuk registry publik: trust anchor produksi + signing (D13), dan
+  publikasi CI/Pages. Hosting/URL (D12), client read-only (F16-T01), UI
+  instalasi (F16-T02), dan update/rollback (F16-T04) sudah selesai.

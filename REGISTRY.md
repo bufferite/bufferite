@@ -16,10 +16,9 @@ dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
 
 Per 2026-11-20, tooling registry (F16-T08), hosting (D12), client read-only
-(F16-T01), dan UI katalog + instalasi terverifikasi (F16-T02) sudah tersedia.
-Verifier signature dan trust store core juga tersedia; trust anchor final dan
-signing produksi menunggu D13. Update/rollback (F16-T04) belum
-diimplementasikan.
+(F16-T01), UI katalog + instalasi terverifikasi (F16-T02), dan update/rollback
+(F16-T04) sudah tersedia. Verifier signature dan trust store core juga
+tersedia; trust anchor final dan signing produksi menunggu D13.
 
 Ruang lingkup v1:
 
@@ -306,8 +305,8 @@ dibersihkan.
 Implementasi F16-T02: `RegistryInstaller` menjalankan langkah 5-7,
 `RegistryInstallService` menjalankan langkah 8-9, dan UI memakai
 `RegistryCatalogScreen`/`RegistryDetailScreen`. Dialog izin memakai komponen
-`showPermissionDialog` yang sama dengan sideload; izin non-`cpu` diminta ulang
-saat update.
+`showPermissionDialog` yang sama dengan sideload; saat update hanya izin yang
+bertambah yang diminta ulang (F16-T04).
 
 ## 8. Update, Rollback, dan Provenance
 
@@ -327,6 +326,15 @@ saat update.
   secara eksplisit; versi `yanked`/`revoked` tidak boleh dipilih.
 - **Plugin `deprecated`:** tetap dapat dipakai; tampilkan saran update.
 - **Plugin `revoked`:** lihat §9.
+
+Implementasi F16-T04 (CP-081): `registry_plugin_status.dart` menghitung rilis
+pembaruan dan status terpasang; `PluginManagerService.update` menyimpan dua
+versi, mempertahankan status enable/disable, dan memulihkan versi lama bila
+aktivasi gagal; `PluginManagerService.rollback` memakai manifest versi
+sebelumnya dari `<root>/<pluginId>/<version>`. Badge update/revocation tampil
+di Plugin Manager dan katalog; detail katalog menyediakan pemilih versi
+eksplisit untuk downgrade. Revocation dari cache/refresh menonaktifkan plugin
+terpasang, tetapi tidak menghapus data pengguna.
 
 ## 9. Revocation & Moderasi
 
@@ -415,10 +423,15 @@ anchor produksi tetap menunggu D13; tanpa aset kunci katalog gagal tertutup.
 
 ### F16-T04 — Update & rollback
 
-- Deteksi update semver + badge.
-- Retensi dua versi, rollback otomatis saat aktivasi gagal, rollback manual.
-- Penanganan `yanked`/`revoked` dan notifikasi di katalog/Plugin Manager.
-- Uji: update sukses, permission escalation, rollback, downgrade, revocation.
+Selesai 2026-11-20 (CP-081): deteksi update, badge, retensi dua versi,
+rollback otomatis/manual, pemilih versi untuk downgrade eksplisit, dan
+penonaktifan plugin `revoked` dari cache/refresh katalog. Trust anchor
+produksi tetap menunggu D13.
+
+- [x] Deteksi update semver + badge.
+- [x] Retensi dua versi, rollback otomatis saat aktivasi gagal, rollback manual.
+- [x] Penanganan `yanked`/`revoked` dan notifikasi di katalog/Plugin Manager.
+- [x] Uji: update sukses, permission escalation, rollback, downgrade, revocation.
 
 ### F16-T08 — Tooling registry
 
@@ -447,7 +460,7 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/HSM; kunci paket di CI; rotasi 90 hari | Terbuka |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
 | — | TTL cache indeks | 24 jam | Diterima — F16-T01/T02 |
-| — | Jumlah versi lama disimpan | 1 versi sebelumnya | Usulan |
+| — | Jumlah versi lama disimpan | 1 versi sebelumnya | Diterima — F16-T04 (CP-081) |
 | — | Registry pihak ketiga | Tidak ada di v1 | Usulan |
 | — | Ikon plugin dari jaringan | Ditunda | Usulan |
 | — | Kebijakan reset `sequence` | Tidak ada reset di v1 | Usulan |
@@ -484,10 +497,11 @@ lib/core/registry/
   registry_transport.dart    transport HTTPS + redirect           (F16-T01)
   registry_error.dart        error jaringan/cache                 (F16-T01)
   registry_installer.dart    unduh, verifikasi, cocokkan manifest, provenance (F16-T02)
+  registry_plugin_status.dart status update/revocation plugin terpasang  (F16-T04)
 lib/features/plugins/registry/
   registry_providers.dart             client/install/provider + konsen  (F16-T02)
-  registry_catalog_screen.dart        daftar, cari, refresh, banner       (F16-T02)
-  registry_detail_screen.dart         detail + dialog izin + instalasi    (F16-T02)
+  registry_catalog_screen.dart        daftar, cari, refresh, banner       (F16-T02/T04)
+  registry_detail_screen.dart         detail + izin + versi + instalasi   (F16-T02/T04)
   registry_consent.dart               dialog & persistensi konsen         (F16-T02)
   registry_error_text.dart            pesan error registry ID/EN          (F16-T02)
 tool/
@@ -498,9 +512,9 @@ registry-scaffold/
   .github/workflows/         validate PR + publish Pages       (D12)
 ```
 
-Tooling F16-T08, hosting D12, client F16-T01, dan UI katalog/instalasi
-F16-T02 selesai 2026-11-20. Update/rollback (F16-T04) belum; signing produksi
-dan trust anchor final tetap menunggu D13.
+Tooling F16-T08, hosting D12, client F16-T01, UI katalog/instalasi F16-T02,
+dan update/rollback F16-T04 selesai 2026-11-20. Signing produksi dan trust
+anchor final tetap menunggu D13.
 
 ### 13.2 CLI registry
 
