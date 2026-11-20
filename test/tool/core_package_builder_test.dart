@@ -43,6 +43,14 @@ void main() {
     ]);
   });
 
+  test('timestamp ZIP dinormalisasi ke 1980-01-01', () {
+    write('manifest/core.manifest.json', '{}');
+
+    final bytes = const CorePackageBuilder().build(source).archiveBytes;
+
+    expect(bytes.sublist(10, 14), <int>[0, 0, 0x21, 0]);
+  });
+
   test('README dan file hash dikeluarkan dari paket', () {
     write('README.md', 'docs');
     write('manifest/core.manifest.json', '{}');
