@@ -235,7 +235,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T02 | UI katalog + konsen jaringan + instalasi terverifikasi: pencarian/detail, banner cache/offline, cabut konsen & hapus cache di Settings, verifikasi paket + provenance, izin Android `INTERNET` | `lib/core/registry/registry_installer.dart`, `lib/features/plugins/registry/**`, `installed_plugin.dart`, `plugin_manager_service.dart`, `settings_*`, `assets/i18n/{id,en}.json`, `test/core/registry/registry_installer_test.dart`, `test/features/plugins/registry/**` | `flutter analyze` 0 issue; `flutter test` 629 lulus; uji installer 7 lulus; widget katalog/detail 5 lulus | `f61eb55` |
 | 2026-11-20 | F16-T04 | Update/rollback + notifikasi versi: deteksi rilis active, retensi dua versi, rollback otomatis/manual, pemilih versi eksplisit, badge update/revocation, enforcement revocation | `lib/core/registry/registry_plugin_status.dart`, `lib/core/plugin/{installed_plugin,plugin_package_store}.dart`, `lib/core/runtime/{lua_runtime,plugin_runtime}.dart`, `lib/features/plugins/{plugin_manager_service,plugin_manager_page,plugin_detail_page}.dart`, `lib/features/plugins/registry/**`, `assets/i18n/{id,en}.json`, test terkait | `flutter analyze` 0 issue; `flutter test` 645 lulus; uji status+update/rollback 10 lulus; widget update/downgrade/revocation lulus | `f2cb225` |
 | 2026-11-20 | F16-T03, D13 | Trust anchor produksi + custody kunci: kunci indeks offline, kunci paket secret CI, rotasi 90 hari/12 bulan, signing indeks manual + deploy terverifikasi | `assets/registry_keys.json`, `pubspec.yaml`, `registry-scaffold/{README.md,keys/**,release/**,.github/workflows/{publish,deploy}.yml}`, `REGISTRY.md`, `TODO.md`, docs terkait, `test/core/registry/registry_trust_store_asset_test.dart` | `flutter analyze` 0 issue; `flutter test` 648 lulus; trust store aset 2 kunci aktif; YAML workflow valid | `7df70b3` |
-| 2026-11-20 | D14 | Distribusi plugin lewat PR GitHub: marketplace lanjutan/akun/rating/laporan ditunda; katalog read-only + pencarian lokal | `registry-scaffold/COMMUNITY.md`, `registry-scaffold/README.md`, `registry-scaffold/.github/pull_request_template.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md` | `git diff --check`; Markdown/link check; `flutter analyze` 0 issue; `flutter test` 648 lulus | `012f17f` |
+| 2026-11-20 | D14 | Distribusi plugin lewat PR GitHub: marketplace lanjutan/akun/rating/laporan ditunda; katalog read-only + pencarian lokal | `registry-scaffold/COMMUNITY.md`, `registry-scaffold/README.md`, `registry-scaffold/.github/pull_request_template.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md` | `git diff --check`; Markdown/link check; `flutter analyze` 0 issue; `flutter test` 648 lulus | `b469fc2` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1951,7 +1951,7 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
 - Catatan/risiko: F17-T02–T05 tetap membutuhkan keputusan privasi/backend.
   Publikasi registry masih menunggu repo `bufferite/plugins`, Pages/DNS, dan
   secret operasional.
-- Commit: `012f17f`
+- Commit: `b469fc2`
 
 ## 7. Template Checkpoint Baru
 
