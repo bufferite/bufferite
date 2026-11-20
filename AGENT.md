@@ -170,5 +170,6 @@ dilaporkan ke manusia.
   reinstalasi; aplikasi tetap bisa dibuka.
 
 ## 14. Pertanyaan Terbuka (isi saat ada)
-- D13: custody/rotasi kunci Ed25519 — lihat `REGISTRY.md` §12. Hosting/URL
-  publik registry (D12) sudah selesai.
+- Tidak ada keputusan registry yang terbuka; D12/D13 selesai. Custody kunci
+  dan rotasi ada di `REGISTRY.md` §5.3/§12. Publikasi CI menunggu repo
+  `bufferite/plugins`, Pages/DNS, dan secret operasional.

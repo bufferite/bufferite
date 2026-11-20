@@ -507,9 +507,9 @@ Catatan progres: lihat [progress.md](progress.md).
 ## F16 — Backlog Fase 2 (P2, setelah MVP)
 
 Spesifikasi dan acceptance criteria registry: `REGISTRY.md` §11.
-Urutan yang disarankan: T08 + T01 + T02 + T04 (selesai) → sisa T03; D12 sudah
-selesai, D13 tetap diperlukan untuk signing produksi. T07 adalah gate sebelum
-registry dibuka publik.
+Semua task F16 selesai 2026-11-20; D12 dan D13 selesai. T07 adalah gate
+sebelum registry dibuka publik. Publikasi CI masih menunggu repo
+`bufferite/plugins`, Pages/DNS, dan secret operasional.
 
 - [x] **F16-T01** Registry resmi read-only + `registry.json` client.
   - `lib/core/registry/registry_client.dart`: transport HTTPS, cache file,
@@ -522,13 +522,20 @@ registry dibuka publik.
   - Instalasi end-to-end: unduh paket + signature, verifikasi ukuran/hash/
     signature, cocokkan manifest, pasang lewat `PluginManagerService`, dan
     simpan provenance (`registryUrl`, `keyId`, `sha256`, `previousVersion`).
-  - `assets/registry_keys.json` belum dibundel; sampai D13 selesai katalog
-    menampilkan `registry.trust_store_missing`, bukan trust-all.
+  - `assets/registry_keys.json` dibundel sejak D13/CP-082; bila aset hilang,
+    katalog menampilkan `registry.trust_store_missing`, bukan trust-all.
   - Test: installer (sukses, ukuran, hash, signature, manifest, host,
     too_large) dan widget katalog/detail/konsen. Lihat `REGISTRY.md` §11.
-- [ ] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
-  - Verifier, trust store, dan signature paket sudah dipakai client/installer;
-    trust anchor produksi dan signing final menunggu D13.
+- [x] **F16-T03** Signature Ed25519 wajib untuk registry resmi.
+  - Verifier, trust store, dan signature paket dipakai client/installer;
+    `assets/registry_keys.json` membundel kunci indeks
+    `official-index-2026-11` (offline) dan kunci paket
+    `official-package-2026-11` (secret CI).
+  - `publish.yml` hanya menandatangani paket; indeks ditandatangani offline
+    dan di-commit ke `release/`; `deploy.yml` memverifikasi signature +
+    rebuild deterministik sebelum deploy.
+  - Rotasi paket 90 hari, indeks 12 bulan, overlap 90 hari, revocation lewat
+    rilis trust store; detail di `REGISTRY.md` §5.3 dan §12.
 - [x] **F16-T04** Plugin update/rollback + notifikasi versi.
   - `registry_plugin_status.dart`: rilis `active` tertinggi yang memenuhi
     `minAppVersion`, status terpasang `deprecated`/`yanked`/`revoked`, dan
@@ -611,7 +618,10 @@ registry dibuka publik.
   `plugins.bufferite.dev`, kontribusi lewat PR (bukan branch publikasi), dan
   deploy atomik dari `main`. Scaffold di `registry-scaffold/`. Detail:
   `REGISTRY.md` §3 dan §12.
-- [ ] **D13** Custody, rotasi, dan revocation kunci Ed25519 registry. Usulan:
-  kunci indeks offline/HSM, kunci paket di CI, rotasi 90 hari. Scaffold publish
-  memakai secret environment sebagai bootstrap sampai D13 selesai. Detail:
-  `REGISTRY.md` §5 dan §12.
+- [x] **D13** Custody, rotasi, dan revocation kunci Ed25519 registry.
+  Kunci indeks `official-index-2026-11` disimpan offline/air-gapped dan
+  signing indeks dilakukan manual; kunci paket `official-package-2026-11`
+  disimpan sebagai secret environment CI `registry-publish`. Rotasi paket
+  90 hari, indeks 12 bulan, overlap kunci lama minimal 90 hari; revocation
+  lewat rilis aplikasi yang memperbarui trust store. Detail:
+  `REGISTRY.md` §5.3 dan §12.

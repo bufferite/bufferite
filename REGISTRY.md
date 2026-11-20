@@ -1,10 +1,10 @@
 # registry.md — Spesifikasi Registry Plugin Bufferite
 
 Versi dokumen: 1.0 (draf)
-Status: **Sebagian** — tooling registry, hosting, model/signature core, client
-read-only, serta UI katalog + instalasi terverifikasi (F16-T02) tersedia.
-Update/rollback (F16-T04), trust anchor produksi (D13), dan publikasi CI
-belum.
+Status: **Selesai untuk v1** — tooling registry, hosting, model/signature core,
+client read-only, UI katalog + instalasi terverifikasi (F16-T02),
+update/rollback (F16-T04), dan trust anchor produksi (D13) tersedia.
+Publikasi CI masih menunggu repo/Pages/secret operasional.
 Berlaku untuk: registry resmi read-only Bufferite
 Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 [PRIVACY.md](PRIVACY.md)
@@ -16,9 +16,10 @@ dalam aplikasi. Registry resmi bersifat **read-only**, **statis**, dan
 **opsional**: aplikasi tetap berjalan penuh secara offline tanpa registry.
 
 Per 2026-11-20, tooling registry (F16-T08), hosting (D12), client read-only
-(F16-T01), UI katalog + instalasi terverifikasi (F16-T02), dan update/rollback
-(F16-T04) sudah tersedia. Verifier signature dan trust store core juga
-tersedia; trust anchor final dan signing produksi menunggu D13.
+(F16-T01), UI katalog + instalasi terverifikasi (F16-T02), update/rollback
+(F16-T04), dan keputusan custody kunci (D13) sudah selesai. Trust store
+produksi (`assets/registry_keys.json`) dibundel di aplikasi; signing indeks
+dilakukan offline, kunci paket berada di CI.
 
 Ruang lingkup v1:
 
@@ -232,14 +233,20 @@ Public key di-pin di aplikasi melalui `assets/registry_keys.json`:
 - `status`: `active` atau `revoked`. Kunci `revoked` selalu ditolak.
 - Menambah atau mencabut kunci memerlukan rilis aplikasi baru. Ini adalah
   kompromi sadar: tidak ada remote key update.
-- Rotasi: publikasikan kunci baru di aplikasi, tanda tangani ulang indeks
-  dan paket, pertahankan kunci lama minimal 90 hari, lalu cabut lewat rilis
+- **Rotasi paket:** setiap 90 hari. Kunci baru di-pin lewat rilis aplikasi,
+  private key baru dipasang sebagai secret CI, lalu paket ditandatangani ulang
+  pada publish berikutnya. Kunci lama dipertahankan minimal 90 hari sebelum
+  `revoked`.
+- **Rotasi indeks:** setiap 12 bulan. Kunci baru dibuat di mesin offline,
+  public key di-pin lewat rilis aplikasi, dan kunci lama dipertahankan minimal
+  90 hari. Setelah indeks ditandatangani ulang, kunci lama dicabut lewat rilis
   aplikasi berikutnya.
-- Rekomendasi: kunci indeks disimpan offline (air-gapped/HSM); kunci paket
-  boleh berbeda dan dipakai CI. Keduanya di-pin.
-- Aset ini belum dibundel sampai D13 selesai. Bila aset tidak ada, katalog
-  menampilkan `registry.trust_store_missing` dan tidak melakukan fallback
-  trust-all.
+- **Custody (D13):** kunci indeks offline/air-gapped dan signing manual; kunci
+  paket di secret environment CI `registry-publish` dengan required reviewers.
+- Aset `assets/registry_keys.json` dibundel di aplikasi dan berisi kunci
+  `official-index-2026-11` serta `official-package-2026-11` (keduanya aktif).
+  Bila aset hilang, katalog menampilkan `registry.trust_store_missing` dan
+  tidak melakukan fallback trust-all.
 
 ### 5.4 Urutan verifikasi
 
@@ -400,17 +407,21 @@ trust store yang diinjeksi. UI katalog ditambahkan di F16-T02 (CP-080).
 
 ### F16-T03 — Signature Ed25519
 
-- Verifier Ed25519 + trust store `assets/registry_keys.json`.
-- Parsing signature file, penolakan keyId tak dikenal/revoked.
-- Uji signature indeks dan paket, domain separation, signature salah,
-  public key salah, ukuran/hash tidak cocok.
-- Dependency kriptografi melalui review `ARCHITECTURE.md` §12.
+Selesai 2026-11-20 (CP-082): verifier, trust store, signature indeks/paket,
+dan trust anchor produksi sudah aktif. Kunci indeks `official-index-2026-11`
+disimpan offline; kunci paket `official-package-2026-11` berada di secret CI.
+
+- [x] Verifier Ed25519 + trust store `assets/registry_keys.json`.
+- [x] Parsing signature file, penolakan keyId tak dikenal/revoked.
+- [x] Uji signature indeks dan paket, domain separation, signature salah,
+      public key salah, ukuran/hash tidak cocok.
+- [x] Dependency kriptografi melalui review `ARCHITECTURE.md` §12.
 
 ### F16-T02 — UI katalog
 
 Selesai 2026-11-20 (CP-080): katalog read-only dengan pencarian, detail,
-konsen jaringan, banner cache/offline, dan instalasi terverifikasi. Trust
-anchor produksi tetap menunggu D13; tanpa aset kunci katalog gagal tertutup.
+konsen jaringan, banner cache/offline, dan instalasi terverifikasi. Sejak D13
+selesai, trust anchor produksi dibundel di `assets/registry_keys.json`.
 
 - [x] Layar katalog: daftar, pencarian, detail, status verifikasi, izin,
       ukuran, sumber, versi, dan status.
@@ -426,7 +437,7 @@ anchor produksi tetap menunggu D13; tanpa aset kunci katalog gagal tertutup.
 Selesai 2026-11-20 (CP-081): deteksi update, badge, retensi dua versi,
 rollback otomatis/manual, pemilih versi untuk downgrade eksplisit, dan
 penonaktifan plugin `revoked` dari cache/refresh katalog. Trust anchor
-produksi tetap menunggu D13.
+produksi tersedia sejak D13 selesai (CP-082).
 
 - [x] Deteksi update semver + badge.
 - [x] Retensi dua versi, rollback otomatis saat aktivasi gagal, rollback manual.
@@ -444,8 +455,8 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
       hash/signature, batas paket.
 - [x] Publikasi atomik: paket + signature dulu, indeks bertanda tangan
       terakhir.
-- [ ] Signing produksi menunggu D13 (custody kunci); `keygen` lokal menulis
-      file JSON tanpa enkripsi untuk dev/CI.
+- [x] Signing produksi (D13): kunci indeks offline/air-gapped, kunci paket di
+      secret CI; `keygen` lokal menulis file JSON tanpa enkripsi untuk dev/CI.
 
 ### Gate publik
 
@@ -457,7 +468,7 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 | ID | Keputusan | Keputusan/Usulan | Status |
 |---|---|---|---|
 | D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20) |
-| D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/HSM; kunci paket di CI; rotasi 90 hari | Terbuka |
+| D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/air-gapped (signing manual); kunci paket di secret CI `registry-publish`; rotasi paket 90 hari, indeks 12 bulan; overlap 90 hari; revocation lewat rilis trust store | Selesai (2026-11-20) |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
 | — | TTL cache indeks | 24 jam | Diterima — F16-T01/T02 |
 | — | Jumlah versi lama disimpan | 1 versi sebelumnya | Diterima — F16-T04 (CP-081) |
@@ -468,20 +479,22 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 Keputusan D12/D13 dicatat juga di `TODO.md` bagian D dan `progress.md` §8.
 
 Catatan D12: scaffold repo ada di `registry-scaffold/`. Workflow validasi PR
-berjalan tanpa secret; workflow publish memakai environment `registry-publish`
-dengan required reviewers. Branch bukan kanal publikasi; hanya `registry.json`
-bertanda tangan hasil deploy dari `main` yang dibaca aplikasi. Publish belum
-berjalan karena repo `bufferite/bufferite` belum terisi, Pages/DNS belum
-aktif, dan secret kunci belum dipasang.
+berjalan tanpa secret; workflow build/publish memakai environment
+`registry-publish` dengan required reviewers. Branch bukan kanal publikasi;
+hanya `registry.json` bertanda tangan hasil deploy dari `main` yang dibaca
+aplikasi. Publish belum berjalan karena repo `bufferite/bufferite` belum
+terisi, Pages/DNS belum aktif, dan secret kunci belum dipasang.
 
-Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi untuk
-dev/CI. Kunci produksi wajib disimpan offline/HSM, tidak masuk repo, dan
-prosedur rotasi/revocation belum final sampai D13 diputuskan. Scaffold publish
-memakai secret environment untuk kedua kunci sebagai bootstrap; sebelum
-registry dibuka publik, signing indeks wajib dipindahkan ke offline/HSM.
-F16-T02 sudah memakai trust store ini; selama `assets/registry_keys.json`
-belum ada, katalog menampilkan `registry.trust_store_missing` dan tidak
-melakukan trust-all.
+Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi. Kunci
+indeks produksi (`official-index-2026-11`) wajib dipindahkan ke media
+offline/air-gapped dan tidak pernah masuk CI; kunci paket
+(`official-package-2026-11`) disimpan sebagai secret environment
+`REGISTRY_PACKAGE_KEY`. `publish.yml` hanya menandatangani paket dan membangun
+indeks; indeks ditandatangani manual lalu di-commit ke `release/`;
+`deploy.yml` memverifikasi signature dan mencocokkan rebuild deterministik
+sebelum deploy. Trust store publik yang sama ada di `assets/registry_keys.json`
+dan `registry-scaffold/keys/registry_keys.json`. Rotasi/revocation mengikuti
+§5.3; aplikasi lama tetap memakai trust store lamanya sampai diperbarui.
 
 ## 13. Implementasi & Tooling
 
@@ -509,12 +522,13 @@ tool/
   registry/
     registry_builder.dart    source -> registry.json deterministik (F16-T08)
 registry-scaffold/
-  .github/workflows/         validate PR + publish Pages       (D12)
+  .github/workflows/         validasi PR + build/publish + deploy (D12/D13)
 ```
 
 Tooling F16-T08, hosting D12, client F16-T01, UI katalog/instalasi F16-T02,
-dan update/rollback F16-T04 selesai 2026-11-20. Signing produksi dan trust
-anchor final tetap menunggu D13.
+update/rollback F16-T04, dan custody kunci/signing D13 selesai 2026-11-20.
+Publikasi CI masih menunggu repo `bufferite/plugins`, Pages/DNS, dan secret
+operasional.
 
 ### 13.2 CLI registry
 
@@ -531,31 +545,42 @@ Jalankan dari root repo (`dart run tool/registry_cli.dart help`).
 | `verify package` | Verifikasi signature paket terhadap keyring. |
 | `verify index` | Verifikasi signature indeks terhadap keyring. |
 
-Contoh alur rilis (kunci di contoh memakai `both`; produksi memisahkan kunci
-index offline dan kunci package CI sesuai D13):
+Contoh alur rilis (produksi memisahkan kunci index offline dan kunci package
+CI sesuai D13):
 
 ```powershell
-dart run tool/registry_cli.dart keygen --key-id official-2026-01 \
-  --usage both --out .keys/official-2026-01.json \
-  --public-out .keys/registry_keys.json
+# Di mesin CI/administratif:
+dart run tool/registry_cli.dart keygen --key-id official-package-2026-11 \
+  --usage package --out .keys/package.json \
+  --public-out .keys/package-public.json
+
+# Di mesin offline/air-gapped:
+dart run tool/registry_cli.dart keygen --key-id official-index-2026-11 \
+  --usage index --out D:\offline\official-index-2026-11.json \
+  --public-out D:\offline\official-index-public.json
+
+# Gabungkan kedua public key menjadi assets/registry_keys.json dan
+# registry-scaffold/keys/registry_keys.json sebelum rilis aplikasi.
 
 dart run tool/registry_cli.dart validate package \
   --in dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp
 dart run tool/registry_cli.dart sign package \
   --in dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp \
   --out dist/packages/com.contoh.encoding-pack/1.2.0/encoding-pack-1.2.0.berp.sig \
-  --key .keys/official-2026-01.json
+  --key .keys/package.json
 
 dart run tool/registry_cli.dart build-index --source registry-source.json \
   --out dist/registry.json --base dist/registry-lama.json \
-  --keyring .keys/registry_keys.json
+  --keyring registry-scaffold/keys/registry_keys.json
 
+# Di mesin offline:
 dart run tool/registry_cli.dart sign index --in dist/registry.json \
-  --out dist/registry.json.sig --key .keys/official-2026-01.json
+  --out dist/registry.json.sig --key D:\offline\official-index-2026-11.json
 
 dart run tool/registry_cli.dart verify index --in dist/registry.json \
-  --sig dist/registry.json.sig --keyring .keys/registry_keys.json \
-  --base-url https://registry.contoh.dev/registry/v1/registry.json
+  --sig dist/registry.json.sig \
+  --keyring registry-scaffold/keys/registry_keys.json \
+  --base-url https://plugins.bufferite.dev/registry/v1/registry.json
 ```
 
 `keygen` menolak menimpa file yang sudah ada tanpa `--force`, termasuk
@@ -636,10 +661,14 @@ Urutan wajib:
    lebih tinggi.
 5. Simpan `registry-source.json`, indeks, dan signature lama untuk audit.
 
-Di GitHub, scaffold `registry-scaffold/` memakai `actions/deploy-pages`
-sehingga paket + indeks terbit dalam satu deployment atomik. Workflow PR
-memakai kunci sementara tanpa secret; workflow publish menandatangani paket di
-CI dan indeks dengan kunci environment (lihat catatan D13 di §12).
+Di GitHub, scaffold `registry-scaffold/` memakai dua workflow:
+`publish.yml` menandatangani paket dengan kunci package CI dan membangun
+indeks (artifact, belum deploy); signing indeks dilakukan manual di mesin
+offline dan hasilnya di-commit ke `release/`; `deploy.yml` memverifikasi
+signature, membangun ulang indeks secara deterministik, lalu men-deploy
+`actions/deploy-pages` sehingga paket + indeks terbit dalam satu deployment
+atomik. Workflow PR memakai kunci sementara tanpa secret (lihat catatan D13
+di §12).
 
 Fondasi yang sudah ada dan dapat dipakai ulang:
 

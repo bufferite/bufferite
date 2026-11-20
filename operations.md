@@ -411,7 +411,8 @@ Catatan keamanan:
 - Batas input/output MVP sudah diterapkan untuk input file dan output step
   (F16-T05); streaming end-to-end per chunk belum diperlukan sampai ada
   operasi yang chunk-aware.
-- Registry: custody kunci Ed25519 (D13) dan detail lain di `REGISTRY.md` §12;
-  hosting/URL (D12) sudah selesai.
+- Registry: custody kunci Ed25519 (D13) selesai (indeks offline, paket di CI)
+  dan detail lain di `REGISTRY.md` §5.3/§12; hosting/URL (D12) sudah selesai.
+  Publikasi CI menunggu repo/Pages/secret.
 - Apakah operasi core perlu metadata contoh I/O di manifest, atau cukup di
   test vector repo.

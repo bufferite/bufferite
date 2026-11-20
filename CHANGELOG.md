@@ -21,6 +21,13 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   `build-index`, dan `verify`; model `registry.json` + parser/validator,
   signature Ed25519 dengan domain separation, trust store, indeks
   deterministik dengan `sequence` monoton, dan penulisan file atomik.
+- Registry resmi: katalog read-only dengan konsen jaringan, cache/offline,
+  instalasi terverifikasi, update/rollback dua versi, dan badge
+  update/deprecated/yanked/revoked.
+- Trust anchor produksi (F16-T03/D13): `assets/registry_keys.json` membundel
+  kunci indeks dan paket; kunci indeks disimpan offline, kunci paket di secret
+  CI; signing indeks manual dengan deploy yang memverifikasi rebuild
+  deterministik.
 
 ### Diubah
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,

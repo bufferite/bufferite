@@ -335,7 +335,8 @@ B. Instalasi via lokal (sideload):
 - Tier: dsl + lua + wasm diimplementasikan berbarengan di MVP.
 
 ## 16. Pertanyaan Terbuka
-- Custody/rotasi kunci Ed25519 (D13): lihat [REGISTRY.md](REGISTRY.md) §12.
+- Custody/rotasi kunci Ed25519 (D13) selesai: kunci indeks offline/air-gapped,
+  kunci paket di secret CI; detail di [REGISTRY.md](REGISTRY.md) §5.3/§12.
   Hosting/URL registry (D12) sudah selesai.
 - Pertanyaan runtime 1.0 sudah ditutup: `lua_dart` default (D02/D11),
   plugin DSL dibungkus `.berp` (D10).

@@ -19,8 +19,8 @@ menyetujui izin eksplisit.
 - Sideload: instal plugin dari file .berp lokal untuk pengembangan.
 - Registry (Fase 2): katalog read-only dengan verifikasi hash + signature
   Ed25519, pencarian/detail, konsen jaringan, dan instalasi terverifikasi.
-  Hosting GitHub Pages (D12), tooling, client, dan UI katalog (F16-T02)
-  selesai. Signing produksi dan trust anchor menunggu D13. Spesifikasi di
+  Hosting GitHub Pages (D12), tooling, client, UI katalog (F16-T02), serta
+  trust anchor + custody kunci (F16-T03/D13) selesai. Spesifikasi di
   `REGISTRY.md`.
 - Core pack: core.berp berisi hampir semua operasi CyberChef, diinstal
   otomatis saat first-run.
@@ -76,6 +76,6 @@ mengikuti lisensi masing-masing.
 MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task, `flutter test` 645 lulus,
 `flutter analyze` 0 issue. Fase 2 berjalan: tooling registry, scaffold GitHub
 Pages (D12), client read-only, UI katalog + instalasi terverifikasi (F16-T02),
-serta update/rollback + badge versi (F16-T04) selesai; signing produksi
-menunggu D13; streaming file besar dan diagnostik selesai. Lihat `ROADMAP.md`
-dan `progress.md` untuk detail.
+update/rollback + badge versi (F16-T04), serta trust anchor + custody kunci
+(F16-T03/D13) selesai; publikasi CI menunggu repo/Pages/secret; streaming file
+besar dan diagnostik selesai. Lihat `ROADMAP.md` dan `progress.md` untuk detail.

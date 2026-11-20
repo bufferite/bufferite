@@ -36,7 +36,7 @@ Versi: 1.2 · Fase: MVP selesai + Fase 2 (katalog + instalasi registry selesai)
 | 10 | Data rusak di storage | Error storage terstruktur; fallback default settings |
 | 11 | Indeks registry dimodifikasi | Signature Ed25519 indeks + trust store di aplikasi (`REGISTRY.md` §5) |
 | 12 | Paket registry ditukar setelah unduh | SHA-256 + signature paket diverifikasi sebelum `.berp` dibuka |
-| 13 | Kunci signing dicuri/diganti | Public key di-pin; rotasi 90 hari; pencabutan kunci lewat rilis aplikasi (plugin `revoked` lewat indeks) |
+| 13 | Kunci signing dicuri/diganti | Public key di-pin; rotasi paket 90 hari dan indeks 12 bulan; pencabutan kunci lewat rilis aplikasi (plugin `revoked` lewat indeks) |
 | 14 | Replay indeks lama / downgrade | `sequence` monoton; semver; konfirmasi downgrade; status `revoked` |
 | 15 | Registry/CDN jadi pengintai | Hanya `GET` saat pengguna membuka katalog; tanpa cookie/ID/telemetri |
 | 16 | Cache registry dirusak | Signature diverifikasi ulang setiap cache dimuat; fail closed |
@@ -83,7 +83,7 @@ sudah tervalidasi di Windows dan Android, tetapi default 1.0 tetap
 `lua_dart` (D11); jalur Lua WASM tidak berbagi ruang alamat dengan host
 selain engine wasmtime sendiri.
 
-### 4.2 Registry (Fase 2; tooling, hosting, client, dan UI instalasi selesai)
+### 4.2 Registry (Fase 2; selesai)
 
 - Trust anchor: public key Ed25519 di-pin di aplikasi, bukan diambil dari
   registry. Menambah/mencabut kunci memerlukan rilis aplikasi.
@@ -100,12 +100,15 @@ selain engine wasmtime sendiri.
   instalasi diam-diam; dialog konfirmasi dan izin selalu ditampilkan.
 - Provenance (`registryUrl`, `keyId`, `sha256`, `previousVersion`) disimpan
   lokal untuk audit dan rollback; provenance bukan pengganti verifikasi.
-- Tanpa `assets/registry_keys.json`, katalog gagal tertutup dengan
-  `registry.trust_store_missing` sampai D13 selesai.
-- Hosting v1 memakai GitHub Pages (D12). Scaffold publish menyimpan kunci
-  indeks di secret environment sebagai bootstrap; ini memperluas permukaan
-  serangan CI sampai D13 memindahkan signing indeks ke offline/HSM. Kompromi
-  repo tanpa secret tetap tidak bisa memalsukan indeks.
+- Trust store produksi `assets/registry_keys.json` dibundel dan berisi kunci
+  indeks `official-index-2026-11` serta kunci paket
+  `official-package-2026-11`. Bila aset hilang, katalog gagal tertutup dengan
+  `registry.trust_store_missing`.
+- Hosting v1 memakai GitHub Pages (D12). Kunci indeks disimpan offline dan
+  signing indeks dilakukan manual; kunci paket berada di secret environment CI
+  `registry-publish`. `deploy.yml` memverifikasi signature dan mencocokkan
+  rebuild deterministik sebelum deploy, sehingga kompromi repo tanpa secret
+  tetap tidak bisa memalsukan indeks.
 - Detail lengkap: `REGISTRY.md` §5–§10.
 
 ### 4.3 Batas runtime WASM dan DSL (F16-T07)
@@ -154,11 +157,16 @@ selain engine wasmtime sendiri.
 - F16-T02 selesai (2026-11-20, CP-080): katalog, konsen, dan instalasi
   terverifikasi; `flutter analyze` 0 issue dan 629 test lulus, termasuk
   installer (hash/signature/manifest/host/ukuran) dan widget katalog/detail.
-  Tanpa trust anchor produksi, katalog gagal tertutup.
+  Sejak CP-082 trust anchor produksi dibundel di aplikasi.
 - F16-T04 selesai (2026-11-20, CP-081): update/rollback dengan retensi dua
   versi, rollback otomatis saat aktivasi gagal, rollback manual, pemilih versi
   eksplisit, dan revocation yang menonaktifkan plugin tanpa menghapus data.
   `flutter analyze` 0 issue dan 645 test lulus.
-- Sisa untuk registry publik: trust anchor produksi + signing (D13), dan
-  publikasi CI/Pages. Hosting/URL (D12), client read-only (F16-T01), UI
-  instalasi (F16-T02), dan update/rollback (F16-T04) sudah selesai.
+- F16-T03/D13 selesai (2026-11-20, CP-082): trust anchor produksi dibundel;
+  kunci indeks offline/air-gapped, kunci paket di secret CI. Rotasi paket 90
+  hari, indeks 12 bulan, overlap 90 hari; revocation lewat rilis trust store.
+  `flutter analyze` 0 issue dan 648 test lulus.
+- Sisa untuk registry publik: publikasi CI/Pages (repo `bufferite/plugins`,
+  DNS, `BUFFERITE_TOOL_REF`, dan secret `REGISTRY_PACKAGE_KEY`). Hosting/URL
+  (D12), client read-only (F16-T01), UI instalasi (F16-T02), update/rollback
+  (F16-T04), dan signing (F16-T03) sudah selesai.

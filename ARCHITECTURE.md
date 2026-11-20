@@ -128,12 +128,13 @@ Implementasi plugin MVP:
 - Registry daring (F16): model `registry.json`, signature Ed25519, trust
   store, tooling build/sign/verify (F16-T08), client read-only HTTPS + cache +
   sequence + fallback offline (F16-T01), UI katalog + konsen + instalasi
-  terverifikasi (F16-T02), serta update/rollback + badge versi (F16-T04) sudah
-  tersedia. Hosting GitHub Pages sudah diputuskan (D12). Signing produksi dan
-  trust anchor final menunggu D13, sehingga tanpa aset trust store katalog
-  gagal tertutup. Spesifikasi di `REGISTRY.md`; modul di
-  `lib/core/registry/`, `lib/features/plugins/registry/`,
-  `tool/registry_cli.dart`, dan scaffold repo di `registry-scaffold/`.
+  terverifikasi (F16-T02), update/rollback + badge versi (F16-T04), serta
+  trust anchor produksi + custody kunci (F16-T03/D13) sudah tersedia. Hosting
+  GitHub Pages sudah diputuskan (D12). Signing indeks dilakukan offline; kunci
+  paket di secret CI. Publikasi CI masih menunggu repo/Pages/secret. Spesifikasi
+  di `REGISTRY.md`; modul di `lib/core/registry/`,
+  `lib/features/plugins/registry/`, `tool/registry_cli.dart`, dan scaffold repo
+  di `registry-scaffold/`.
 
 Implementasi storage MVP:
 - `AppDatabase` (`lib/core/storage/app_database.dart`) membuka SQLite dengan
@@ -206,8 +207,8 @@ Implementasi storage MVP:
 - Signature: sideload cukup SHA-256; registry resmi wajib signature Ed25519
   untuk indeks + paket (Fase 2, `REGISTRY.md`).
 - Registry read-only: satu registry resmi, trust anchor kunci di aplikasi,
-  tanpa sinkronisasi latar belakang (D13 terbuka; D12 selesai). UI katalog,
-  konsen, dan instalasi memakai `RegistryInstaller` + `PluginManagerService`.
+  tanpa sinkronisasi latar belakang (D12/D13 selesai). UI katalog, konsen, dan
+  instalasi memakai `RegistryInstaller` + `PluginManagerService`.
 - Interpreter Lua via WASM dijalankan dengan wasmtime C API (FFI) di worker
   isolate persisten; `wasi_config` (stdout/stderr file, stdin bytes) + epoch
   untuk timeout. Engine + modul dikompilasi sekali per plugin.
@@ -215,8 +216,9 @@ Implementasi storage MVP:
 ## 11. Pertanyaan Terbuka
 - Streaming end-to-end berbasis chunk belum ada; input file dimaterialisasi
   bertahap di worker isolate dengan batas memori (F16-T05 selesai).
-- Custody/rotasi kunci Ed25519 (D13); detail di `REGISTRY.md` §12. Hosting/URL
-  registry (D12) sudah selesai.
+- Custody/rotasi kunci Ed25519 (D13) selesai: kunci indeks offline, kunci
+  paket di CI; detail di `REGISTRY.md` §5.3/§12. Publikasi CI menunggu
+  operasional repo/Pages/secret. Hosting/URL registry (D12) sudah selesai.
 - Ukuran `core.berp` sudah diputuskan (D03: 2 MiB, pecah per kategori bila
   melewati).
 
@@ -246,7 +248,8 @@ Catatan:
   langsung di `pubspec.yaml`.
 - Penambahan dependency untuk Fase 2 (signature Ed25519) sudah melalui
   review: `package:cryptography` 2.9.0 (pure Dart, Ed25519) ditambahkan untuk
-  tooling registry F16-T08 dan akan dipakai verifikasi client F16-T03.
+  tooling registry F16-T08 dan dipakai verifikasi client F16-T03.
   `pointycastle` 4.0.0 belum menyediakan Ed25519. Test vector RFC 8032 ada di
   `test/core/registry/registry_signature_test.dart`. Custody kunci produksi
-  tetap mengikuti D13 (offline/HSM), bukan file repo.
+  mengikuti D13: kunci indeks offline/air-gapped, kunci paket di secret CI,
+  bukan file repo.
