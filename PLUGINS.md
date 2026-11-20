@@ -211,6 +211,11 @@ Spesifikasi lengkap ada di [REGISTRY.md](REGISTRY.md). Ringkasan:
   tidak ada upaya akses os/io/net, tidak ada resource abuse, logika benar.
 - Tier WASM: SHA-256 WAJIB; signature Ed25519 WAJIB untuk registry resmi
   (F16-T03). Detail di [REGISTRY.md](REGISTRY.md) §5.
+- Distribusi resmi lewat PR ke repo GitHub `bufferite/plugins` (D14).
+  Kontributor menambahkan paket + entri `registry-source.json`, CI
+  memverifikasi, maintainer review, lalu merge. Tidak ada marketplace
+  lanjutan, akun, rating, ulasan, atau laporan pada v1; aplikasi hanya
+  menampilkan katalog read-only dan pencarian lokal.
 - Sideload (instal dari file .berp lokal) didukung penuh, termasuk di MVP,
   untuk memudahkan developer menguji plugin. Plugin sideload ditandai
   "unverified", cukup diverifikasi SHA-256, dan izinnya tetap harus

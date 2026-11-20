@@ -21,6 +21,9 @@ Status keputusan:
   environment CI. Rotasi paket 90 hari, rotasi indeks 12 bulan, overlap kunci
   lama minimal 90 hari, revocation lewat rilis aplikasi yang memperbarui
   trust store.
+- **D14 selesai (2026-11-20):** distribusi plugin hanya lewat PR ke repo
+  GitHub ini. Marketplace lanjutan, akun, rating, ulasan, atau laporan
+  ditunda; aplikasi hanya menampilkan katalog read-only dan pencarian lokal.
 
 ## Struktur
 
@@ -31,7 +34,8 @@ keys/registry_keys.json              trust store publik (tanpa private key)
 release/registry.json                indeks bertanda tangan (hasil signing offline)
 release/registry.json.sig            signature indeks
 .gitattributes                       jaga byte artifact bertanda tangan
-COMMUNITY.md                         daftar repo komunitas, tidak dibaca app
+COMMUNITY.md                         panduan kontributor, tidak dibaca app
+.github/pull_request_template.md     checklist PR
 .github/workflows/validate.yml       validasi PR tanpa secret
 .github/workflows/publish.yml        tanda tangan paket + build indeks (artifact)
 .github/workflows/deploy.yml         verifikasi + deploy indeks bertanda tangan
@@ -110,14 +114,19 @@ tidak pernah ada di repo.
    }
    ```
 
-3. Buka pull request. Workflow `validate.yml` berjalan **tanpa secret**:
-   membuat kunci sementara, menandatangani paket, membangun indeks, lalu
-   memverifikasi signature dan batasnya.
+3. Buka pull request; template PR berisi checklist singkat. Workflow
+   `validate.yml` berjalan **tanpa secret**: membuat kunci sementara,
+   menandatangani paket, membangun indeks, lalu memverifikasi signature dan
+   batasnya.
 4. Maintainer review dengan checklist `REGISTRY.md` §13.3, termasuk source
    Lua/WASM, izin, lisensi, dan hash paket.
-5. Setelah merge ke `main`, `publish.yml` menandatangani paket dengan kunci
-   package dan membangun indeks. Indeks **belum** ditandatangani dan belum
-   di-deploy.
+5. Merge ke `main` = selesai untuk kontributor. `publish.yml` menandatangani
+   paket dengan kunci package dan membangun indeks; maintainer lalu
+   menandatangani indeks secara offline (lihat bagian berikut). Setelah deploy
+   dan refresh katalog, plugin muncul di aplikasi.
+
+Tidak ada marketplace lanjutan, akun, rating, atau laporan. Aplikasi hanya
+melakukan pencarian lokal terhadap `registry.json` yang sudah ditandatangani.
 
 File `.sig` paket tidak perlu di-commit. Workflow membuatnya saat build dan
 deploy. Untuk build lokal, tanda tangani paket lebih dulu dengan kunci package

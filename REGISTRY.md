@@ -32,7 +32,9 @@ Ruang lingkup v1:
 
 Di luar ruang lingkup v1:
 
-- Rating, komentar, marketplace, dan akun pengguna (F17).
+- Rating, komentar, marketplace lanjutan, laporan, dan akun pengguna:
+  **ditunda** (D14). Distribusi plugin hanya lewat PR ke repo GitHub resmi
+  dan katalog read-only di aplikasi.
 - Auto-update di latar belakang.
 - Registri pihak ketiga / URL kustom dari pengguna.
 - Ikon atau aset gambar dari jaringan (dapat ditambahkan nanti).
@@ -469,6 +471,7 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 |---|---|---|---|
 | D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20) |
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/air-gapped (signing manual); kunci paket di secret CI `registry-publish`; rotasi paket 90 hari, indeks 12 bulan; overlap 90 hari; revocation lewat rilis trust store | Selesai (2026-11-20) |
+| D14 | Model distribusi dan marketplace plugin | Satu repo GitHub `bufferite/plugins`; kontribusi lewat PR (fork/branch, CI verify, review, merge); marketplace lanjutan (akun, rating, ulasan, laporan) ditunda; aplikasi hanya mencari/menampilkan/menginstal dari indeks bertanda tangan | Selesai (2026-11-20) |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
 | — | TTL cache indeks | 24 jam | Diterima — F16-T01/T02 |
 | — | Jumlah versi lama disimpan | 1 versi sebelumnya | Diterima — F16-T04 (CP-081) |
@@ -476,7 +479,8 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 | — | Ikon plugin dari jaringan | Ditunda | Usulan |
 | — | Kebijakan reset `sequence` | Tidak ada reset di v1 | Usulan |
 
-Keputusan D12/D13 dicatat juga di `TODO.md` bagian D dan `progress.md` §8.
+Keputusan D12/D13/D14 dicatat juga di `TODO.md` bagian D dan `progress.md`
+§8 dan §9.
 
 Catatan D12: scaffold repo ada di `registry-scaffold/`. Workflow validasi PR
 berjalan tanpa secret; workflow build/publish memakai environment
@@ -495,6 +499,16 @@ indeks; indeks ditandatangani manual lalu di-commit ke `release/`;
 sebelum deploy. Trust store publik yang sama ada di `assets/registry_keys.json`
 dan `registry-scaffold/keys/registry_keys.json`. Rotasi/revocation mengikuti
 §5.3; aplikasi lama tetap memakai trust store lamanya sampai diperbarui.
+
+Catatan D14: registry resmi tetap satu katalog statis dari repo
+`bufferite/plugins`. Kontributor cukup fork/branch, menambahkan paket dan
+entri `registry-source.json`, membuka PR, lalu menunggu CI dan review. Merge
+adalah akhir pekerjaan kontributor; maintainer menandatangani indeks dan
+men-deploy. Aplikasi belum memiliki akun, rating, ulasan, laporan, atau
+backend marketplace; semuanya ditunda. Pencarian katalog bersifat lokal atas
+nama, `pluginId`, `summary`, dan tag dari indeks. F17-T01 ditunda;
+F17-T02–T05 tetap backlog terpisah yang membutuhkan keputusan
+privasi/backend.
 
 ## 13. Implementasi & Tooling
 
@@ -686,4 +700,4 @@ Fondasi yang sudah ada dan dapat dipakai ulang:
 - [THREAT_MODEL.md](THREAT_MODEL.md) — ancaman dan batas isolasi.
 - [PRIVACY.md](PRIVACY.md) — komitmen offline dan perilaku jaringan.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — layer dan dependency.
-- [TODO.md](TODO.md) — F16 dan keputusan D12/D13.
+- [TODO.md](TODO.md) — F16 dan keputusan D12–D14.

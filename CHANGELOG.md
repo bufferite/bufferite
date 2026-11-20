@@ -30,6 +30,10 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   deterministik.
 
 ### Diubah
+- Distribusi plugin disederhanakan menjadi PR ke repo `bufferite/plugins`
+  (D14); marketplace lanjutan, akun, rating, ulasan, dan laporan ditunda.
+  Aplikasi
+  tetap read-only dan hanya melakukan pencarian lokal pada katalog.
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,
   dialog, dan toast dipindahkan ke katalog terjemahan; istilah
   "Ingredients" dipertahankan di kedua bahasa.

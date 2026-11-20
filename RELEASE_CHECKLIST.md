@@ -39,10 +39,11 @@ menyertakan library engine.
 Kesimpulan: MVP memenuhi Definisi Done untuk lingkup 1.0; item tertunda
 dilacak di `progress.md` §8 Blocker.
 
-## Checklist Publikasi Registry (D12/D13)
+## Checklist Publikasi Registry (D12/D13/D14)
 
 | Item | Status | Bukti |
 |---|---|---|
+| Model distribusi tanpa marketplace lanjutan | OK | D14: PR ke `bufferite/plugins`, CI verify, review, merge; app hanya search/detail/install |
 | Trust anchor produksi dibundel | OK | `assets/registry_keys.json` + `test/core/registry/registry_trust_store_asset_test.dart` (`7df70b3`) |
 | Kunci indeks offline, kunci paket secret CI | SEBAGIAN | kunci dibuat; private key ada di `.keys/` (gitignored) dan harus dipindahkan/dipasang oleh manusia |
 | Rehearsal lokal rilis penuh | OK | paket 1.0.0/1.1.0: signature, build indeks, sequence 1→2, rebuild deterministik, immutability, tamper/replay ditolak |

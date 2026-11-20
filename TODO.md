@@ -1,8 +1,8 @@
 # TODO.md — Bufferite Feature Backlog
 
 Versi: 1.0
-Diperbarui: 2026-11-11
-Status: Perencanaan MVP
+Diperbarui: 2026-11-20
+Status: MVP dan Fase 2 selesai; Fase 3 belum (F17-T01 ditunda).
 Sumber kebenaran daftar pekerjaan: dokumen ini.
 Catatan progres: lihat [progress.md](progress.md).
 
@@ -558,7 +558,10 @@ sebelum registry dibuka publik. Publikasi CI masih menunggu repo
 
 ## F17 — Backlog Fase 3 (P2)
 
-- [ ] **F17-T01** Marketplace plugin (kurasi, rating, laporan).
+- [ ] **F17-T01** Marketplace plugin lanjutan (akun, rating, ulasan,
+  laporan) — **ditunda** (D14). Untuk saat ini tidak ada backend marketplace;
+  kontribusi plugin lewat PR ke `bufferite/plugins` dan aplikasi hanya
+  mencari/menampilkan/menginstal dari indeks bertanda tangan.
 - [ ] **F17-T02** Kolaborasi recipe (share/fork/komentar) opt-in.
 - [ ] **F17-T03** AI assistant opsional untuk menyusun recipe.
 - [ ] **F17-T04** Dukungan desktop/web.
@@ -625,3 +628,9 @@ sebelum registry dibuka publik. Publikasi CI masih menunggu repo
   90 hari, indeks 12 bulan, overlap kunci lama minimal 90 hari; revocation
   lewat rilis aplikasi yang memperbarui trust store. Detail:
   `REGISTRY.md` §5.3 dan §12.
+- [x] **D14** Model distribusi dan marketplace plugin: satu registry resmi
+  dari repo GitHub `bufferite/plugins`, kontribusi lewat PR (fork/branch,
+  CI verify, review, merge). Marketplace lanjutan (akun, rating, ulasan,
+  laporan) ditunda; saat ini tidak ada backend terpisah dan aplikasi hanya
+  melakukan pencarian lokal serta instalasi dari indeks bertanda tangan.
+  F17-T01 ditunda. Detail: `REGISTRY.md` §1 dan §12.

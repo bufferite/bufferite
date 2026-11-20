@@ -31,10 +31,10 @@ Status yang dipakai:
 | Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (selesai) |
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 8 / 8 |
-| Task Fase 3 | 0 / 5 |
+| Task Fase 3 | 0 / 5 (F17-T01 ditunda) |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
-| Task berikutnya | F17-T01 (Fase 3) atau publikasi registry setelah repo/Pages/secret siap |
+| Task berikutnya | Publikasi registry (operasional); F17-T01 ditunda |
 | Blocker aktif | Publikasi CI menunggu repo `bufferite/plugins`, Pages/DNS, dan secret kunci |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (648 test, 2026-11-20) |
@@ -63,9 +63,9 @@ Angka "Selesai" hanya bertambah setelah checkpoint dicatat di §5.
 | F15 — Rilis MVP | 7 | 7 | Selesai |
 | **Total MVP** | **131** | **131** | **Selesai** |
 | F16 - Backlog Fase 2 | 8 | 8 | Selesai |
-| F17 — Backlog Fase 3 | 5 | 0 | Belum |
+| F17 — Backlog Fase 3 | 5 | 0 | Belum (T01 ditunda) |
 | F18 — Lokalisasi Antarmuka | 1 | 1 | Selesai |
-| D — Keputusan Manusia | 13 | 13 | Selesai |
+| D — Keputusan Manusia | 14 | 14 | Selesai |
 
 ## 4. Ringkasan Baseline (2026-11-11)
 
@@ -235,6 +235,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T02 | UI katalog + konsen jaringan + instalasi terverifikasi: pencarian/detail, banner cache/offline, cabut konsen & hapus cache di Settings, verifikasi paket + provenance, izin Android `INTERNET` | `lib/core/registry/registry_installer.dart`, `lib/features/plugins/registry/**`, `installed_plugin.dart`, `plugin_manager_service.dart`, `settings_*`, `assets/i18n/{id,en}.json`, `test/core/registry/registry_installer_test.dart`, `test/features/plugins/registry/**` | `flutter analyze` 0 issue; `flutter test` 629 lulus; uji installer 7 lulus; widget katalog/detail 5 lulus | `f61eb55` |
 | 2026-11-20 | F16-T04 | Update/rollback + notifikasi versi: deteksi rilis active, retensi dua versi, rollback otomatis/manual, pemilih versi eksplisit, badge update/revocation, enforcement revocation | `lib/core/registry/registry_plugin_status.dart`, `lib/core/plugin/{installed_plugin,plugin_package_store}.dart`, `lib/core/runtime/{lua_runtime,plugin_runtime}.dart`, `lib/features/plugins/{plugin_manager_service,plugin_manager_page,plugin_detail_page}.dart`, `lib/features/plugins/registry/**`, `assets/i18n/{id,en}.json`, test terkait | `flutter analyze` 0 issue; `flutter test` 645 lulus; uji status+update/rollback 10 lulus; widget update/downgrade/revocation lulus | `f2cb225` |
 | 2026-11-20 | F16-T03, D13 | Trust anchor produksi + custody kunci: kunci indeks offline, kunci paket secret CI, rotasi 90 hari/12 bulan, signing indeks manual + deploy terverifikasi | `assets/registry_keys.json`, `pubspec.yaml`, `registry-scaffold/{README.md,keys/**,release/**,.github/workflows/{publish,deploy}.yml}`, `REGISTRY.md`, `TODO.md`, docs terkait, `test/core/registry/registry_trust_store_asset_test.dart` | `flutter analyze` 0 issue; `flutter test` 648 lulus; trust store aset 2 kunci aktif; YAML workflow valid | `7df70b3` |
+| 2026-11-20 | D14 | Distribusi plugin lewat PR GitHub: marketplace lanjutan/akun/rating/laporan ditunda; katalog read-only + pencarian lokal | `registry-scaffold/COMMUNITY.md`, `registry-scaffold/README.md`, `registry-scaffold/.github/pull_request_template.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md` | `git diff --check`; Markdown/link check; `flutter analyze` 0 issue; `flutter test` 648 lulus | `012f17f` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
@@ -1926,6 +1927,32 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   produksi.
 - Commit: `7df70b3`
 
+### CP-083 - 2026-11-20 - D14 distribusi plugin via PR GitHub
+
+- Status: Selesai
+- Perubahan:
+  - D14 diputuskan: registry resmi tetap satu katalog read-only dari repo
+    `bufferite/plugins`. Kontributor fork/branch, menambahkan `.berp` dan
+    entri `registry-source.json`, membuka PR, lalu CI memverifikasi dan
+    maintainer meninjau. Merge = selesai untuk kontributor; signing indeks
+    dan deploy tetap dilakukan maintainer.
+  - Marketplace lanjutan (akun, rating, ulasan, laporan) ditunda.
+    Aplikasi hanya melakukan pencarian lokal atas nama, `pluginId`, `summary`,
+    dan tag dari `registry.json`; tidak ada backend baru.
+  - `COMMUNITY.md` ditulis ulang menjadi panduan singkat, template PR
+    ditambahkan, dan `README.md` scaffold, `REGISTRY.md`, `PLUGINS.md`,
+    `ROADMAP.md`, serta `TODO.md` disinkronkan. F17-T01 ditandai ditunda.
+- File: `registry-scaffold/COMMUNITY.md`,
+  `registry-scaffold/.github/pull_request_template.md`,
+  `registry-scaffold/README.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`,
+  `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md`.
+- Verifikasi: `git diff --check` bersih; `flutter analyze` 0 issue;
+  `flutter test` 648 lulus (tidak ada perubahan kode).
+- Catatan/risiko: F17-T02–T05 tetap membutuhkan keputusan privasi/backend.
+  Publikasi registry masih menunggu repo `bufferite/plugins`, Pages/DNS, dan
+  secret operasional.
+- Commit: `012f17f`
+
 ## 7. Template Checkpoint Baru
 
 Salin format berikut saat menyelesaikan task:
@@ -1964,6 +1991,7 @@ bagian D.
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
 | 2026-11-20 | F16-T02/T03/T04, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | Katalog, konsen, instalasi terverifikasi (F16-T02), serta update/rollback (F16-T04) selesai; trust anchor produksi belum bisa difinalisasi | Selesai (D13: indeks offline, paket CI, trust store dibundel) |
 | 2026-11-20 | D12/publish | Repo `bufferite/bufferite` kosong sehingga workflow publish gagal di checkout tooling; Pages belum aktif | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka (push repo lokal, set `BUFFERITE_TOOL_REF`, aktifkan Pages/DNS, environment + secret `REGISTRY_PACKAGE_KEY`) |
+| 2026-11-20 | D14, F17-T01 | Model marketplace/rating/laporan belum diputuskan | Berpotensi menambah backend, akun, dan moderasi yang tidak diperlukan | Selesai (D14: marketplace lanjutan ditunda; kontribusi via PR GitHub, katalog read-only) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
 
@@ -1977,6 +2005,7 @@ bagian D.
 | 2026-11-19 | D05 | MIT untuk aplikasi dan `core.berp` | Konsisten dengan LICENSE & manifest | Tidak ada perubahan |
 | 2026-11-19 | D06 | Default `stop`; lanjut dengan output terakhir hanya opt-in; izin/batal/runtime selalu stop | Menghindari output menyesatkan | F05-T07 menegakkan |
 | 2026-11-20 | D12 | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR untuk kontribusi, deploy atomik dari `main` | URL stabil, tidak perlu CDN terpisah, review tetap di GitHub | Scaffold `registry-scaffold/`; F16-T01/T03 unblocked |
+| 2026-11-20 | D14 | Distribusi plugin via PR ke `bufferite/plugins`; marketplace lanjutan (akun, rating, ulasan, laporan) ditunda | Menjaga scope kecil; GitHub sudah cukup untuk kurasi/verifikasi, aplikasi tetap read-only | F17-T01 ditunda; katalog memakai pencarian lokal |
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
 | 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 selesai (CP-064) |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |

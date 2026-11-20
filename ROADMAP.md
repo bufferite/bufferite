@@ -13,8 +13,8 @@ dengan prioritas, risiko, dan definisi done per fase.
   sideload, DSL + Lua + WASM berbarengan.
 - Fase 2: Registry resmi, signature wajib, streaming file besar,
   peningkatan sandbox.
-- Fase 3: Ekosistem lanjutan (marketplace, kolaborasi, AI assistant,
-  multi-platform).
+- Fase 3: Ekosistem lanjutan (kolaborasi recipe, AI assistant,
+  multi-platform); distribusi plugin tetap registry GitHub read-only (D14).
 
 ## 3. Fase 0 — Fondasi
 Cakupan:
@@ -78,15 +78,18 @@ Definisi done:
 
 ## 6. Fase 3 — Ekosistem Lanjutan
 Cakupan:
-- Marketplace plugin (kurasi, rating, laporan).
 - Kolaborasi recipe (berbagi, fork, komentar) — opt-in, privacy-aware.
 - AI assistant opsional untuk menyusun recipe (lokal/remote, opt-in).
 - Multi-platform (desktop/web) dengan Flutter.
 - Integrasi share sheet dan automation.
 
+Marketplace lanjutan (akun, rating, ulasan, laporan) **ditunda** (D14) sampai
+ada kebutuhan. Distribusi plugin sudah diselesaikan pada Fase 2 lewat PR ke
+repo GitHub `bufferite/plugins` dan katalog read-only di aplikasi.
+
 Definisi done:
-- Marketplace berjalan dengan moderasi aktif.
 - Fitur kolaborasi tidak mengorbankan offline-first default.
+- Tidak ada upload data otomatis; semua fitur jaringan bersifat opt-in.
 
 ## 7. Risiko Teknis & Mitigasi
 1. Kompleksitas WASM di Flutter.
