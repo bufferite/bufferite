@@ -6,9 +6,12 @@ import 'registry_index.dart';
 import 'registry_signature.dart';
 import 'registry_transport.dart';
 
-/// URL kanonis registry v1 (D12).
+/// URL kanonis registry v1 (D12/D15).
+///
+/// Sementara memakai domain default GitHub Pages sampai `bufferite.dev`
+/// terdaftar. Ganti kembali ke `plugins.bufferite.dev` lewat rilis aplikasi.
 final Uri registryIndexUrl = Uri.parse(
-  'https://plugins.bufferite.dev/registry/v1/registry.json',
+  'https://bufferite.github.io/plugins/registry/v1/registry.json',
 );
 
 /// TTL tampilan cache indeks.

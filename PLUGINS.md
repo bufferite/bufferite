@@ -314,9 +314,10 @@ B. Instalasi via lokal (sideload):
 ## 14. Distribusi & Moderasi
 - Spesifikasi registry, signature, update/rollback, dan moderasi ada di
   [REGISTRY.md](REGISTRY.md).
-- Registry resmi di-host di GitHub Pages dari repo `bufferite/plugins` pada
-  `https://plugins.bufferite.dev`; kontribusi lewat PR dan publikasi dari
-  `main` (D12). Scaffold ada di `registry-scaffold/`.
+- Registry resmi di-host di GitHub Pages dari repo `bufferite/plugins`.
+  Sementara memakai `https://bufferite.github.io/plugins` sampai domain
+  `plugins.bufferite.dev` terdaftar (D15); kontribusi lewat PR dan publikasi
+  dari `main` (D12). Scaffold ada di `registry-scaffold/`.
 - Kurator awal: pembuat proyek + komunitas open-source GitHub.
 - Moderasi: kurator komunitas + maintainer; kriteria: keamanan,
   fungsionalitas, lisensi jelas.

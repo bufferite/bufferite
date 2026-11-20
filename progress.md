@@ -34,8 +34,8 @@ Status yang dipakai:
 | Task Fase 3 | 0 / 5 (F17-T01 ditunda) |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
-| Task berikutnya | Publikasi registry (operasional); F17-T01 ditunda |
-| Blocker aktif | Domain `bufferite.dev` belum terdaftar; Pages/DNS dan publikasi pertama menunggu registrasi domain |
+| Task berikutnya | Publikasi registry via URL sementara D15; F17-T01 ditunda |
+| Blocker aktif | Domain `bufferite.dev` belum terdaftar; sementara memakai `bufferite.github.io/plugins` (D15), publikasi pertama menunggu signing indeks offline |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (649 test, 2026-11-20) |
 
@@ -1990,7 +1990,7 @@ bagian D.
 | 2026-11-19 | F05-T06 | Tier WASM belum punya runtime. Spike: aset Lua EH valid (Node), WAMR ditolak; engine berikutnya wasmtime C API | Operasi tier `wasm` belum bisa dieksekusi | Selesai (CP-065; wasmtime Windows + Android, ABI plugin WASM v1, stdin/argv/stdout) |
 | 2026-11-20 | D12 | Hosting/URL registry dan kanal publikasi | F16-T01/T03 belum bisa difinalisasi | Selesai (GitHub Pages `bufferite/plugins` di `plugins.bufferite.dev`; scaffold `registry-scaffold/`) |
 | 2026-11-20 | F16-T02/T03/T04, D13 | Custody kunci Ed25519 dan signing produksi belum diputuskan | Katalog, konsen, instalasi terverifikasi (F16-T02), serta update/rollback (F16-T04) selesai; trust anchor produksi belum bisa difinalisasi | Selesai (D13: indeks offline, paket CI, trust store dibundel) |
-| 2026-11-20 | D12/publish | Repo `bufferite/bufferite` kosong sehingga workflow publish gagal di checkout tooling; Pages belum aktif | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka sebagian (repo aplikasi/registry ter-push, CI aplikasi hijau, Pages Actions aktif, environment + secret dan `BUFFERITE_TOOL_REF` terpasang; DNS menunggu registrasi `bufferite.dev`) |
+| 2026-11-20 | D12/D15/publish | `bufferite.dev` belum terdaftar sehingga DNS kanonis tidak bisa dipakai | Registry belum dapat dipublikasikan/diuji end-to-end dari perangkat | Terbuka sebagian (D15: repo aplikasi/registry ter-push, CI aplikasi hijau, Pages Actions aktif di `bufferite.github.io/plugins`, environment + secret dan `BUFFERITE_TOOL_REF` terpasang; publikasi pertama menunggu signing offline; domain kanonis ditunda) |
 | 2026-11-20 | D14, F17-T01 | Model marketplace/rating/laporan belum diputuskan | Berpotensi menambah backend, akun, dan moderasi yang tidak diperlukan | Selesai (D14: marketplace lanjutan ditunda; kontribusi via PR GitHub, katalog read-only) |
 
 ## 9. Catatan Keputusan (diisi saat ada)
@@ -2006,6 +2006,7 @@ bagian D.
 | 2026-11-19 | D06 | Default `stop`; lanjut dengan output terakhir hanya opt-in; izin/batal/runtime selalu stop | Menghindari output menyesatkan | F05-T07 menegakkan |
 | 2026-11-20 | D12 | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR untuk kontribusi, deploy atomik dari `main` | URL stabil, tidak perlu CDN terpisah, review tetap di GitHub | Scaffold `registry-scaffold/`; F16-T01/T03 unblocked |
 | 2026-11-20 | D14 | Distribusi plugin via PR ke `bufferite/plugins`; marketplace lanjutan (akun, rating, ulasan, laporan) ditunda | Menjaga scope kecil; GitHub sudah cukup untuk kurasi/verifikasi, aplikasi tetap read-only | F17-T01 ditunda; katalog memakai pencarian lokal |
+| 2026-11-20 | D15 | URL registry sementara memakai `https://bufferite.github.io/plugins` selama `bufferite.dev` belum terdaftar; domain kanonis tetap `plugins.bufferite.dev` dan dikembalikan lewat rilis aplikasi | Domain belum ada tetapi publikasi/deploy tetap bisa diuji | `allowedHosts` sementara `bufferite.github.io`; perlu rilis app saat pindah domain |
 | 2026-11-19 | D07 | Target rilis MVP 2026-12-31; fallback rilis 1.0 DSL-only bila runtime belum siap | Memberi batas waktu realistis | CHANGELOG/checklist |
 | 2026-11-19 | D09 | Cache runtime: 1 instance/plugin, LRU 4, idle 5 menit, dispose saat disable/hapus | Hindari instansiasi berulang & kebocoran | F05-T08 selesai (CP-064) |
 | 2026-11-19 | D10 | Plugin DSL dibungkus `.berp` | Konsisten dengan loader/manifest | Sideload DSL sama |

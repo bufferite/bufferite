@@ -34,6 +34,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
   (D14); marketplace lanjutan, akun, rating, ulasan, dan laporan ditunda.
   Aplikasi
   tetap read-only dan hanya melakukan pencarian lokal pada katalog.
+- URL registry sementara memakai `https://bufferite.github.io/plugins`
+  (D15) sampai domain `plugins.bufferite.dev` terdaftar; kembali ke domain
+  kanonis dilakukan lewat rilis aplikasi.
 - Seluruh teks UI Home, Library, Recipe Editor, Plugin Manager, Settings,
   dialog, dan toast dipindahkan ke katalog terjemahan; istilah
   "Ingredients" dipertahankan di kedua bahasa.

@@ -634,3 +634,8 @@ sebelum registry dibuka publik. Publikasi CI masih menunggu repo
   laporan) ditunda; saat ini tidak ada backend terpisah dan aplikasi hanya
   melakukan pencarian lokal serta instalasi dari indeks bertanda tangan.
   F17-T01 ditunda. Detail: `REGISTRY.md` §1 dan §12.
+- [x] **D15** URL registry sementara saat domain belum terdaftar: pakai
+  `https://bufferite.github.io/plugins/registry/v1/registry.json` dengan
+  `allowedHosts: ["bufferite.github.io"]`; kembali ke
+  `plugins.bufferite.dev` lewat rilis aplikasi setelah domain aktif. Detail:
+  `REGISTRY.md` §3 dan §12.

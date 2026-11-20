@@ -65,11 +65,14 @@ Di luar ruang lingkup v1:
 ## 3. Hosting & Tata Letak File
 
 Hosting v1 diputuskan di D12 (2026-11-20): GitHub Pages dari repo
-`bufferite/plugins` di org `bufferite`, disajikan pada domain kanonis
-`https://plugins.bufferite.dev`. Aplikasi hanya membaca
-`https://plugins.bufferite.dev/registry/v1/registry.json` dan signature-nya.
-DNS CNAME harus aktif sebelum client registry dirilis; jangan mengganti URL
-setelah rilis. `allowedHosts` v1 hanya berisi `plugins.bufferite.dev`.
+`bufferite/plugins` di org `bufferite`. Domain kanonis jangka panjang adalah
+`https://plugins.bufferite.dev`, tetapi domain itu belum terdaftar. D15
+(2026-11-20) memakai URL default GitHub Pages
+`https://bufferite.github.io/plugins/registry/v1/registry.json` sampai domain
+aktif; aplikasi saat ini membaca URL tersebut dan signature-nya. Kembali ke
+`plugins.bufferite.dev` memerlukan rilis aplikasi baru, bukan perubahan
+konfigurasi di perangkat. `allowedHosts` v1 saat ini hanya berisi
+`bufferite.github.io`.
 
 Kontribusi lewat pull request ke repo registry; branch bukan kanal publikasi.
 Hanya hasil deploy dari `main` yang dibaca aplikasi. Scaffold repo tersedia di
@@ -400,7 +403,8 @@ cache file, replay guard, fallback offline, dan verifikasi signature memakai
 trust store yang diinjeksi. UI katalog ditambahkan di F16-T02 (CP-080).
 
 - [x] Model + parser `registry.json` v1 dengan validasi §4 dan batas ukuran.
-- [x] URL awal `https://plugins.bufferite.dev/registry/v1/registry.json` (D12).
+- [x] URL awal `https://bufferite.github.io/plugins/registry/v1/registry.json`
+      (D12/D15; `plugins.bufferite.dev` ditunda sampai domain terdaftar).
 - [x] Fetch HTTPS + cache + `sequence` + fallback offline.
 - [x] Verifikasi signature indeks terintegrasi (dengan T03).
 - [x] Unit test: indeks valid, field hilang, tipe salah, versi tak didukung,
@@ -469,7 +473,8 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 
 | ID | Keputusan | Keputusan/Usulan | Status |
 |---|---|---|---|
-| D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20) |
+| D12 | Hosting, URL publik, dan CDN registry | GitHub Pages dari `bufferite/plugins` di `plugins.bufferite.dev`; PR + deploy atomik | Selesai (2026-11-20); dialihkan sementara oleh D15 |
+| D15 | URL registry saat domain belum terdaftar | Pakai `https://bufferite.github.io/plugins/registry/v1/registry.json` dan `allowedHosts: ["bufferite.github.io"]`; kembali ke `plugins.bufferite.dev` lewat rilis aplikasi setelah domain aktif | Selesai (2026-11-20) |
 | D13 | Custody kunci Ed25519, rotasi, dan revocation | Kunci indeks offline/air-gapped (signing manual); kunci paket di secret CI `registry-publish`; rotasi paket 90 hari, indeks 12 bulan; overlap 90 hari; revocation lewat rilis trust store | Selesai (2026-11-20) |
 | D14 | Model distribusi dan marketplace plugin | Satu repo GitHub `bufferite/plugins`; kontribusi lewat PR (fork/branch, CI verify, review, merge); marketplace lanjutan (akun, rating, ulasan, laporan) ditunda; aplikasi hanya mencari/menampilkan/menginstal dari indeks bertanda tangan | Selesai (2026-11-20) |
 | — | Library Ed25519 | `package:cryptography` 2.9.0 (pure Dart) | Diterima — F16-T08 (CP-077) |
@@ -479,15 +484,22 @@ Selesai 2026-11-20 (CP-077). Detail di §13.2-§13.4.
 | — | Ikon plugin dari jaringan | Ditunda | Usulan |
 | — | Kebijakan reset `sequence` | Tidak ada reset di v1 | Usulan |
 
-Keputusan D12/D13/D14 dicatat juga di `TODO.md` bagian D dan `progress.md`
+Keputusan D12/D13/D14/D15 dicatat juga di `TODO.md` bagian D dan `progress.md`
 §8 dan §9.
 
 Catatan D12: scaffold repo ada di `registry-scaffold/`. Workflow validasi PR
 berjalan tanpa secret; workflow build/publish memakai environment
 `registry-publish` dengan required reviewers. Branch bukan kanal publikasi;
 hanya `registry.json` bertanda tangan hasil deploy dari `main` yang dibaca
-aplikasi. Publish belum berjalan karena repo `bufferite/bufferite` belum
-terisi, Pages/DNS belum aktif, dan secret kunci belum dipasang.
+aplikasi.
+
+Catatan D15: repo aplikasi dan registry sudah di-push; Pages Actions,
+environment `registry-publish`, secret `REGISTRY_PACKAGE_KEY`, dan
+`BUFFERITE_TOOL_REF` sudah terpasang. Karena `bufferite.dev` belum terdaftar,
+deploy pertama memakai URL default `bufferite.github.io/plugins`. Saat domain
+aktif, tambahkan custom domain di Settings Pages, arahkan CNAME `plugins` ke
+`bufferite.github.io`, lalu rilis aplikasi dengan URL `plugins.bufferite.dev`.
+Jangan mengubah `registry-source.json` tanpa koordinasi rilis aplikasi.
 
 Catatan D13: `keygen` hanya membuat file kunci lokal tanpa enkripsi. Kunci
 indeks produksi (`official-index-2026-11`) wajib dipindahkan ke media
@@ -539,10 +551,10 @@ registry-scaffold/
   .github/workflows/         validasi PR + build/publish + deploy (D12/D13)
 ```
 
-Tooling F16-T08, hosting D12, client F16-T01, UI katalog/instalasi F16-T02,
+Tooling F16-T08, hosting D12/D15, client F16-T01, UI katalog/instalasi F16-T02,
 update/rollback F16-T04, dan custody kunci/signing D13 selesai 2026-11-20.
-Publikasi CI masih menunggu repo `bufferite/plugins`, Pages/DNS, dan secret
-operasional.
+Repo, Pages, variable, dan secret operasional sudah siap; publikasi pertama
+menunggu signing indeks offline setelah deploy URL sementara D15.
 
 ### 13.2 CLI registry
 
@@ -594,7 +606,7 @@ dart run tool/registry_cli.dart sign index --in dist/registry.json \
 dart run tool/registry_cli.dart verify index --in dist/registry.json \
   --sig dist/registry.json.sig \
   --keyring registry-scaffold/keys/registry_keys.json \
-  --base-url https://plugins.bufferite.dev/registry/v1/registry.json
+  --base-url https://bufferite.github.io/plugins/registry/v1/registry.json
 ```
 
 `keygen` menolak menimpa file yang sudah ada tanpa `--force`, termasuk
