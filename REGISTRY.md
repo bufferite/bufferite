@@ -695,10 +695,14 @@ Urutan wajib:
 Di GitHub, scaffold `registry-scaffold/` memakai dua workflow:
 `publish.yml` menandatangani paket dengan kunci package CI dan membangun
 indeks (artifact, belum deploy); signing indeks dilakukan manual di mesin
-offline dan hasilnya di-commit ke `release/`; `deploy.yml` memverifikasi
-signature, membangun ulang indeks secara deterministik, lalu men-deploy
-`actions/deploy-pages` sehingga paket + indeks terbit dalam satu deployment
-atomik. Workflow PR memakai kunci sementara tanpa secret (lihat catatan D13
+offline dan hasilnya di-commit ke `release/`; `deploy.yml` menandatangani dan
+memverifikasi paket dengan kunci package CI **sebelum** membangun ulang indeks
+secara deterministik, lalu men-deploy `actions/deploy-pages` sehingga paket +
+indeks terbit dalam satu deployment atomik. Karena `build-index` mewajibkan
+`sequence` baru lebih besar dari indeks live, menjalankan ulang `deploy.yml`
+untuk rilis yang sudah live (mis. lewat `workflow_dispatch` tanpa perubahan
+`release/`) akan ditolak di langkah rebuild; ini disengaja untuk mencegah
+replay. Workflow PR memakai kunci sementara tanpa secret (lihat catatan D13
 di §12).
 
 Fondasi yang sudah ada dan dapat dipakai ulang:

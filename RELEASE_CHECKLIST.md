@@ -61,3 +61,7 @@ Catatan: Pages meng-cache `registry.json` selama 10 menit (`max-age=600`).
 Jika publish berikutnya dijalankan kurang dari 10 menit setelah deploy,
 tunggu cache kedaluwarsa atau jalankan ulang `workflow_dispatch` agar workflow
 membaca indeks lama yang benar; `sequence` harus selalu naik.
+Catatan: `deploy.yml` menandatangani paket dengan kunci package CI sebelum
+rebuild deterministik. Menjalankan ulang deploy untuk `release/` yang
+`sequence`-nya sudah live akan gagal di rebuild (replay guard), jadi perubahan
+workflow saja tidak bisa diuji dengan men-deploy ulang indeks lama.
