@@ -91,7 +91,7 @@ MIT untuk inti dan core.berp (lihat [LICENSE](LICENSE)). Plugin komunitas
 mengikuti lisensi masing-masing.
 
 ## Status
-MVP 1.0 selesai (tag lokal `v1.0.0`): 131/131 task. Fase 2 selesai 8/8:
+MVP 1.0 selesai (tag `v1.0.0`). Rilis **1.1.0** mencakup Fase 2 (8/8):
 tooling registry, client read-only, UI katalog + instalasi terverifikasi,
 update/rollback, trust anchor, dan registry live di
 `https://bufferite.github.io/plugins` (URL sementara D15) dengan

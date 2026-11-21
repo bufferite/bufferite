@@ -5,6 +5,8 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-21
+
 ### Ditambahkan
 - Spesifikasi registry plugin v1 (`REGISTRY.md`): skema `registry.json`,
   signature Ed25519, konsen jaringan, cache, update/rollback, revocation,
