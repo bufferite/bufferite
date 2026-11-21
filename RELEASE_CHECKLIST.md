@@ -45,14 +45,15 @@ dilacak di `progress.md` §8 Blocker.
 |---|---|---|
 | Model distribusi tanpa marketplace lanjutan | OK | D14: PR ke `bufferite/plugins`, CI verify, review, merge; app hanya search/detail/install |
 | Trust anchor produksi dibundel | OK | `assets/registry_keys.json` + `test/core/registry/registry_trust_store_asset_test.dart` (`7df70b3`) |
-| Kunci indeks offline, kunci paket secret CI | SEBAGIAN | Kunci paket sudah menjadi secret `REGISTRY_PACKAGE_KEY`; kunci indeks dipakai menandatangani rilis pertama dan masih berada di `.keys/index.json` (gitignored) — wajib segera dipindah ke media offline |
-| Rehearsal lokal rilis penuh | OK | paket 1.0.0/1.1.0: signature, build indeks, sequence 1→2, rebuild deterministik, immutability, tamper/replay ditolak |
-| Repo `bufferite/plugins` | OK | Scaffold D13/D14 di-push ke `main` (`2c4f9c0`) |
+| Kunci indeks offline, kunci paket secret CI | SEBAGIAN | Kunci paket sudah menjadi secret `REGISTRY_PACKAGE_KEY`; kunci indeks dipakai menandatangani rilis dan masih berada di `G:\Code\Flutter\.keys\index.json` (di luar repo) — wajib segera dipindah ke media offline |
+| Rehearsal lokal rilis penuh | OK | paket 1.0.0/1.1.0: signature, build indeks, sequence 1→2→3, rebuild deterministik, immutability, tamper/replay ditolak; artifact CI `sequence` 3 identik dengan rehearsal |
+| Repo `bufferite/plugins` | OK | Scaffold D13/D14 di-push ke `main`; rilis live terakhir `c37b6f1` (`sequence` 3) |
 | GitHub Pages + DNS | OK (sementara) | Pages via Actions aktif tanpa custom domain; site `https://bufferite.github.io/plugins/` (D15). Domain `plugins.bufferite.dev` menunggu registrasi, lalu CNAME `plugins` → `bufferite.github.io` |
 | Environment `registry-publish` + secret | OK | Required reviewer `exphert`; secret `REGISTRY_PACKAGE_KEY` terpasang; tidak ada secret kunci indeks |
 | `BUFFERITE_TOOL_REF` | OK | `a4ba47d` (commit aplikasi yang sudah di-push dan memuat `tool/registry_cli.dart`) |
-| Release pertama ditandatangani | OK | `publish.yml` run `44744500110` → signing offline `.keys/index.json` → `release/registry.json` + `.sig` (`08b1b8e`) → `deploy.yml` run `44746692155`. Live: sequence 1, sha256 `f7968ea514cd9519138c7c2030c65d93c4a123791df7edc4128de35e88c08a95`, signature verified |
-| Smoke test client aplikasi | OK | `RegistryClient.loadWithFallback()` terhadap `https://bufferite.github.io/plugins/registry/v1/registry.json`: signature valid, `sequence=1`, `allowedHosts=[bufferite.github.io]`, cache terverifikasi |
+| Release ditandatangani | OK | Plugin `dev.bufferite.newline-normalizer` `1.1.0`: `publish.yml` run `44765363101` → signing offline `.keys/index.json` → `release/registry.json` + `.sig` (`c37b6f1`) → `deploy.yml` run `44767289603`. Live: `sequence` 3, sha256 `1b9f22e3d9df365347256e3499c741efdcdc68e773876f7c60d83a0b3dd37440`, signature verified |
+| Smoke test client aplikasi | OK | `RegistryClient.loadWithFallback()` terhadap `https://bufferite.github.io/plugins/registry/v1/registry.json`: signature valid, `sequence` naik ke 3, `allowedHosts=[bufferite.github.io]`, cache terverifikasi |
+| Uji katalog di emulator | OK | Android 12: katalog `sequence` 2 → install `1.0.0` → update ke `1.1.0` → `1.0.0` tampil `revoked`; signature indeks+paket valid; plugin `1.1.0` aktif, operasi muncul di Library, input CRLF menghasilkan output tiga baris LF |
 | Uji katalog di perangkat | DITUNDA | Uji perangkat Android fisik ditunda; tidak memblokir publikasi |
 
 Catatan: jangan menaruh `REGISTRY_INDEX_KEY` di CI. Signing indeks selalu

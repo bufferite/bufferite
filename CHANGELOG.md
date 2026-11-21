@@ -63,6 +63,9 @@ Format mengikuti Keep a Changelog; versi mengikuti Semantic Versioning.
 - Daftar recipe di Home tidak diperbarui setelah menyimpan dari Recipe
   Editor; provider daftar/pencarian kini di-invalidate saat editor
   mengembalikan recipe tersimpan.
+- `deploy.yml` registry kini menandatangani paket sebelum membangun ulang
+  indeks deterministik, sehingga `package.json.sig` yang wajib ada tidak lagi
+  menyebabkan deploy gagal.
 - File input besar tidak lagi dibaca utuh ke memori sebelum eksekusi,
   sehingga preview tidak memicu OOM; file di atas batas memori ditolak
   dengan pesan lokal sebelum alokasi.

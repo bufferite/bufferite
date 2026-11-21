@@ -4,8 +4,10 @@ Versi dokumen: 1.0 (draf)
 Status: **Selesai untuk v1** — tooling registry, hosting, model/signature core,
 client read-only, UI katalog + instalasi terverifikasi (F16-T02),
 update/rollback (F16-T04), dan trust anchor produksi (D13) tersedia.
-Publikasi rilis pertama sudah live di `https://bufferite.github.io/plugins`
-(URL sementara D15) dengan indeks `sequence` 1 bertanda tangan.
+Publikasi sudah live di `https://bufferite.github.io/plugins` (URL sementara
+D15) dengan indeks `sequence` 3 bertanda tangan: plugin uji
+`dev.bufferite.newline-normalizer` versi `1.1.0` aktif dan versi `1.0.0`
+`revoked`.
 Berlaku untuk: registry resmi read-only Bufferite
 Dokumen terkait: [PLUGINS.md](PLUGINS.md), [THREAT_MODEL.md](THREAT_MODEL.md),
 [PRIVACY.md](PRIVACY.md)
@@ -497,10 +499,11 @@ aplikasi.
 Catatan D15: repo aplikasi dan registry sudah di-push; Pages Actions,
 environment `registry-publish`, secret `REGISTRY_PACKAGE_KEY`, dan
 `BUFFERITE_TOOL_REF` sudah terpasang. Karena `bufferite.dev` belum terdaftar,
-deploy pertama memakai URL default `bufferite.github.io/plugins`. Rilis
-pertama sudah live: `sequence` 1, `registry.json` sha256
-`f7968ea514cd9519138c7c2030c65d93c4a123791df7edc4128de35e88c08a95`, dan
-signature `official-index-2026-11` terverifikasi. Saat domain aktif, tambahkan
+deploy pertama memakai URL default `bufferite.github.io/plugins`. Rilis live
+terakhir: `sequence` 3, `registry.json` sha256
+`1b9f22e3d9df365347256e3499c741efdcdc68e773876f7c60d83a0b3dd37440`, dua entri
+(`1.0.0` revoked, `1.1.0` active), dan signature `official-index-2026-11`
+terverifikasi. Saat domain aktif, tambahkan
 custom domain di Settings Pages, arahkan CNAME `plugins` ke
 `bufferite.github.io`, lalu rilis aplikasi dengan URL `plugins.bufferite.dev`.
 Jangan mengubah `registry-source.json` tanpa koordinasi rilis aplikasi.
@@ -557,9 +560,13 @@ registry-scaffold/
 
 Tooling F16-T08, hosting D12/D15, client F16-T01, UI katalog/instalasi F16-T02,
 update/rollback F16-T04, dan custody kunci/signing D13 selesai 2026-11-20.
-Repo, Pages, variable, dan secret operasional sudah siap. Rilis pertama
-(`sequence` 1) sudah ditandatangani offline, di-deploy, dan diverifikasi lewat
-URL publik serta smoke test client aplikasi.
+Repo, Pages, variable, dan secret operasional sudah siap. Rilis live
+(`sequence` 3) sudah ditandatangani offline, di-deploy, dan diverifikasi lewat
+URL publik serta smoke test client aplikasi. Paket uji
+`dev.bufferite.newline-normalizer` `1.1.0` aktif, sedangkan `1.0.0` ditandai
+`revoked` karena bug penggantian newline. Alur katalog, instalasi,
+update/revocation, dan eksekusi `1.1.0` (CRLF → LF) sudah diuji di emulator
+Android 12.
 
 ### 13.2 CLI registry
 

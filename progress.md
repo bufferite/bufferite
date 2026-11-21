@@ -28,14 +28,14 @@ Status yang dipakai:
 | Item | Nilai |
 |---|---|
 | Fase aktif | Fase 2 - Registry & pengerasan (kode selesai; registry live di URL sementara D15) |
-| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (selesai; release pertama live) |
+| Milestone aktif | M5 - Rilis MVP (selesai, tag `v1.0.0`); M6 - Registry (selesai; rilis plugin live `sequence` 3) |
 | Task MVP selesai | 131 / 131 |
 | Task Fase 2 | 8 / 8 |
 | Task Fase 3 | 0 / 5 (F17-T01 ditunda) |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
-| Task berikutnya | Uji katalog di perangkat fisik (ditunda); F17-T01 ditunda |
-| Blocker aktif | Domain `bufferite.dev` belum terdaftar (D15: live di `bufferite.github.io/plugins`); `.keys/index.json` masih di disk kerja dan perlu dipindah ke media offline |
+| Task berikutnya | Uji instalasi plugin di emulator (berjalan); uji perangkat fisik ditunda; F17-T01 ditunda |
+| Blocker aktif | Domain `bufferite.dev` belum terdaftar (D15: live di `bufferite.github.io/plugins`); `.keys/index.json` masih di `G:\Code\Flutter\.keys` dan perlu dipindah ke media offline |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (649 test, 2026-11-20) |
 
@@ -237,6 +237,7 @@ Tabel checkpoint per task. Satu baris per task yang sudah dicentang di
 | 2026-11-20 | F16-T03, D13 | Trust anchor produksi + custody kunci: kunci indeks offline, kunci paket secret CI, rotasi 90 hari/12 bulan, signing indeks manual + deploy terverifikasi | `assets/registry_keys.json`, `pubspec.yaml`, `registry-scaffold/{README.md,keys/**,release/**,.github/workflows/{publish,deploy}.yml}`, `REGISTRY.md`, `TODO.md`, docs terkait, `test/core/registry/registry_trust_store_asset_test.dart` | `flutter analyze` 0 issue; `flutter test` 648 lulus; trust store aset 2 kunci aktif; YAML workflow valid | `7df70b3` |
 | 2026-11-20 | D14 | Distribusi plugin lewat PR GitHub: marketplace lanjutan/akun/rating/laporan ditunda; katalog read-only + pencarian lokal | `registry-scaffold/COMMUNITY.md`, `registry-scaffold/README.md`, `registry-scaffold/.github/pull_request_template.md`, `REGISTRY.md`, `PLUGINS.md`, `ROADMAP.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `TODO.md`, `progress.md` | `git diff --check`; Markdown/link check; `flutter analyze` 0 issue; `flutter test` 648 lulus | `b469fc2` |
 | 2026-11-20 | D15/publish | URL sementara `bufferite.github.io/plugins`; rilis pertama ditandatangani offline, di-deploy, dan diverifikasi lewat client aplikasi | `lib/core/registry/registry_client.dart`, `registry-scaffold/**`, `REGISTRY.md`, `PLUGINS.md`, `RELEASE_CHECKLIST.md`, `TODO.md`, `progress.md` | `flutter analyze` 0 issue; `flutter test` 649 lulus; publish run `44744500110`; deploy run `44746692155`; live sha256 `f7968ea5…`; signature valid; smoke client `sequence=1` | `a4ba47d` |
+| 2026-11-21 | Registry/publish | Plugin uji `dev.bufferite.newline-normalizer` `1.0.0` dipublikasikan, bug newline diperbaiki di `1.1.0`, `1.0.0` di-revoke, lalu diuji di emulator | `packages/dev.bufferite.newline-normalizer/**`, `registry-source.json`, `REGISTRY.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `progress.md` | publish run `44765363101`; deploy run `44767289603`; live `sequence` 3 sha256 `1b9f22e3…`; emulator: instal `1.0.0`, update ke `1.1.0`, badge `revoked`, operasi muncul di Library, input CRLF → output 3 baris LF | `3dcf4e0`, `c37b6f1`, `dbbd204` |
 Format verifikasi: perintah yang dijalankan + hasil, mis.
 `flutter test (12 pass)`, `manual: sideload sukses`, atau
 `analyze: 0 issue`.
