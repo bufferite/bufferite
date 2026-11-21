@@ -34,7 +34,7 @@ Status yang dipakai:
 | Task Fase 3 | 0 / 5 (F17-T01 ditunda) |
 | Keputusan terbuka | 0 |
 | Task sedang berjalan | - |
-| Task berikutnya | Uji instalasi plugin di emulator (berjalan); uji perangkat fisik ditunda; F17-T01 ditunda |
+| Task berikutnya | Uji katalog di perangkat fisik (ditunda); domain `bufferite.dev`; F17-T01 ditunda |
 | Blocker aktif | Domain `bufferite.dev` belum terdaftar (D15: live di `bufferite.github.io/plugins`); `.keys/index.json` masih di `G:\Code\Flutter\.keys` dan perlu dipindah ke media offline |
 | Analyze | Lulus (0 issue, 2026-11-20) |
 | Test suite | Lulus (649 test, 2026-11-20) |
@@ -1954,6 +1954,33 @@ Format verifikasi: perintah yang dijalankan + hasil, mis.
   Publikasi registry masih menunggu repo `bufferite/plugins`, Pages/DNS, dan
   secret operasional.
 - Commit: `b469fc2`
+
+### CP-084 - 2026-11-21 - D15 rilis registry + plugin uji newline
+
+- Status: Selesai
+- Perubahan:
+  - Registry live di `https://bufferite.github.io/plugins` (D15) dengan
+    indeks bertanda tangan. Plugin uji
+    `dev.bufferite.newline-normalizer` `1.0.0` diterbitkan, lalu `1.1.0`
+    memperbaiki transform yang sebelumnya menghasilkan literal `\n`;
+    `1.0.0` ditandai `revoked`. Indeks live sekarang `sequence` 3.
+  - `deploy.yml` diperbaiki agar menandatangani dan memverifikasi paket
+    **sebelum** rebuild indeks deterministik; re-deploy indeks lama tetap
+    ditolak replay guard.
+  - Alur katalog, instalasi, update, badge revocation, dan eksekusi operasi
+    plugin diuji di emulator Android 12.
+- File: `packages/dev.bufferite.newline-normalizer/**`,
+  `registry-source.json` (repo plugins), `registry-scaffold/**`,
+  `REGISTRY.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `progress.md`.
+- Verifikasi: publish run `44765363101`, deploy run `44767289603`; live
+  `sequence` 3 sha256 `1b9f22e3d9df365347256e3499c741efdcdc68e773876f7c60d83a0b3dd37440`;
+  signature indeks+paket valid; artifact CI identik dengan rehearsal;
+  emulator: instal `1.0.0`, update `1.1.0`, `1.0.0` tampil `revoked`,
+  input CRLF `satu/dua/tiga` menghasilkan output tiga baris LF.
+- Catatan/risiko: `.keys/index.json` masih di `G:\Code\Flutter\.keys` dan
+  wajib dipindah ke media offline; domain kanonis menunggu registrasi;
+  uji perangkat fisik ditunda.
+- Commit: `73d36c9` (aplikasi), `c37b6f1` (plugins)
 
 ## 7. Template Checkpoint Baru
 
