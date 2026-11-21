@@ -96,6 +96,7 @@ tooling registry, client read-only, UI katalog + instalasi terverifikasi,
 update/rollback, trust anchor, dan registry live di
 `https://bufferite.github.io/plugins` (URL sementara D15) dengan
 `sequence` 3. `flutter analyze` 0 issue; `flutter test` 649 lulus.
+Unduhan APK: [GitHub Releases v1.1.0](https://github.com/bufferite/bufferite/releases/tag/v1.1.0).
 Berikutnya: uji perangkat fisik, pemindahan kunci indeks ke media offline,
 dan domain kanonis `plugins.bufferite.dev`. Lihat `ROADMAP.md` dan
 `progress.md` untuk detail.
